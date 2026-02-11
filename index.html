@@ -1,0 +1,624 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Chat UI (Tek Dosya)</title>
+  <style>
+    :root{
+      --bg:#0b1020;
+      --card:#111a33;
+      --card2:#0f1730;
+      --muted:#9aa5c3;
+      --text:#e9eeff;
+      --accent:#5b8cff;
+      --accent2:#22c55e;
+      --danger:#ef4444;
+      --bubbleMe:#2b3f7a;
+      --bubbleOther:#182449;
+      --shadow: 0 18px 45px rgba(0,0,0,.35);
+      --radius: 18px;
+      --radius2: 14px;
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bot: env(safe-area-inset-bottom, 0px);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: radial-gradient(1200px 800px at 20% 0%, #1b2a63 0%, rgba(27,42,99,0) 55%),
+                  radial-gradient(900px 700px at 90% 20%, #2f1b63 0%, rgba(47,27,99,0) 60%),
+                  var(--bg);
+      color:var(--text);
+      display:flex;
+      justify-content:center;
+      align-items:stretch;
+      padding: 0;
+    }
+
+    .phone{
+      width:min(420px, 100%);
+      height:100%;
+      display:flex;
+      flex-direction:column;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .topbar{
+      padding: calc(14px + var(--safe-top)) 16px 14px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      position:sticky;
+      top:0;
+      z-index:10;
+      background: linear-gradient(to bottom, rgba(11,16,32,.92), rgba(11,16,32,.55));
+      backdrop-filter: blur(10px);
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width:0;
+    }
+    .logo{
+      width:38px;height:38px;border-radius:14px;
+      background: linear-gradient(135deg, rgba(91,140,255,1), rgba(34,197,94,1));
+      box-shadow: 0 10px 22px rgba(91,140,255,.25);
+      display:grid;place-items:center;
+      font-weight:800;
+    }
+    .brand h1{
+      margin:0;
+      font-size:15px;
+      line-height:1.15;
+      letter-spacing:.2px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .brand p{
+      margin:2px 0 0;
+      font-size:12px;
+      color:var(--muted);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .actions{display:flex; gap:10px; align-items:center;}
+    .iconbtn{
+      width:40px;height:40px;border-radius:14px;
+      border:1px solid rgba(255,255,255,.08);
+      background: rgba(255,255,255,.04);
+      color:var(--text);
+      display:grid;place-items:center;
+      cursor:pointer;
+      transition: transform .12s ease, background .12s ease;
+    }
+    .iconbtn:active{transform: scale(.96);}
+    .iconbtn:hover{background: rgba(255,255,255,.07);}
+
+    .search{
+      margin: 0 16px 10px;
+      padding: 10px 12px;
+      border-radius: 16px;
+      border:1px solid rgba(255,255,255,.08);
+      background: rgba(255,255,255,.04);
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    .search input{
+      width:100%;
+      border:0;
+      outline:0;
+      background:transparent;
+      color:var(--text);
+      font-size:14px;
+    }
+
+    .screen{
+      flex:1;
+      overflow:auto;
+      padding-bottom: calc(94px + var(--safe-bot));
+    }
+    .hidden{display:none !important;}
+
+    .tabs{
+      position:sticky;
+      bottom:0;
+      z-index:20;
+      padding: 10px 12px calc(10px + var(--safe-bot));
+      background: linear-gradient(to top, rgba(11,16,32,.92), rgba(11,16,32,.55));
+      backdrop-filter: blur(10px);
+      border-top: 1px solid rgba(255,255,255,.06);
+    }
+    .tabrow{
+      display:flex;
+      gap:10px;
+      justify-content:space-between;
+    }
+    .tab{
+      flex:1;
+      border-radius: 18px;
+      padding: 10px 10px;
+      border:1px solid rgba(255,255,255,.08);
+      background: rgba(255,255,255,.03);
+      color:var(--muted);
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      font-size:13px;
+      transition: background .15s ease, color .15s ease, transform .12s ease;
+      user-select:none;
+    }
+    .tab:active{transform: scale(.98);}
+    .tab.active{
+      background: rgba(91,140,255,.16);
+      color: var(--text);
+      border-color: rgba(91,140,255,.35);
+    }
+
+    .card{
+      margin: 12px 16px;
+      padding: 14px;
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.025));
+      border: 1px solid rgba(255,255,255,.08);
+      box-shadow: var(--shadow);
+    }
+    .sectionTitle{
+      margin: 14px 16px 8px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      color:var(--muted);
+      font-size:12px;
+      letter-spacing:.4px;
+      text-transform: uppercase;
+    }
+
+    .chatItem{
+      display:flex;
+      gap:12px;
+      padding: 12px;
+      border-radius: 16px;
+      cursor:pointer;
+      border:1px solid transparent;
+      transition: background .12s ease, border-color .12s ease, transform .12s ease;
+    }
+    .chatItem:hover{background: rgba(255,255,255,.04);}
+    .chatItem:active{transform: scale(.99);}
+    .avatar{
+      width:44px;height:44px;border-radius:16px;
+      background: linear-gradient(135deg, rgba(91,140,255,.9), rgba(47,27,99,.8));
+      border: 1px solid rgba(255,255,255,.10);
+      display:grid;place-items:center;
+      font-weight:700;
+      flex:0 0 auto;
+    }
+    .chatMain{flex:1; min-width:0;}
+    .row1{display:flex; align-items:center; justify-content:space-between; gap:10px;}
+    .name{font-weight:650; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+    .time{font-size:12px; color:var(--muted); flex:0 0 auto;}
+    .preview{margin-top:3px; font-size:13px; color:rgba(233,238,255,.82); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+    .badge{
+      margin-left:auto;
+      min-width:22px;
+      height:22px;
+      border-radius: 999px;
+      background: rgba(34,197,94,.18);
+      border: 1px solid rgba(34,197,94,.35);
+      color: #c7f9d6;
+      display:grid;place-items:center;
+      font-size:12px;
+      padding:0 7px;
+    }
+
+    .chatHeader{
+      margin: 0 16px 10px;
+      padding: 12px 12px;
+      border-radius: 18px;
+      background: rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.08);
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+    .chatHeader .title{
+      display:flex;
+      flex-direction:column;
+      min-width:0;
+    }
+    .chatHeader .title strong{font-size:14px}
+    .chatHeader .title span{font-size:12px;color:var(--muted)}
+    .chatHeader .right{margin-left:auto; display:flex; gap:10px;}
+
+    .messages{
+      padding: 0 16px 12px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .msgRow{
+      display:flex;
+      gap:8px;
+      align-items:flex-end;
+    }
+    .msgRow.me{justify-content:flex-end;}
+    .bubble{
+      max-width: 78%;
+      padding: 10px 12px;
+      border-radius: 18px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      line-height:1.35;
+      font-size:14px;
+      box-shadow: 0 10px 25px rgba(0,0,0,.18);
+      word-wrap:break-word;
+      white-space:pre-wrap;
+    }
+    .me .bubble{
+      background: linear-gradient(180deg, rgba(91,140,255,.26), rgba(91,140,255,.12));
+      border-color: rgba(91,140,255,.35);
+    }
+    .other .bubble{
+      background: rgba(255,255,255,.045);
+      border-color: rgba(255,255,255,.09);
+    }
+    .meta{
+      font-size:11px;
+      color:var(--muted);
+      margin: 2px 2px 0;
+    }
+    .me .meta{text-align:right}
+
+    .composerWrap{
+      position:sticky;
+      bottom: 66px;
+      z-index:15;
+      padding: 10px 16px 0;
+    }
+    .composer{
+      border-radius: 20px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(17,26,51,.72);
+      backdrop-filter: blur(12px);
+      display:flex;
+      gap:10px;
+      align-items:center;
+      padding: 10px 10px;
+      box-shadow: var(--shadow);
+    }
+    .composer input{
+      flex:1;
+      border:0;
+      outline:0;
+      background:transparent;
+      color:var(--text);
+      font-size:14px;
+    }
+    .send{
+      width:42px;height:42px;border-radius:16px;
+      border:1px solid rgba(91,140,255,.35);
+      background: rgba(91,140,255,.18);
+      color:var(--text);
+      cursor:pointer;
+      display:grid;place-items:center;
+      transition: transform .12s ease, background .12s ease;
+    }
+    .send:active{transform: scale(.96);}
+    .send:hover{background: rgba(91,140,255,.24);}
+
+    .fab{
+      position:fixed;
+      right: 18px;
+      bottom: calc(86px + var(--safe-bot));
+      z-index:30;
+      width:56px;height:56px;border-radius:22px;
+      border:1px solid rgba(255,255,255,.12);
+      background: linear-gradient(135deg, rgba(91,140,255,1), rgba(34,197,94,1));
+      box-shadow: 0 18px 45px rgba(0,0,0,.35);
+      cursor:pointer;
+      display:grid;place-items:center;
+      transition: transform .15s ease;
+    }
+    .fab:active{transform: scale(.96);}
+    .fabIcon{transition: transform .2s ease;}
+    .fab.open .fabIcon{transform: rotate(45deg);}
+
+    .fabMenu{
+      position:fixed;
+      right: 18px;
+      bottom: calc(150px + var(--safe-bot));
+      z-index:29;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      pointer-events:none;
+      opacity:0;
+      transform: translateY(10px);
+      transition: opacity .16s ease, transform .16s ease;
+    }
+    .fabMenu.open{
+      pointer-events:auto;
+      opacity:1;
+      transform: translateY(0);
+    }
+    .fabItem{
+      display:flex;
+      align-items:center;
+      justify-content:flex-end;
+      gap:10px;
+    }
+    .fabLabel{
+      padding: 8px 10px;
+      border-radius: 14px;
+      background: rgba(17,26,51,.78);
+      border:1px solid rgba(255,255,255,.10);
+      color: rgba(233,238,255,.90);
+      font-size:13px;
+      box-shadow: 0 10px 25px rgba(0,0,0,.22);
+      backdrop-filter: blur(10px);
+    }
+    .fabMini{
+      width:44px;height:44px;border-radius:18px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      color:var(--text);
+      cursor:pointer;
+      display:grid;place-items:center;
+      transition: transform .12s ease, background .12s ease;
+    }
+    .fabMini:active{transform: scale(.96);}
+    .fabMini:hover{background: rgba(255,255,255,.09);}
+
+    .backdrop{
+      position:fixed; inset:0;
+      background: rgba(0,0,0,.55);
+      backdrop-filter: blur(4px);
+      display:none;
+      z-index:40;
+      padding: 18px;
+      align-items:center;
+      justify-content:center;
+    }
+    .backdrop.show{display:flex;}
+    .modal{
+      width:min(420px, 100%);
+      background: rgba(17,26,51,.92);
+      border:1px solid rgba(255,255,255,.12);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .modalHeader{
+      padding: 14px 14px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+    .modalHeader strong{font-size:14px}
+    .modalBody{padding: 14px;}
+    .field{
+      display:flex; flex-direction:column; gap:6px;
+      margin-bottom: 12px;
+    }
+    .field label{font-size:12px; color:var(--muted)}
+    .field input{
+      padding: 12px 12px;
+      border-radius: 16px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      color:var(--text);
+      outline:0;
+      font-size:14px;
+    }
+    .modalFooter{
+      padding: 12px 14px 14px;
+      display:flex;
+      gap:10px;
+    }
+    .btn{
+      flex:1;
+      padding: 12px 12px;
+      border-radius: 16px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      color:var(--text);
+      cursor:pointer;
+      font-weight:600;
+    }
+    .btn.primary{
+      border-color: rgba(91,140,255,.35);
+      background: rgba(91,140,255,.18);
+    }
+    .btn.danger{
+      border-color: rgba(239,68,68,.35);
+      background: rgba(239,68,68,.14);
+    }
+    .muted{color:var(--muted); font-size:12px; line-height:1.4; margin-top:8px}
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.08);
+      color: rgba(233,238,255,.88);
+      font-size:12px;
+    }
+    .grid2{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+      margin-top:10px;
+    }
+    .tile{
+      padding: 12px;
+      border-radius: 18px;
+      background: rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.08);
+    }
+    .tile strong{display:block; font-size:13px}
+    .tile span{display:block; font-size:12px; color:var(--muted); margin-top:4px}
+  </style>
+</head>
+<body>
+  <div class="phone">
+    <div class="topbar">
+      <div class="brand">
+        <div class="logo">C</div>
+        <div style="min-width:0">
+          <h1 id="topTitle">Chat</h1>
+          <p id="topSub">Sekmeli • Tek dosya UI</p>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="iconbtn" id="btnTheme" title="Tema">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <path d="M21 15.5A8.5 8.5 0 0 1 8.5 3a7 7 0 1 0 12.5 12.5Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <button class="iconbtn" id="btnInfo" title="Bilgi">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <path d="M12 16v-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            <path d="M12 8h.01" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+            <path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" stroke="currentColor" stroke-width="1.8"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="search" id="searchWrap">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+        <path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        <path d="M11 19a8 8 0 1 1 0-16 8 8 0 0 1 0 16Z" stroke="currentColor" stroke-width="1.8"/>
+      </svg>
+      <input id="search" placeholder="Ara: sohbet, kişi, ayar..." />
+    </div>
+
+    <div class="screen" id="screenChats">
+      <div class="sectionTitle">
+        <span>Sohbetler</span>
+        <span class="pill" id="myCodePill">Kod: <strong id="myCode">engin#0001</strong></span>
+      </div>
+
+      <div class="card" id="chatList"></div>
+
+      <div class="sectionTitle"><span>Hızlı İşlemler</span><span></span></div>
+      <div class="card">
+        <div class="grid2">
+          <div class="tile"><strong>Yeni sohbet</strong><span>FAB menüsünden aç</span></div>
+          <div class="tile"><strong>Kişi ekle</strong><span>Kod ile ekleme</span></div>
+          <div class="tile"><strong>Dosya gönder</strong><span>UI hazır (demo)</span></div>
+          <div class="tile"><strong>Bildirim</strong><span>APK/Firebase ile</span></div>
+        </div>
+        <p class="muted">
+          Not: Bu sürüm sadece görünüm/prototip. Gerçek mesajlaşma için Firebase/Backend ekleriz.
+        </p>
+      </div>
+    </div>
+
+    <div class="screen hidden" id="screenContacts">
+      <div class="sectionTitle"><span>Kişiler</span><span></span></div>
+      <div class="card" id="contactsList"></div>
+    </div>
+
+    <div class="screen hidden" id="screenProfile">
+      <div class="sectionTitle"><span>Profil / Ayarlar</span><span></span></div>
+      <div class="card">
+        <div style="display:flex; gap:12px; align-items:center;">
+          <div class="avatar" style="width:54px;height:54px;border-radius:20px;">E</div>
+          <div style="min-width:0">
+            <div style="font-weight:700">Engin</div>
+            <div style="color:var(--muted);font-size:12px">Android • UI Prototip</div>
+          </div>
+          <div style="margin-left:auto" class="badge">Pro</div>
+        </div>
+        <div style="height:12px"></div>
+        <div class="grid2">
+          <div class="tile"><strong>Kullanıcı kodu</strong><span id="myCode2">engin#0001</span></div>
+          <div class="tile"><strong>Durum</strong><span>Çevrimiçi</span></div>
+        </div>
+        <div style="height:10px"></div>
+        <button class="btn primary" id="btnEditProfile">Profili düzenle</button>
+        <div style="height:10px"></div>
+        <button class="btn" id="btnClearDemo">Demo mesajları sıfırla</button>
+      </div>
+    </div>
+
+    <div class="screen hidden" id="screenChatView">
+      <div class="chatHeader">
+        <button class="iconbtn" id="btnBack" title="Geri">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <div class="avatar" id="chatAvatar">A</div>
+        <div class="title">
+          <strong id="chatName">Arda</strong>
+          <span id="chatStatus">çevrimiçi</span>
+        </div>
+        <div class="right">
+          <button class="iconbtn" title="Ara">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              <path d="M11 19a8 8 0 1 1 0-16 8 8 0 0 1 0 16Z" stroke="currentColor" stroke-width="1.8"/>
+            </svg>
+          </button>
+          <button class="iconbtn" title="Menü">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <path d="M5 7h14M5 12h14M5 17h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="messages" id="messages"></div>
+
+      <div class="composerWrap">
+        <div class="composer">
+          <button class="iconbtn" id="btnAttach" title="Ekle">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <path d="M21.44 11.05 12.25 20.24a6 6 0 0 1-8.49-8.49L12 3.5a4.5 4.5 0 0 1 6.36 6.36l-8.6 8.6a3 3 0 0 1-4.24-4.24l7.78-7.78" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <input id="msgInput" placeholder="Mesaj yaz..." />
+          <button class="send" id="btnSend" title="Gönder">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <path d="M22 2 11 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              <path d="M22 2 15 22l-4-9-9-4 20-7Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="tabs" id="tabs">
+      <div class="tabrow">
+        <div class="tab active" data-tab="chats">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v8Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+          </svg>
+          Sohbetler
+        </div>
+        <div class="tab" data-tab="contacts">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            <path d="M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" stroke="currentColor" stroke-width="1.8"/>
+          </svg>
+          Kişiler
+        </div>
+        <div class="tab" data-tab="profile">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <path d="M20 21a8 8 0 1 0-16 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            <path d=
