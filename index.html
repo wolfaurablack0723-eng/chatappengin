@@ -1,114 +1,161 @@
-<script>
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<title>VigoChatt</title>
+
+<style>
+:root{
+  --bg:#efe7db;
+  --card:rgba(0,0,0,.06);
+  --text:#1b1b1b;
+  --muted:rgba(0,0,0,.55);
+  --border:rgba(0,0,0,.10);
+  --accent:#2b6cff;
+  --radius:18px;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui;background:var(--bg);color:var(--text)}
+.app{max-width:520px;margin:auto;height:100vh;display:flex;flex-direction:column}
+.header{padding:16px;display:flex;justify-content:space-between}
+.view{flex:1;overflow:auto;padding:10px}
+.card{background:#fff;border-radius:var(--radius);padding:14px;margin-bottom:12px}
+.list{display:flex;flex-direction:column;gap:10px}
+.item{background:#fff;padding:12px;border-radius:14px;cursor:pointer}
+.overlay{position:fixed;inset:0;background:#fff;display:none;flex-direction:column}
+.overlay.show{display:flex}
+.chatBody{flex:1;overflow:auto;padding:10px;display:flex;flex-direction:column;gap:8px}
+.bubble{padding:10px;border-radius:14px;background:#fff;max-width:75%}
+.me{align-self:flex-end;background:#dbe8ff}
+.composer{display:flex;padding:10px;gap:8px}
+textarea{flex:1;border-radius:14px;padding:8px}
+.send{background:var(--accent);color:#fff;border:none;border-radius:14px;padding:10px 14px}
+.bottom{display:flex;justify-content:center;padding:10px;background:#fff}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+<div class="header">
+<h2>VigoChatt</h2>
+<button onclick="logout()">Çıkış</button>
+</div>
+
+<div class="view">
+<div class="card">
+<input type="text" id="phone" placeholder="Numara ile giriş">
+<button onclick="login()">Giriş Yap</button>
+</div>
+
+<div class="list" id="chatList"></div>
+</div>
+</div>
+
+<div class="overlay" id="chatOverlay">
+<div style="padding:10px;display:flex;justify-content:space-between">
+<b id="chatName"></b>
+<button onclick="closeChat()">Kapat</button>
+</div>
+<div class="chatBody" id="chatBody"></div>
+<div class="composer">
+<textarea id="msg"></textarea>
+<button class="send" onclick="sendMsg()">Gönder</button>
+</div>
+</div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
 const firebaseConfig = {
   apiKey: "AIzaSyA3--Xy1WrM6WlxurXXr4i5qwMZiafXN4k",
   authDomain: "vigochat-58144.firebaseapp.com",
+  databaseURL: "https://vigochat-58144-default-rtdb.europe-west1.firebasedatabase.app",
   projectId: "vigochat-58144",
+  storageBucket: "vigochat-58144.firebasestorage.app",
+  messagingSenderId: "384136632816",
+  appId: "1:384136632816:web:2bb6d6942680a2e2e6e535"
 };
 
-let app, db, auth, userId = null;
-let currentRoom = null;
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
-const chatList = document.getElementById("chatList");
-const chatBody = document.getElementById("chatBody");
-const msgInput = document.getElementById("msg");
-const sendBtn = document.getElementById("send");
-const overlay = document.getElementById("overlay");
-const backBtn = document.getElementById("back");
+let currentUser = null;
+let currentChat = null;
 
-function initFirebase() {
-  const s1 = document.createElement("script");
-  s1.src = "https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js";
-  document.body.appendChild(s1);
-
-  s1.onload = () => {
-    const s2 = document.createElement("script");
-    s2.src = "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js";
-    document.body.appendChild(s2);
-
-    const s3 = document.createElement("script");
-    s3.src = "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js";
-    document.body.appendChild(s3);
-
-    s3.onload = startApp;
-  };
+window.login = function(){
+  const phone = document.getElementById("phone").value;
+  if(!phone) return alert("Numara gir");
+  currentUser = phone;
+  loadUsers();
 }
 
-function startApp() {
-  app = firebase.initializeApp(firebaseConfig);
-  auth = firebase.auth();
-  db = firebase.firestore();
-
-  auth.signInAnonymously().then((res)=>{
-    userId = res.user.uid;
-    loadRooms();
-  }).catch(()=> {
-    console.log("Auth hatası ama görüntü var");
-  });
-}
-
-function loadRooms() {
-  chatList.innerHTML = "";
-
-  db.collection("rooms").get().then((snapshot)=>{
-    snapshot.forEach(doc=>{
-      const data = doc.data();
-      const div = document.createElement("div");
-      div.className = "item";
-      div.innerHTML = `
-        <div class="avatar">${data.name[0]}</div>
-        <div class="meta">
-          <b>${data.name}</b>
-          <span>Sohbete gir</span>
-        </div>
+function loadUsers(){
+  const usersRef = ref(db,"users");
+  onValue(usersRef,snap=>{
+    const data = snap.val() || {};
+    const list = document.getElementById("chatList");
+    list.innerHTML="";
+    Object.keys(data).forEach(uid=>{
+      if(uid===currentUser) return;
+      list.innerHTML+=`
+        <div class="item" onclick="openChat('${uid}')">${uid}</div>
       `;
-      div.onclick = ()=> openChat(doc.id, data.name);
-      chatList.appendChild(div);
     });
   });
 }
 
-function openChat(roomId, name){
-  currentRoom = roomId;
-  document.getElementById("chatName").textContent = name;
-  overlay.classList.add("show");
-
-  db.collection("rooms")
-    .doc(roomId)
-    .collection("messages")
-    .orderBy("createdAt")
-    .onSnapshot((snapshot)=>{
-      chatBody.innerHTML = "";
-      snapshot.forEach(doc=>{
-        const data = doc.data();
-        const div = document.createElement("div");
-        div.className = "bubble " + (data.uid === userId ? "me":"");
-        div.textContent = data.text;
-        chatBody.appendChild(div);
-      });
-      chatBody.scrollTop = chatBody.scrollHeight;
-    });
+window.openChat = function(uid){
+  currentChat = uid;
+  document.getElementById("chatName").innerText=uid;
+  document.getElementById("chatOverlay").classList.add("show");
+  loadMessages();
 }
 
-sendBtn.onclick = ()=>{
-  const text = msgInput.value.trim();
-  if(!text || !currentRoom) return;
+window.closeChat = function(){
+  document.getElementById("chatOverlay").classList.remove("show");
+}
 
-  db.collection("rooms")
-    .doc(currentRoom)
-    .collection("messages")
-    .add({
-      text: text,
-      uid: userId,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+function chatId(a,b){
+  return a<b? a+"_"+b : b+"_"+a;
+}
+
+function loadMessages(){
+  const id = chatId(currentUser,currentChat);
+  const messagesRef = ref(db,"messages/"+id);
+  onValue(messagesRef,snap=>{
+    const data = snap.val()||{};
+    const box=document.getElementById("chatBody");
+    box.innerHTML="";
+    Object.values(data).forEach(m=>{
+      box.innerHTML+=`
+      <div class="bubble ${m.from===currentUser?'me':''}">
+      ${m.text}
+      </div>`;
     });
+    box.scrollTop=box.scrollHeight;
+  });
+}
 
-  msgInput.value = "";
-};
+window.sendMsg = function(){
+  const text=document.getElementById("msg").value;
+  if(!text) return;
+  const id = chatId(currentUser,currentChat);
+  push(ref(db,"messages/"+id),{
+    from:currentUser,
+    text:text,
+    time:Date.now()
+  });
+  document.getElementById("msg").value="";
+}
 
-backBtn.onclick = ()=>{
-  overlay.classList.remove("show");
-  currentRoom = null;
-};
+window.logout=function(){
+  location.reload();
+}
 
-initFirebase();
 </script>
+</body>
+</html>
