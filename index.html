@@ -7,79 +7,71 @@
 
 <style>
 :root{
-    --bg:#0f172a;
-    --card:#1e293b;
-    --accent:#3b82f6;
-    --text:#f1f5f9;
+  --bg:#0f172a;
+  --card:#1e293b;
+  --accent:#3b82f6;
+  --text:#f1f5f9;
 }
 
 body{
-    margin:0;
-    font-family:Arial, sans-serif;
-    background:var(--bg);
-    color:var(--text);
+  margin:0;
+  font-family:Arial, sans-serif;
+  background:var(--bg);
+  color:var(--text);
 }
 
 header{
-    padding:20px;
-    font-size:22px;
-    font-weight:bold;
-    display:flex;
-    justify-content:space-between;
-    background:#111827;
-}
-
-.container{
-    padding:20px;
-}
-
-.card{
-    background:var(--card);
-    padding:20px;
-    border-radius:12px;
-    margin-bottom:20px;
-}
-
-input{
-    width:100%;
-    padding:12px;
-    margin-bottom:12px;
-    border:none;
-    border-radius:8px;
+  padding:15px;
+  background:var(--card);
+  display:flex;
+  justify-content:space-between;
 }
 
 button{
-    width:100%;
-    padding:12px;
-    border:none;
-    border-radius:8px;
-    background:var(--accent);
-    color:white;
-    font-weight:bold;
-    cursor:pointer;
+  padding:10px;
+  border:none;
+  background:var(--accent);
+  color:white;
+  cursor:pointer;
+  border-radius:8px;
 }
 
-.hidden{ display:none; }
-
-.navbar{
-    position:fixed;
-    bottom:0;
-    width:100%;
-    background:#111827;
-    display:flex;
-    justify-content:space-around;
-    padding:12px 0;
+input{
+  padding:10px;
+  width:100%;
+  margin-bottom:10px;
+  border-radius:8px;
+  border:none;
 }
 
-.nav-item{
-    cursor:pointer;
+.section{
+  padding:15px;
+  display:none;
+}
+
+.active{
+  display:block;
 }
 
 .message{
-    background:#334155;
-    padding:10px;
-    margin-bottom:8px;
-    border-radius:8px;
+  background:#334155;
+  padding:8px;
+  margin-bottom:8px;
+  border-radius:8px;
+}
+
+.nav{
+  position:fixed;
+  bottom:0;
+  width:100%;
+  background:var(--card);
+  display:flex;
+  justify-content:space-around;
+  padding:10px;
+}
+
+.nav div{
+  cursor:pointer;
 }
 </style>
 </head>
@@ -87,44 +79,38 @@ button{
 <body>
 
 <header>
-    VigoChat Pro
-    <button onclick="toggleTheme()" style="background:none;border:none;color:white;">Tema</button>
+  <div>VigoChat</div>
+  <button onclick="toggleTheme()">Tema</button>
 </header>
 
-<div class="container">
-
-    <!-- AUTH -->
-    <div id="authSection" class="card">
-        <h3>Giriş / Kayıt</h3>
-        <input type="email" id="email" placeholder="Email">
-        <input type="password" id="password" placeholder="Şifre">
-        <button onclick="register()">Kayıt Ol</button>
-        <button onclick="login()">Giriş Yap</button>
-        <div id="authError" style="color:red;margin-top:10px;"></div>
-    </div>
-
-    <!-- CHAT -->
-    <div id="chatSection" class="hidden">
-        <div class="card">
-            <input type="text" id="messageInput" placeholder="Mesaj yaz">
-            <button onclick="sendMessage()">Gönder</button>
-        </div>
-        <div id="messages"></div>
-    </div>
-
-    <!-- PROFILE -->
-    <div id="profileSection" class="hidden card">
-        <h3>Profil</h3>
-        <p id="userEmail"></p>
-        <p id="userStatus"></p>
-        <button onclick="logout()">Çıkış</button>
-    </div>
-
+<!-- AUTH -->
+<div id="auth" class="section active">
+  <h3>Giriş / Kayıt</h3>
+  <input type="email" id="email" placeholder="Email">
+  <input type="password" id="password" placeholder="Şifre">
+  <button onclick="register()">Kayıt Ol</button>
+  <button onclick="login()">Giriş Yap</button>
+  <p id="authError" style="color:red;"></p>
 </div>
 
-<div class="navbar hidden" id="navbar">
-    <div class="nav-item" onclick="showSection('chat')">Sohbet</div>
-    <div class="nav-item" onclick="showSection('profile')">Profil</div>
+<!-- CHAT -->
+<div id="chat" class="section">
+  <h3>Sohbet</h3>
+  <div id="messages"></div>
+  <input type="text" id="messageInput" placeholder="Mesaj yaz">
+  <button onclick="sendMessage()">Gönder</button>
+</div>
+
+<!-- PROFILE -->
+<div id="profile" class="section">
+  <h3>Profil</h3>
+  <p id="userEmail"></p>
+  <button onclick="logout()">Çıkış</button>
+</div>
+
+<div class="nav">
+  <div onclick="showSection('chat')">Sohbet</div>
+  <div onclick="showSection('profile')">Profil</div>
 </div>
 
 <script type="module">
@@ -138,13 +124,12 @@ import {
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-import { 
+import {
   getDatabase,
   ref,
   push,
   onValue,
-  set,
-  onDisconnect
+  set
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
 const firebaseConfig = {
@@ -152,7 +137,7 @@ const firebaseConfig = {
   authDomain: "vigochat-58144.firebaseapp.com",
   databaseURL: "https://vigochat-58144-default-rtdb.europe-west1.firebasedatabase.app",
   projectId: "vigochat-58144",
-  storageBucket: "vigochat-58144.appspot.com",
+  storageBucket: "vigochat-58144.firebasestorage.app",
   messagingSenderId: "384136632816",
   appId: "1:384136632816:web:2bb6d6942680a2e2e6e535"
 };
@@ -161,104 +146,95 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
 
-window.register = async function(){
-    try{
-        await createUserWithEmailAndPassword(auth,
-            email.value,
-            password.value
-        );
-    }catch(e){
-        authError.innerText = e.message;
-    }
-}
+let currentUser = null;
 
-window.login = async function(){
-    try{
-        await signInWithEmailAndPassword(auth,
-            email.value,
-            password.value
-        );
-    }catch(e){
-        authError.innerText = e.message;
-    }
-}
-
-window.logout = function(){
-    signOut(auth);
-}
-
-onAuthStateChanged(auth, (user)=>{
-    if(user){
-        authSection.classList.add("hidden");
-        chatSection.classList.remove("hidden");
-        navbar.classList.remove("hidden");
-        userEmail.innerText = user.email;
-
-        const userRef = ref(db,"users/"+user.uid);
-        set(userRef,{
-            email:user.email,
-            online:true,
-            lastSeen:Date.now()
-        });
-
-        onDisconnect(userRef).update({
-            online:false,
-            lastSeen:Date.now()
-        });
-
-        loadMessages();
-    }else{
-        authSection.classList.remove("hidden");
-        chatSection.classList.add("hidden");
-        navbar.classList.add("hidden");
-    }
+// AUTH STATE
+onAuthStateChanged(auth, user=>{
+  if(user){
+    currentUser = user;
+    document.getElementById("auth").classList.remove("active");
+    document.getElementById("chat").classList.add("active");
+    document.getElementById("userEmail").innerText = user.email;
+    listenMessages();
+    set(ref(db, "users/"+user.uid), {
+      email:user.email,
+      online:true
+    });
+  }else{
+    document.getElementById("auth").classList.add("active");
+    document.getElementById("chat").classList.remove("active");
+  }
 });
 
+// REGISTER
+window.register = async function(){
+  const email = document.getElementById("email").value;
+  const pass = document.getElementById("password").value;
+  try{
+    await createUserWithEmailAndPassword(auth,email,pass);
+  }catch(e){
+    document.getElementById("authError").innerText = e.message;
+  }
+}
+
+// LOGIN
+window.login = async function(){
+  const email = document.getElementById("email").value;
+  const pass = document.getElementById("password").value;
+  try{
+    await signInWithEmailAndPassword(auth,email,pass);
+  }catch(e){
+    document.getElementById("authError").innerText = e.message;
+  }
+}
+
+// LOGOUT
+window.logout = async function(){
+  await signOut(auth);
+}
+
+// SEND MESSAGE
 window.sendMessage = function(){
-    const text = messageInput.value;
-    if(!text) return;
+  const text = document.getElementById("messageInput").value;
+  if(!text || !currentUser) return;
+  push(ref(db,"messages"),{
+    text:text,
+    uid:currentUser.uid,
+    email:currentUser.email,
+    time:Date.now()
+  });
+  document.getElementById("messageInput").value="";
+}
 
-    push(ref(db,"messages"),{
-        uid:auth.currentUser.uid,
-        text:text,
-        time:Date.now()
+// LISTEN MESSAGES
+function listenMessages(){
+  onValue(ref(db,"messages"), snapshot=>{
+    const data = snapshot.val();
+    const container = document.getElementById("messages");
+    container.innerHTML="";
+    if(!data) return;
+    Object.values(data).forEach(msg=>{
+      const div=document.createElement("div");
+      div.className="message";
+      div.innerText=msg.email+": "+msg.text;
+      container.appendChild(div);
     });
-
-    messageInput.value="";
+  });
 }
 
-function loadMessages(){
-    onValue(ref(db,"messages"), snapshot=>{
-        messages.innerHTML="";
-        const data = snapshot.val();
-        if(!data) return;
-
-        Object.values(data).forEach(msg=>{
-            const div = document.createElement("div");
-            div.className="message";
-            div.innerText=msg.text;
-            messages.appendChild(div);
-        });
-    });
+// NAVIGATION
+window.showSection=function(id){
+  document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
 }
 
-window.showSection = function(section){
-    chatSection.classList.add("hidden");
-    profileSection.classList.add("hidden");
-
-    if(section==="chat")
-        chatSection.classList.remove("hidden");
-
-    if(section==="profile")
-        profileSection.classList.remove("hidden");
-}
-
-window.toggleTheme = function(){
-    if(document.body.style.background==="white"){
-        document.body.style.background="var(--bg)";
-    }else{
-        document.body.style.background="white";
-    }
+// THEME
+window.toggleTheme=function(){
+  if(document.body.style.background=="white"){
+    document.body.style.background="#0f172a";
+  }else{
+    document.body.style.background="white";
+  }
 }
 
 </script>
