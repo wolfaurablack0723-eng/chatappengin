@@ -22,13 +22,14 @@
     html,body{height:100%}
     body{
       margin:0;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
       background:
         radial-gradient(900px 600px at 60% 10%, rgba(255,255,255,.78), transparent 60%),
         radial-gradient(900px 600px at 10% 90%, rgba(255,255,255,.62), transparent 60%),
         var(--bg);
       color:var(--text);
     }
+
     .wrap{
       max-width:520px;
       margin:0 auto;
@@ -39,7 +40,6 @@
       flex-direction:column;
     }
 
-    /* Top */
     .top{
       padding:16px 16px 10px;
       display:flex;
@@ -62,7 +62,6 @@
     }
     .pill:active{transform:scale(.98)}
 
-    /* Cards + inputs */
     .card{
       margin:0 16px 12px;
       border:1px solid var(--border);
@@ -71,8 +70,10 @@
       padding:14px;
       box-shadow: var(--shadow);
     }
-    .row{display:flex; gap:10px; align-items:center}
-    .col{display:flex; flex-direction:column; gap:8px}
+    .hint{margin-top:8px; font-size:12px; color:var(--muted)}
+    .danger{color:#b42318}
+    .ok{color:#067647}
+
     .label{font-size:12px; font-weight:900; color:var(--muted); letter-spacing:.2px}
     input, textarea{
       width:100%;
@@ -83,7 +84,8 @@
       outline:none;
       font-size:14px;
     }
-    textarea{min-height:90px; resize:none}
+    textarea{min-height:44px; max-height:140px; resize:none}
+
     .btn{
       border:1px solid rgba(43,108,255,.24);
       background: var(--accent2);
@@ -97,12 +99,10 @@
       user-select:none;
     }
     .btn:active{transform:scale(.99)}
-    .hint{margin-top:8px; font-size:12px; color:var(--muted)}
-    .danger{color:#b42318}
 
-    /* Tabs */
     .view{display:none; flex:1; overflow:auto; padding-bottom:12px}
     .view.active{display:block}
+
     .list{margin:0 16px; display:flex; flex-direction:column; gap:10px}
     .item{
       display:flex; gap:12px; align-items:center;
@@ -122,8 +122,9 @@
       display:grid; place-items:center;
       overflow:hidden;
       flex:0 0 auto;
+      font-weight:900;
+      color:var(--accent);
     }
-    .avatar img{width:100%;height:100%;object-fit:cover}
     .meta{min-width:0; flex:1}
     .meta b{display:block; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
     .meta span{display:block; font-size:13px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:3px}
@@ -165,8 +166,8 @@
       appearance:none;-webkit-appearance:none;
       font:inherit;color:inherit;
       user-select:none;
+      padding:0;
     }
-    .iconBtn:active{transform:scale(.98)}
     .chatTitle{min-width:0; flex:1}
     .chatTitle b{display:block; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
     .chatTitle span{display:block; font-size:12px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
@@ -178,7 +179,6 @@
       display:flex;
       flex-direction:column;
       gap:10px;
-      scroll-behavior:smooth;
     }
     .bubble{
       max-width:82%;
@@ -198,7 +198,6 @@
       border-color: rgba(43,108,255,.20);
     }
 
-    /* Composer (inside chat; no page jump) */
     .composer{
       position: sticky;
       bottom: 0;
@@ -209,12 +208,6 @@
       gap:10px;
       align-items:flex-end;
       box-shadow: 0 -10px 24px rgba(0,0,0,.06);
-    }
-    .composer textarea{
-      flex:1;
-      min-height:44px;
-      max-height:140px;
-      resize:none;
     }
     .send{
       width:52px;height:52px;border-radius:16px;
@@ -227,8 +220,8 @@
       font:inherit;
       user-select:none;
       display:grid;place-items:center;
+      padding:0;
     }
-    .send:active{transform:scale(.98)}
 
     /* Bottom nav */
     .bottom{
@@ -267,12 +260,6 @@
     }
     .tab .ico{font-size:20px; line-height:1}
     .tab .lbl{font-size:12px; font-weight:900}
-
-    /* Auth screen */
-    .authWrap{padding: 10px 0 0}
-    .seg{display:flex; gap:8px; margin-top:10px}
-    .seg .pill{flex:1; text-align:center}
-    .hide{display:none!important}
   </style>
 </head>
 
@@ -281,44 +268,35 @@
     <div class="top">
       <div>
         <h1 id="title">VigoChatt</h1>
-        <small id="sub">Hazırlanıyor…</small>
+        <small id="sub">Sekmeler çalışmalı ✅</small>
       </div>
       <button class="pill" id="logoutBtn" type="button">Çıkış</button>
     </div>
 
     <!-- AUTH -->
     <section class="view active" id="view-auth">
-      <div class="card authWrap">
+      <div class="card">
         <b>Giriş / Kayıt</b>
-        <div class="hint">APK’da gerçek kullanıcı olsun diye email+şifre ile giriş.</div>
-
-        <div class="seg">
-          <button class="pill" id="segLogin" type="button">Giriş</button>
-          <button class="pill" id="segSignup" type="button">Kayıt</button>
+        <div class="hint">
+          Firebase: <span id="fbState">yükleniyor…</span>
         </div>
 
-        <div id="loginBox" style="margin-top:12px">
-          <div class="col">
-            <div class="label">E-posta</div>
-            <input id="loginEmail" inputmode="email" placeholder="ornek@mail.com">
-            <div class="label">Şifre</div>
-            <input id="loginPass" type="password" placeholder="••••••••">
-            <button class="btn" id="loginBtn" type="button">Giriş yap</button>
-            <div class="hint danger" id="loginErr"></div>
-          </div>
+        <div style="margin-top:12px" class="hint">
+          Email/Şifre ile giriş çalışır. (Telefon için sonra native APK gerekir.)
         </div>
 
-        <div id="signupBox" class="hide" style="margin-top:12px">
-          <div class="col">
-            <div class="label">Ad Soyad</div>
-            <input id="signupName" placeholder="Engin">
-            <div class="label">E-posta</div>
-            <input id="signupEmail" inputmode="email" placeholder="ornek@mail.com">
-            <div class="label">Şifre (en az 6)</div>
-            <input id="signupPass" type="password" placeholder="••••••••">
-            <button class="btn" id="signupBtn" type="button">Kayıt ol</button>
-            <div class="hint danger" id="signupErr"></div>
+        <div style="margin-top:12px">
+          <div class="label">E-posta</div>
+          <input id="email" inputmode="email" placeholder="ornek@mail.com">
+          <div class="label" style="margin-top:10px">Şifre</div>
+          <input id="pass" type="password" placeholder="••••••••">
+
+          <div style="display:flex; gap:10px; margin-top:12px">
+            <button class="btn" id="loginBtn" type="button" style="flex:1">Giriş</button>
+            <button class="btn" id="signupBtn" type="button" style="flex:1">Kayıt</button>
           </div>
+
+          <div class="hint danger" id="authErr"></div>
         </div>
       </div>
     </section>
@@ -327,11 +305,11 @@
     <section class="view" id="view-chats">
       <div class="card">
         <b>Sohbetler</b>
-        <div class="hint">Sahte isim yok. Kullanıcı email’i ile sohbet başlat.</div>
+        <div class="hint">Gerçek kullanıcı listesi (kayıtlı kişiler).</div>
 
-        <div class="col" style="margin-top:10px">
-          <div class="label">Sohbet başlat (karşı tarafın e-postası)</div>
-          <div class="row">
+        <div style="margin-top:12px">
+          <div class="label">Kime yazacaksın? (email)</div>
+          <div style="display:flex; gap:10px; margin-top:8px">
             <input id="startEmail" inputmode="email" placeholder="arkadas@mail.com" style="flex:1">
             <button class="btn" id="startBtn" type="button">Başlat</button>
           </div>
@@ -346,11 +324,12 @@
     <section class="view" id="view-status">
       <div class="card">
         <b>Durum</b>
-        <div class="hint">İstersen sonra “hikaye” gibi geliştireceğiz. Şimdilik kısa durum metni.</div>
-        <div class="col" style="margin-top:10px">
+        <div class="hint">Şimdilik “durum metni” kaydediyoruz.</div>
+
+        <div style="margin-top:12px">
           <div class="label">Durumun</div>
-          <input id="aboutQuick" placeholder="çevrimiçi">
-          <button class="btn" id="saveAboutQuick" type="button">Kaydet</button>
+          <input id="about" placeholder="çevrimiçi">
+          <button class="btn" id="saveAbout" type="button" style="margin-top:10px">Kaydet</button>
           <div class="hint" id="aboutHint"></div>
         </div>
       </div>
@@ -360,30 +339,21 @@
     <section class="view" id="view-settings">
       <div class="card">
         <b>Ayarlar</b>
-        <div class="hint">Profil foto + isim.</div>
+        <div class="hint">İsim + Profil foto.</div>
 
-        <div class="row" style="margin-top:12px; align-items:flex-start">
-          <div class="avatar" style="width:74px;height:74px;border-radius:22px">
-            <img id="mePhoto" alt="" style="display:none">
-            <div id="mePhotoFallback" style="font-weight:900;color:var(--accent)">🙂</div>
-          </div>
-
-          <div style="flex:1" class="col">
-            <div class="label">Ad Soyad</div>
-            <input id="meName" placeholder="Engin">
-            <div class="label">Durum</div>
-            <input id="meAbout" placeholder="çevrimiçi">
-            <div class="label">Profil Foto</div>
-            <input id="meFile" type="file" accept="image/*">
-            <button class="btn" id="saveProfile" type="button">Kaydet</button>
-            <div class="hint" id="saveProfileHint"></div>
-          </div>
+        <div style="margin-top:12px">
+          <div class="label">Ad Soyad</div>
+          <input id="name" placeholder="Engin">
+          <div class="label" style="margin-top:10px">Profil foto</div>
+          <input id="photo" type="file" accept="image/*">
+          <button class="btn" id="saveProfile" type="button" style="margin-top:10px">Kaydet</button>
+          <div class="hint" id="saveHint"></div>
         </div>
       </div>
     </section>
   </div>
 
-  <!-- CHAT OVERLAY -->
+  <!-- CHAT -->
   <div class="overlay" id="overlay">
     <div class="chat" id="chatRoot">
       <div class="chatTop">
@@ -404,7 +374,7 @@
     </div>
   </div>
 
-  <!-- Bottom nav -->
+  <!-- NAV -->
   <div class="bottom">
     <nav class="nav">
       <div class="tab active" data-tab="chats"><div class="ico">💬</div><div class="lbl">Sohbet</div></div>
@@ -417,199 +387,244 @@
     const $ = (s, el=document)=> el.querySelector(s);
     const $$ = (s, el=document)=> Array.from(el.querySelectorAll(s));
 
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-    import {
-      getAuth, onAuthStateChanged,
-      createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut
-    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-    import {
-      getFirestore, doc, setDoc, getDoc, updateDoc,
-      collection, addDoc, query, orderBy, limit, onSnapshot,
-      where, getDocs, serverTimestamp
-    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
-    import {
-      getStorage, ref as sRef, uploadBytes, getDownloadURL
-    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-storage.js";
-
-    // ✅ SENİN CONFIG
-    const firebaseConfig = {
-      apiKey: "AIzaSyB1qovN4BNfaFlvE-KvURhX31AshxLuc0",
-      authDomain: "vigochatt.firebaseapp.com",
-      projectId: "vigochatt",
-      storageBucket: "vigochatt.firebasestorage.app",
-      messagingSenderId: "12259504636",
-      appId: "1:12259504636:web:d6ee79daceac8834d70279"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    const storage = getStorage(app);
-
-    function esc(s){
-      return String(s ?? "").replace(/[&<>"']/g, c => ({
-        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
-      }[c]));
-    }
-
-    // ---------------- UI NAV
+    // ✅ Sekmeler HER ŞARTTA çalışsın (Firebase bozulsa da)
     function setView(id){
       ["auth","chats","status","settings"].forEach(v=>{
         $("#view-"+v).classList.toggle("active", v===id);
       });
       $$(".tab").forEach(t=> t.classList.toggle("active", t.dataset.tab===id));
-      $("#logoutBtn").style.display = (id==="auth") ? "none" : "inline-block";
       const titles = {auth:"VigoChatt", chats:"Sohbetler", status:"Durum", settings:"Ayarlar"};
       $("#title").textContent = titles[id] || "VigoChatt";
     }
+    $$(".tab").forEach(t=>{
+      t.addEventListener("click", ()=>{
+        // giriş yoksa auth’a at
+        if(!state.meUid) { setView("auth"); return; }
+        setView(t.dataset.tab);
+      });
+    });
 
+    function bindMulti(el, fn){
+      ["click","touchend","pointerup"].forEach(ev=>{
+        el.addEventListener(ev, (e)=>{
+          e.preventDefault(); e.stopPropagation();
+          fn();
+        }, {passive:false});
+      });
+    }
     function autoGrow(ta){
       ta.style.height = "auto";
       ta.style.height = Math.min(140, ta.scrollHeight) + "px";
     }
 
-    // ---------------- AUTH SEGMENT
-    function showAuthSeg(which){
-      $("#loginBox").classList.toggle("hide", which!=="login");
-      $("#signupBox").classList.toggle("hide", which!=="signup");
-      $("#loginErr").textContent = "";
-      $("#signupErr").textContent = "";
+    const state = {
+      meUid: null,
+      meEmail: "",
+      meName: "",
+      fb: null, auth: null, db: null, storage: null,
+      currentThread: null,
+      unsubThreads: null,
+      unsubMsgs: null
+    };
+
+    // ✅ Firebase’i DİNAMİK yükle: yüklenemezse sayfa yine çalışır
+    async function loadFirebase(){
+      try{
+        const [{ initializeApp }, authMod, fsMod, stMod] = await Promise.all([
+          import("https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js"),
+          import("https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js"),
+          import("https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js"),
+          import("https://www.gstatic.com/firebasejs/10.12.5/firebase-storage.js")
+        ]);
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyB1qovN4BNfaFlvE-KvURhX31AshxLuc0",
+          authDomain: "vigochatt.firebaseapp.com",
+          projectId: "vigochatt",
+          storageBucket: "vigochatt.firebasestorage.app",
+          messagingSenderId: "12259504636",
+          appId: "1:12259504636:web:d6ee79daceac8834d70279"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        state.fb = { app, authMod, fsMod, stMod };
+        state.auth = authMod.getAuth(app);
+        state.db = fsMod.getFirestore(app);
+        state.storage = stMod.getStorage(app);
+
+        $("#fbState").textContent = "OK ✅";
+        $("#fbState").className = "ok";
+
+        // Auth listener
+        authMod.onAuthStateChanged(state.auth, async (user)=>{
+          if(!user){
+            state.meUid = null;
+            $("#sub").textContent = "Giriş gerekli";
+            $("#logoutBtn").style.display = "none";
+            setView("auth");
+            return;
+          }
+          state.meUid = user.uid;
+          state.meEmail = user.email || "";
+          $("#sub").textContent = "Online ✅";
+          $("#logoutBtn").style.display = "inline-block";
+
+          await ensureUserDoc();
+          subscribeThreads();
+          setView("chats");
+        });
+
+      }catch(err){
+        console.log(err);
+        $("#fbState").textContent = "HATA ❌ (Firebase yüklenmedi)";
+        $("#fbState").className = "danger";
+        $("#authErr").textContent = "Firebase yüklenmediği için giriş/mesaj çalışmaz. GitHub Pages linkini HTTPS açtığından emin ol.";
+      }
     }
-    $("#segLogin").addEventListener("click", ()=>showAuthSeg("login"));
-    $("#segSignup").addEventListener("click", ()=>showAuthSeg("signup"));
 
-    // ---------------- STATE
-    let me = { uid:null, email:"", name:"", about:"", photoURL:"" };
-    let unsubThreads = null;
-    let currentThreadId = null;
-    let unsubMessages = null;
+    const esc = (s)=> String(s ?? "").replace(/[&<>"']/g, c => ({
+      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+    }[c]));
 
-    async function loadMyProfile(uid){
-      const ref = doc(db, "users", uid);
-      const snap = await getDoc(ref);
+    async function ensureUserDoc(){
+      const { fsMod } = state.fb;
+      const meRef = fsMod.doc(state.db, "users", state.meUid);
+      const snap = await fsMod.getDoc(meRef);
       if(!snap.exists()){
-        // ilk girişte en az bir doc olsun
-        await setDoc(ref, {
-          email: auth.currentUser?.email || "",
-          name: me.name || "Kullanıcı",
+        await fsMod.setDoc(meRef, {
+          email: state.meEmail,
+          name: "Kullanıcı",
           about: "çevrimiçi",
           photoURL: "",
-          createdAt: serverTimestamp()
+          createdAt: fsMod.serverTimestamp()
         });
       }
-      const s2 = await getDoc(ref);
+      const s2 = await fsMod.getDoc(meRef);
       const d = s2.data() || {};
-      me = {
-        uid,
-        email: d.email || auth.currentUser?.email || "",
-        name: d.name || "Kullanıcı",
-        about: d.about || "çevrimiçi",
-        photoURL: d.photoURL || ""
-      };
-      renderMe();
+      state.meName = d.name || "Kullanıcı";
+      $("#name").value = state.meName;
+      $("#about").value = d.about || "çevrimiçi";
     }
 
-    function renderMe(){
-      $("#sub").textContent = me.uid ? "Online ✅" : "Giriş gerekli";
-      $("#meName").value = me.name || "";
-      $("#meAbout").value = me.about || "";
-      $("#aboutQuick").value = me.about || "";
+    function threadIdFor(a,b){ return (a<b) ? (a+"_"+b) : (b+"_"+a); }
 
-      const img = $("#mePhoto");
-      const fb = $("#mePhotoFallback");
-      if(me.photoURL){
-        img.src = me.photoURL;
-        img.style.display = "block";
-        fb.style.display = "none";
-      }else{
-        img.style.display = "none";
-        fb.style.display = "grid";
-        fb.textContent = (me.name?.trim()?.[0] || "🙂");
-      }
-    }
-
-    // ---------------- AUTH ACTIONS
-    $("#loginBtn").addEventListener("click", async ()=>{
-      $("#loginErr").textContent = "";
-      const email = ($("#loginEmail").value||"").trim();
-      const pass = ($("#loginPass").value||"").trim();
-      try{
-        await signInWithEmailAndPassword(auth, email, pass);
-      }catch(e){
-        $("#loginErr").textContent = e?.message || "Giriş hatası";
-      }
-    });
-
-    $("#signupBtn").addEventListener("click", async ()=>{
-      $("#signupErr").textContent = "";
-      const name = ($("#signupName").value||"").trim() || "Kullanıcı";
-      const email = ($("#signupEmail").value||"").trim();
-      const pass = ($("#signupPass").value||"").trim();
-      try{
-        const cred = await createUserWithEmailAndPassword(auth, email, pass);
-        // kullanıcı doc’u oluştur
-        await setDoc(doc(db,"users",cred.user.uid),{
-          email,
-          name,
-          about:"çevrimiçi",
-          photoURL:"",
-          createdAt: serverTimestamp()
-        });
-      }catch(e){
-        $("#signupErr").textContent = e?.message || "Kayıt hatası";
-      }
-    });
-
-    $("#logoutBtn").addEventListener("click", async ()=>{
-      try{ await signOut(auth); }catch{}
-    });
-
-    // ---------------- THREADS
-    function threadIdFor(a,b){
-      return (a < b) ? (a+"_"+b) : (b+"_"+a);
-    }
-
-    async function startChatByEmail(){
+    async function startChat(){
       $("#startErr").textContent = "";
       const email = ($("#startEmail").value||"").trim().toLowerCase();
       if(!email) return;
-
-      if(email === (me.email||"").toLowerCase()){
+      if(email === (state.meEmail||"").toLowerCase()){
         $("#startErr").textContent = "Kendi email’inle sohbet açamazsın.";
         return;
       }
+      const { fsMod } = state.fb;
 
-      // users içinde email ara
-      const qU = query(collection(db,"users"), where("email","==", email));
-      const snap = await getDocs(qU);
+      const qU = fsMod.query(fsMod.collection(state.db,"users"), fsMod.where("email","==", email));
+      const snap = await fsMod.getDocs(qU);
       if(snap.empty){
         $("#startErr").textContent = "Bu email ile kayıtlı kullanıcı yok.";
         return;
       }
       const otherDoc = snap.docs[0];
-      const other = { uid: otherDoc.id, ...otherDoc.data() };
+      const otherUid = otherDoc.id;
+      const other = otherDoc.data() || {};
 
-      const tid = threadIdFor(me.uid, other.uid);
-      const tRef = doc(db,"threads",tid);
-
-      // thread var mı
-      const tSnap = await getDoc(tRef);
+      const tid = threadIdFor(state.meUid, otherUid);
+      const tRef = fsMod.doc(state.db, "threads", tid);
+      const tSnap = await fsMod.getDoc(tRef);
       if(!tSnap.exists()){
-        await setDoc(tRef,{
-          participants: [me.uid, other.uid],
-          updatedAt: serverTimestamp(),
+        await fsMod.setDoc(tRef, {
+          participants: [state.meUid, otherUid],
+          updatedAt: fsMod.serverTimestamp(),
           lastText: "",
-          // küçük cache (listede hızlı göstermek için)
-          a: { uid: me.uid, name: me.name, photoURL: me.photoURL || "" },
-          b: { uid: other.uid, name: other.name || "Kullanıcı", photoURL: other.photoURL || "" }
+          a: { uid: state.meUid, name: state.meName, photoURL:"" },
+          b: { uid: otherUid, name: other.name || "Kullanıcı", photoURL: other.photoURL || "" }
         });
       }
       $("#startEmail").value = "";
       openThread(tid);
     }
 
-    $("#startBtn").addEventListener("click", startChatByEmail);
+    function subscribeThreads(){
+      const { fsMod } = state.fb;
+      if(state.unsubThreads){ state.unsubThreads(); state.unsubThreads=null; }
+
+      const qT = fsMod.query(fsMod.collection(state.db,"threads"), fsMod.orderBy("updatedAt","desc"), fsMod.limit(50));
+      state.unsubThreads = fsMod.onSnapshot(qT, (snap)=>{
+        const list = [];
+        snap.forEach(d=>{
+          const t = d.data();
+          if(Array.isArray(t.participants) && t.participants.includes(state.meUid)){
+            list.push({id:d.id, ...t});
+          }
+        });
+        renderThreads(list);
+      });
+    }
 
     function renderThreads(list){
       const el = $("#threadList");
-      el.innerHTML =
+      el.innerHTML = list.map(t=>{
+        const other = (t.a?.uid === state.meUid) ? t.b : t.a;
+        const name = other?.name || "Kullanıcı";
+        const last = t.lastText || "Sohbete gir…";
+        return `
+          <div class="item" data-thread="${esc(t.id)}">
+            <div class="avatar">${esc(name[0] || "🙂")}</div>
+            <div class="meta">
+              <b>${esc(name)}</b>
+              <span>${esc(last)}</span>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      $$("#threadList .item").forEach(it=>{
+        it.addEventListener("click", ()=> openThread(it.dataset.thread));
+      });
+    }
+
+    function openThread(tid){
+      state.currentThread = tid;
+
+      $("#overlay").classList.add("show");
+      $("#chatName").textContent = "Sohbet";
+      $("#chatSub").textContent = "online";
+
+      const { fsMod } = state.fb;
+      if(state.unsubMsgs){ state.unsubMsgs(); state.unsubMsgs=null; }
+
+      const mRef = fsMod.collection(state.db, "threads", tid, "messages");
+      const qM = fsMod.query(mRef, fsMod.orderBy("createdAt","asc"), fsMod.limit(300));
+
+      state.unsubMsgs = fsMod.onSnapshot(qM, (snap)=>{
+        const arr = [];
+        snap.forEach(d=> arr.push(d.data()));
+        renderMsgs(arr);
+      });
+    }
+
+    function closeChat(){
+      $("#overlay").classList.remove("show");
+      $("#msg").value = "";
+      if(state.unsubMsgs){ state.unsubMsgs(); state.unsubMsgs=null; }
+      state.currentThread = null;
+    }
+
+    function renderMsgs(arr){
+      const box = $("#chatBody");
+      box.innerHTML = arr.map(m=>{
+        const mine = (m.uid === state.meUid);
+        return `<div class="bubble ${mine ? "me":""}">${esc(m.text || "")}</div>`;
+      }).join("");
+      box.scrollTop = box.scrollHeight;
+    }
+
+    async function sendMsg(){
+      if(!state.currentThread) return;
+      const text = ($("#msg").value||"").trim();
+      if(!text) return;
+      $("#msg").value = "";
+      autoGrow($("#msg"));
+
+      const { fsMod } = state.fb;
+      await fsMod.addDoc(fsMod.collection(state.db, "threads
