@@ -1,249 +1,275 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VigoChatt</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<title>VigoChat</title>
 
 <style>
 :root{
---bg:#0f172a;
---card:#1e293b;
---text:#ffffff;
---accent:#3b82f6;
+  --bg:#f1efe9;
+  --card:#ffffff;
+  --text:#1b1b1b;
+  --muted:#777;
+  --accent:#2b6cff;
+  --border:#e4e4e4;
 }
-body.light{
---bg:#f1f5f9;
---card:#ffffff;
---text:#0f172a;
---accent:#2563eb;
+
+body.dark{
+  --bg:#121212;
+  --card:#1e1e1e;
+  --text:#ffffff;
+  --muted:#aaa;
+  --border:#333;
 }
+
+*{box-sizing:border-box;margin:0;padding:0}
 body{
-margin:0;
-font-family:Arial;
-background:var(--bg);
-color:var(--text);
+  font-family:system-ui;
+  background:var(--bg);
+  color:var(--text);
 }
-.container{
-max-width:500px;
-margin:auto;
-padding:15px;
+
+header{
+  padding:16px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
 }
-.card{
-background:var(--card);
-padding:15px;
-border-radius:15px;
-margin-bottom:15px;
+
+header h1{
+  font-size:18px;
 }
-input,textarea{
-width:100%;
-padding:12px;
-border-radius:10px;
-border:none;
-margin-bottom:10px;
-}
+
 button{
-width:100%;
-padding:12px;
-border:none;
-border-radius:10px;
-background:var(--accent);
-color:#fff;
-font-weight:bold;
-cursor:pointer;
-margin-bottom:10px;
+  cursor:pointer;
 }
-.nav{
-position:fixed;
-bottom:0;
-left:0;
-right:0;
-background:var(--card);
-display:flex;
-justify-content:space-around;
-padding:10px;
+
+.view{
+  display:none;
+  padding:16px;
 }
-.nav button{
-width:auto;
-flex:1;
-margin:0 5px;
+
+.view.active{
+  display:block;
 }
-.hidden{display:none;}
-.user{
-padding:10px;
-background:#334155;
-margin-bottom:8px;
-border-radius:8px;
-cursor:pointer;
+
+.card{
+  background:var(--card);
+  padding:16px;
+  border-radius:14px;
+  margin-bottom:14px;
+  border:1px solid var(--border);
 }
-.message{
-padding:8px;
-margin:5px 0;
-border-radius:8px;
+
+.bottom-nav{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  background:var(--card);
+  border-top:1px solid var(--border);
+  display:flex;
 }
-.me{background:#3b82f6;text-align:right;}
-.other{background:#475569;}
+
+.tab{
+  flex:1;
+  padding:14px;
+  text-align:center;
+  font-size:13px;
+  color:var(--muted);
+}
+
+.tab.active{
+  color:var(--accent);
+  font-weight:600;
+}
 </style>
 </head>
+
 <body>
 
-<div class="container">
+<header>
+  <h1 id="title">VigoChat</h1>
+  <button id="themeBtn">🌙</button>
+</header>
 
-<div id="authSection" class="card">
-<h2>Giriş / Kayıt</h2>
-<input id="email" placeholder="Email">
-<input id="password" type="password" placeholder="Şifre">
-<button onclick="register()">Kayıt Ol</button>
-<button onclick="login()">Giriş Yap</button>
-<p id="authError" style="color:red;"></p>
-</div>
+<!-- AUTH -->
+<section class="view active" id="view-auth">
+  <div class="card">
+    <h2>Giriş / Kayıt</h2><br>
+    <input id="email" placeholder="E-posta" style="width:100%;padding:10px;margin-bottom:10px">
+    <input id="pass" type="password" placeholder="Şifre" style="width:100%;padding:10px;margin-bottom:10px">
+    <button id="loginBtn" style="width:100%;padding:10px;margin-bottom:10px">Giriş Yap</button>
+    <button id="signupBtn" style="width:100%;padding:10px">Kayıt Ol</button>
+    <p id="authErr" style="color:red;margin-top:10px"></p>
+  </div>
+</section>
 
-<div id="appSection" class="hidden">
+<!-- CHATS -->
+<section class="view" id="view-chats">
+  <div class="card">
+    <h2>Sohbetler</h2>
+    <div id="chatList"></div>
+  </div>
+</section>
 
-<div class="card">
-<h2>VigoChatt</h2>
-<button onclick="toggleTheme()">Tema</button>
-<button onclick="logout()">Çıkış</button>
-</div>
+<!-- STATUS -->
+<section class="view" id="view-status">
+  <div class="card">
+    <h2>Durum</h2>
+    <p>Durum sistemi eklenecek</p>
+  </div>
+</section>
 
-<div id="usersSection" class="card">
-<h3>Kişiler</h3>
-<div id="usersList"></div>
-</div>
+<!-- CALLS -->
+<section class="view" id="view-calls">
+  <div class="card">
+    <h2>Aramalar</h2>
+    <p>Arama geçmişi burada olacak</p>
+  </div>
+</section>
 
-<div id="chatSection" class="card hidden">
-<h3 id="chatTitle">Sohbet</h3>
-<div id="messages"></div>
-<textarea id="messageInput" placeholder="Mesaj yaz"></textarea>
-<button onclick="sendMessage()">Gönder</button>
-</div>
+<!-- PROFILE -->
+<section class="view" id="view-profile">
+  <div class="card">
+    <h2>Profil</h2>
+    <p id="profileEmail"></p>
+    <button id="logoutBtn">Çıkış Yap</button>
+  </div>
+</section>
 
-</div>
+<nav class="bottom-nav">
+  <div class="tab active" data-tab="chats">Sohbet</div>
+  <div class="tab" data-tab="status">Durum</div>
+  <div class="tab" data-tab="calls">Arama</div>
+  <div class="tab" data-tab="profile">Profil</div>
+</nav>
 
-</div>
+<script>
+const $ = s => document.querySelector(s);
+const $$ = s => document.querySelectorAll(s);
 
-<div class="nav hidden" id="navBar">
-<button onclick="showUsers()">Kişiler</button>
-<button onclick="showChat()">Sohbet</button>
-</div>
-
-<script type="module">
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getDatabase, ref, set, onValue, push } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-
-const firebaseConfig = {
-apiKey: "AIzaSyA3--Xy1WrM6WlxurXXr4i5qwMZiafXN4k",
-authDomain: "vigochat-58144.firebaseapp.com",
-databaseURL: "https://vigochat-58144-default-rtdb.europe-west1.firebasedatabase.app",
-projectId: "vigochat-58144",
-storageBucket: "vigochat-58144.appspot.com",
-messagingSenderId: "384136632816",
-appId: "1:384136632816:web:2bb6d6942680a2e2e6e535"
+const state = {
+  user:null
 };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getDatabase(app);
-
-let currentUser;
-let currentChatId;
-
-window.register = async function(){
-try{
-const userCred = await createUserWithEmailAndPassword(auth,email.value,password.value);
-await set(ref(db,'users/'+userCred.user.uid),{
-email:email.value
-});
-}catch(err){
-authError.innerText=err.message;
-}
+function setView(name){
+  $$(".view").forEach(v=>v.classList.remove("active"));
+  $("#view-"+name).classList.add("active");
+  $$(".tab").forEach(t=>t.classList.remove("active"));
+  document.querySelector(`[data-tab="${name}"]`)?.classList.add("active");
 }
 
-window.login = async function(){
-try{
-await signInWithEmailAndPassword(auth,email.value,password.value);
-}catch(err){
-authError.innerText=err.message;
-}
-}
-
-window.logout = function(){
-signOut(auth);
-}
-
-onAuthStateChanged(auth,user=>{
-if(user){
-currentUser=user;
-authSection.classList.add("hidden");
-appSection.classList.remove("hidden");
-navBar.classList.remove("hidden");
-loadUsers();
-}else{
-authSection.classList.remove("hidden");
-appSection.classList.add("hidden");
-navBar.classList.add("hidden");
-}
+$$(".tab").forEach(tab=>{
+  tab.onclick=()=>setView(tab.dataset.tab);
 });
 
-function loadUsers(){
-const usersRef=ref(db,'users');
-onValue(usersRef,snapshot=>{
-usersList.innerHTML="";
-snapshot.forEach(child=>{
-if(child.key!==currentUser.uid){
-const div=document.createElement("div");
-div.className="user";
-div.innerText=child.val().email;
-div.onclick=()=>startChat(child.key,child.val().email);
-usersList.appendChild(div);
-}
-});
-});
-}
+$("#themeBtn").onclick=()=>{
+  document.body.classList.toggle("dark");
+  localStorage.setItem("theme",
+    document.body.classList.contains("dark")?"dark":"light");
+};
 
-function startChat(uid,email){
-currentChatId=[currentUser.uid,uid].sort().join("_");
-chatTitle.innerText=email;
-chatSection.classList.remove("hidden");
-const messagesRef=ref(db,'messages/'+currentChatId);
-onValue(messagesRef,snapshot=>{
-messages.innerHTML="";
-snapshot.forEach(child=>{
-const msg=child.val();
-const div=document.createElement("div");
-div.className="message "+(msg.sender===currentUser.uid?"me":"other");
-div.innerText=msg.text;
-messages.appendChild(div);
-});
-});
+if(localStorage.getItem("theme")==="dark"){
+  document.body.classList.add("dark");
 }
-
-window.sendMessage=function(){
-if(!messageInput.value)return;
-push(ref(db,'messages/'+currentChatId),{
-text:messageInput.value,
-sender:currentUser.uid,
-timestamp:Date.now()
-});
-messageInput.value="";
-}
-
-window.toggleTheme=function(){
-document.body.classList.toggle("light");
-}
-
-window.showUsers=function(){
-usersSection.classList.remove("hidden");
-chatSection.classList.add("hidden");
-}
-
-window.showChat=function(){
-chatSection.classList.remove("hidden");
-usersSection.classList.add("hidden");
-}
-
 </script>
+
 </body>
 </html>
+/* =========================
+   FIREBASE CONFIG
+========================= */
+
+const firebaseConfig = {
+  apiKey: "BURAYA_KENDI_APIKEY",
+  authDomain: "BURAYA_AUTHDOMAIN",
+  projectId: "BURAYA_PROJECTID",
+  storageBucket: "BURAYA_STORAGE",
+  messagingSenderId: "BURAYA_SENDERID",
+  appId: "BURAYA_APPID"
+};
+
+/* =========================
+   FIREBASE LOAD
+========================= */
+
+function loadFirebase(){
+  return new Promise(resolve=>{
+    const appScript = document.createElement("script");
+    appScript.src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js";
+    document.body.appendChild(appScript);
+
+    appScript.onload=()=>{
+      const authScript=document.createElement("script");
+      authScript.src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js";
+      document.body.appendChild(authScript);
+
+      authScript.onload=()=>{
+        const dbScript=document.createElement("script");
+        dbScript.src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js";
+        document.body.appendChild(dbScript);
+
+        dbScript.onload=()=>resolve();
+      };
+    };
+  });
+}
+
+let auth;
+let db;
+
+async function initFirebase(){
+  await loadFirebase();
+
+  firebase.initializeApp(firebaseConfig);
+
+  auth = firebase.auth();
+  db = firebase.firestore();
+
+  auth.onAuthStateChanged(user=>{
+    if(user){
+      state.user=user;
+      $("#profileEmail").textContent=user.email;
+      setView("chats");
+    }else{
+      state.user=null;
+      setView("auth");
+    }
+  });
+}
+
+/* =========================
+   AUTH FUNCTIONS
+========================= */
+
+$("#loginBtn").onclick=async ()=>{
+  $("#authErr").textContent="";
+  try{
+    await auth.signInWithEmailAndPassword(
+      $("#email").value,
+      $("#pass").value
+    );
+  }catch(e){
+    $("#authErr").textContent=e.message;
+  }
+};
+
+$("#signupBtn").onclick=async ()=>{
+  $("#authErr").textContent="";
+  try{
+    await auth.createUserWithEmailAndPassword(
+      $("#email").value,
+      $("#pass").value
+    );
+  }catch(e){
+    $("#authErr").textContent=e.message;
+  }
+};
+
+$("#logoutBtn").onclick=()=>{
+  auth.signOut();
+};
+
+initFirebase();
