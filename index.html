@@ -1,144 +1,449 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Vigo Chat</title>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+  <title>Basit Mesajlaşma</title>
+  <style>
+    :root{
+      --bg:#efe7db;
+      --card:rgba(0,0,0,.06);
+      --text:#1b1b1b;
+      --muted:rgba(0,0,0,.55);
+      --border:rgba(0,0,0,.10);
+      --accent:#2b6cff;
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --safe-top: env(safe-area-inset-top, 0px);
+      --radius:18px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      background: radial-gradient(900px 600px at 60% 10%, rgba(255,255,255,.75), transparent 60%),
+                  radial-gradient(900px 600px at 10% 90%, rgba(255,255,255,.60), transparent 60%),
+                  var(--bg);
+      color:var(--text);
+    }
 
-<style>
-body{
-  margin:0;
-  font-family:sans-serif;
-  background:#efe7db;
-}
+    .app{
+      max-width:520px;
+      margin:0 auto;
+      height:100dvh;
+      display:flex;
+      flex-direction:column;
+      padding-top: var(--safe-top);
+      padding-bottom: calc(84px + var(--safe-bottom));
+    }
 
-.header{
-  background:#111;
-  color:#fff;
-  padding:15px;
-  font-size:20px;
-  font-weight:bold;
-}
+    /* Header */
+    .header{
+      padding:16px 16px 10px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .header h1{
+      margin:0;
+      font-size:18px;
+      letter-spacing:.2px;
+    }
+    .header small{color:var(--muted)}
+    .pill{
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.55);
+      padding:10px 12px;
+      border-radius:999px;
+      cursor:pointer;
+      user-select:none;
+    }
+    .pill:active{transform:scale(.98)}
 
-.container{
-  padding:20px;
-  padding-bottom:90px;
-}
+    /* Views */
+    .view{
+      display:none;
+      padding: 6px 16px 16px;
+      overflow:auto;
+      flex:1;
+    }
+    .view.active{display:block}
 
-.message{
-  background:#fff;
-  padding:12px;
-  border-radius:16px;
-  margin-bottom:10px;
-}
+    .card{
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.55);
+      border-radius: var(--radius);
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+    .list{display:flex; flex-direction:column; gap:10px}
+    .item{
+      display:flex; align-items:center; gap:12px;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.55);
+      border-radius: 16px;
+      padding: 12px;
+      cursor:pointer;
+      user-select:none;
+    }
+    .item:active{transform:scale(.99)}
+    .avatar{
+      width:44px;height:44px;border-radius:16px;
+      background: rgba(43,108,255,.12);
+      border:1px solid rgba(43,108,255,.18);
+      display:grid; place-items:center;
+      font-weight:900;
+      color:var(--accent);
+      flex:0 0 auto;
+    }
+    .meta{min-width:0; flex:1}
+    .meta b{display:block; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+    .meta span{display:block; font-size:13px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:3px}
 
-.inputBox{
-  position:fixed;
-  bottom:70px;
-  left:0;
-  right:0;
-  padding:10px;
-  display:flex;
-  gap:10px;
-  background:#efe7db;
-}
+    /* Chat overlay */
+    .overlay{
+      position:fixed; inset:0;
+      background: rgba(0,0,0,.15);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display:none;
+      z-index: 50;
+      padding-top: var(--safe-top);
+      padding-bottom: var(--safe-bottom);
+    }
+    .overlay.show{display:block}
 
-input{
-  flex:1;
-  padding:12px;
-  border-radius:12px;
-  border:1px solid #ccc;
-}
+    .chat{
+      max-width:520px;
+      margin:0 auto;
+      height:100%;
+      display:flex;
+      flex-direction:column;
+      background: rgba(255,255,255,.50);
+    }
+    .chatTop{
+      padding: 12px 14px;
+      display:flex; align-items:center; gap:10px;
+      border-bottom:1px solid var(--border);
+      background: rgba(255,255,255,.55);
+    }
+    .btn{
+      width:44px; height:44px;
+      border-radius: 14px;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.65);
+      cursor:pointer;
+      display:grid; place-items:center;
+      user-select:none;
+    }
+    .btn:active{transform:scale(.98)}
+    .chatTitle{min-width:0; flex:1}
+    .chatTitle b{display:block; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+    .chatTitle span{display:block; font-size:12px; color:var(--muted)}
 
-button{
-  padding:12px 18px;
-  border-radius:12px;
-  border:none;
-  background:#2b6cff;
-  color:#fff;
-  font-weight:bold;
-}
+    .chatBody{
+      flex:1;
+      overflow:auto;
+      padding: 12px 14px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .bubble{
+      max-width:78%;
+      padding:10px 12px;
+      border-radius: 16px;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.75);
+      font-size:14px;
+      line-height:1.35;
+      white-space:pre-wrap;
+      word-break:break-word;
+    }
+    .bubble.me{
+      margin-left:auto;
+      background: rgba(43,108,255,.12);
+      border-color: rgba(43,108,255,.20);
+    }
+    .composer{
+      padding: 10px 14px calc(10px + var(--safe-bottom));
+      border-top:1px solid var(--border);
+      background: rgba(255,255,255,.55);
+      display:flex;
+      gap:10px;
+      align-items:flex-end;
+    }
+    .composer textarea{
+      flex:1;
+      min-height:44px;
+      max-height:140px;
+      resize:none;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.75);
+      border-radius: 16px;
+      padding: 12px;
+      outline:none;
+      font-size:14px;
+    }
+    .send{
+      width:52px;height:52px;
+      border-radius:16px;
+      border:1px solid rgba(43,108,255,.25);
+      background: rgba(43,108,255,.12);
+      color: var(--accent);
+      font-weight:900;
+      cursor:pointer;
+      display:grid; place-items:center;
+      user-select:none;
+    }
 
-.nav{
-  position:fixed;
-  bottom:0;
-  left:0;
-  right:0;
-  background:#fff;
-  display:flex;
-  padding:10px;
-}
+    /* Bottom bar */
+    .bottom{
+      position:fixed;
+      left:0; right:0; bottom:0;
+      z-index:9999;
+      padding: 10px 12px calc(10px + var(--safe-bottom));
+      display:flex;
+      justify-content:center;
+    }
+    .nav{
+      width:min(520px, calc(100% - 24px));
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.55);
+      border-radius: 22px;
+      padding: 10px;
+      display:flex;
+      gap:8px;
+    }
+    .tab{
+      flex:1;
+      border-radius: 16px;
+      padding: 10px 6px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:6px;
+      cursor:pointer;
+      user-select:none;
+      color:var(--muted);
+      border:1px solid transparent;
+    }
+    .tab.active{
+      color: var(--text);
+      background: rgba(43,108,255,.10);
+      border-color: rgba(43,108,255,.18);
+    }
+    .tab .ico{font-size:20px; line-height:1}
+    .tab .lbl{font-size:12px; font-weight:800}
 
-.nav div{
-  flex:1;
-  text-align:center;
-  font-weight:bold;
-}
-</style>
+  </style>
 </head>
 
 <body>
+  <div class="app">
+    <div class="header">
+      <div>
+        <h1 id="title">Mesajlar</h1>
+        <small id="sub">Basit mesajlaşma</small>
+      </div>
+      <div class="pill" id="addBtn">＋</div>
+    </div>
 
-<div class="header">Vigo Chat ⭐</div>
+    <!-- Aramalar -->
+    <section class="view" id="view-calls">
+      <div class="card">
+        <b>Aramalar</b>
+        <div style="margin-top:6px; color:var(--muted); font-size:13px">
+          Son aramalar burada görünecek (demo).
+        </div>
+      </div>
+      <div class="list">
+        <div class="item"><div class="avatar">👤</div><div class="meta"><b>Ahmet</b><span>Bugün 12:05 • Gelen</span></div></div>
+        <div class="item"><div class="avatar">👤</div><div class="meta"><b>Zeynep</b><span>Dün 21:18 • Giden</span></div></div>
+      </div>
+    </section>
 
-<div class="container" id="messages"></div>
+    <!-- Durum -->
+    <section class="view" id="view-status">
+      <div class="card">
+        <b>Durum</b>
+        <div style="margin-top:6px; color:var(--muted); font-size:13px">
+          Buraya hikaye/durum mantığı eklenir (demo).
+        </div>
+      </div>
+      <div class="list">
+        <div class="item"><div class="avatar">✨</div><div class="meta"><b>Senin durumun</b><span>Durum ekle</span></div></div>
+        <div class="item"><div class="avatar">📌</div><div class="meta"><b>Ahmet</b><span>“Dışarıdayım”</span></div></div>
+      </div>
+    </section>
 
-<div class="inputBox">
-  <input id="msg" placeholder="Mesaj yaz">
-  <button onclick="send()">Gönder</button>
-</div>
+    <!-- Mesajlar -->
+    <section class="view active" id="view-messages">
+      <div class="card">
+        <b>Mesajlar</b>
+        <div style="margin-top:6px; color:var(--muted); font-size:13px">
+          Bir sohbet seç — mesaj yazıp gönderebilirsin.
+        </div>
+      </div>
+      <div class="list" id="chatList"></div>
+    </section>
 
-<div class="nav">
-  <div>Aramalar</div>
-  <div>Durum</div>
-  <div>Mesajlar</div>
-  <div>Profil</div>
-</div>
+    <!-- Profil -->
+    <section class="view" id="view-profile">
+      <div class="card">
+        <b>Profil</b>
+        <div style="margin-top:6px; color:var(--muted); font-size:13px">
+          Basit profil ekranı (demo).
+        </div>
+      </div>
+      <div class="list">
+        <div class="item" style="cursor:default"><div class="avatar">🙂</div><div class="meta"><b>Engin</b><span>Durum: çevrimiçi</span></div></div>
+        <div class="item" style="cursor:default"><div class="avatar">⚙️</div><div class="meta"><b>Ayarlar</b><span>Bildirim / Gizlilik (demo)</span></div></div>
+      </div>
+    </section>
+  </div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, push, onValue }
-from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+  <!-- Chat overlay -->
+  <div class="overlay" id="overlay">
+    <div class="chat">
+      <div class="chatTop">
+        <div class="btn" id="back">←</div>
+        <div class="chatTitle">
+          <b id="chatName">Sohbet</b>
+          <span>çevrimiçi</span>
+        </div>
+        <div class="btn" id="more">⋯</div>
+      </div>
+      <div class="chatBody" id="chatBody"></div>
+      <div class="composer">
+        <textarea id="msg" rows="1" placeholder="Mesaj yaz..."></textarea>
+        <div class="send" id="send">➤</div>
+      </div>
+    </div>
+  </div>
 
-const firebaseConfig = {
-  apiKey: "AIzaSyA3--Xy1WrM6WlxurXXr4i5qwMZiafXN4k",
-  authDomain: "vigochat-58144.firebaseapp.com",
-  databaseURL: "https://vigochat-58144-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "vigochat-58144",
-  storageBucket: "vigochat-58144.appspot.com",
-  messagingSenderId: "384136632816",
-  appId: "1:384136632816:web:2bb6d6942680a2e2e6e535"
-};
+  <!-- Bottom nav -->
+  <div class="bottom">
+    <nav class="nav">
+      <div class="tab" data-tab="calls"><div class="ico">👥</div><div class="lbl">Aramalar</div></div>
+      <div class="tab" data-tab="status"><div class="ico">❗</div><div class="lbl">Durum</div></div>
+      <div class="tab active" data-tab="messages"><div class="ico">📶</div><div class="lbl">Mesajlar</div></div>
+      <div class="tab" data-tab="profile"><div class="ico">🤔</div><div class="lbl">Profil</div></div>
+    </nav>
+  </div>
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
+  <script>
+    const $ = (s, el=document)=> el.querySelector(s);
+    const $$ = (s, el=document)=> Array.from(el.querySelectorAll(s));
 
-window.send = function(){
-  const text = document.getElementById("msg").value.trim();
-  if(!text) return;
+    // Demo sohbetler
+    const chats = [
+      {id:"c1", name:"Ahmet", last:"Nasılsın?", msgs:[
+        {me:false, text:"Selam 👋"},
+        {me:true, text:"Nasılsın?"}
+      ]},
+      {id:"c2", name:"Zeynep", last:"Yarın görüşürüz.", msgs:[
+        {me:false, text:"Yarın saat kaç?"},
+        {me:true, text:"18:00 iyi mi?"},
+        {me:false, text:"Yarın görüşürüz."
+        }
+      ]},
+      {id:"c3", name:"Mert", last:"Tamamdır.", msgs:[
+        {me:false, text:"Akşam maç var mı?"},
+        {me:true, text:"Var gibi"},
+        {me:false, text:"Tamamdır."}
+      ]}
+    ];
 
-  push(ref(db,"messages"),{
-    text:text,
-    time:Date.now()
-  });
+    function renderChats(){
+      const el = $("#chatList");
+      el.innerHTML = chats.map(c=>`
+        <div class="item" data-chat="${c.id}">
+          <div class="avatar">${c.name[0]}</div>
+          <div class="meta">
+            <b>${escapeHtml(c.name)}</b>
+            <span>${escapeHtml(c.last)}</span>
+          </div>
+        </div>
+      `).join("");
+    }
 
-  document.getElementById("msg").value="";
-};
+    function escapeHtml(s){
+      return String(s).replace(/[&<>"']/g, c => ({
+        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+      }[c]));
+    }
 
-onValue(ref(db,"messages"), (snap)=>{
-  const box=document.getElementById("messages");
-  box.innerHTML="";
-  const data=snap.val();
-  if(!data) return;
+    // Tab geçiş
+    function setTab(tab){
+      $$(".tab").forEach(t=> t.classList.toggle("active", t.dataset.tab === tab));
+      ["calls","status","messages","profile"].forEach(v=>{
+        const view = $("#view-" + v);
+        if(view) view.classList.toggle("active", v === tab);
+      });
 
-  Object.values(data).forEach(m=>{
-    const div=document.createElement("div");
-    div.className="message";
-    div.innerText=m.text;
-    box.appendChild(div);
-  });
-});
-</script>
+      const titles = {calls:"Aramalar", status:"Durum", messages:"Mesajlar", profile:"Profil"};
+      $("#title").textContent = titles[tab] || "Mesajlar";
+      $("#sub").textContent = "Basit mesajlaşma";
+      closeChat();
+    }
 
+    // Chat
+    let current = null;
+    function openChat(id){
+      current = chats.find(c=>c.id===id) || null;
+      if(!current) return;
+      $("#chatName").textContent = current.name;
+      renderChat();
+      $("#overlay").classList.add("show");
+    }
+    function closeChat(){
+      $("#overlay").classList.remove("show");
+      current = null;
+      $("#msg").value = "";
+    }
+    function renderChat(){
+      const box = $("#chatBody");
+      box.innerHTML = (current?.msgs || []).map(m=>
+        `<div class="bubble ${m.me ? "me":""}">${escapeHtml(m.text)}</div>`
+      ).join("");
+      box.scrollTop = box.scrollHeight;
+    }
+    function sendMsg(){
+      if(!current) return;
+      const t = $("#msg").value.trim();
+      if(!t) return;
+      current.msgs.push({me:true, text:t});
+      current.last = t;
+      $("#msg").value = "";
+      renderChat();
+      renderChats();
+    }
+
+    // Tek event sistemi (sorunsuz)
+    document.addEventListener("click", (e)=>{
+      const tab = e.target.closest(".tab");
+      if(tab) setTab(tab.dataset.tab);
+
+      const chatItem = e.target.closest("#chatList .item");
+      if(chatItem) openChat(chatItem.dataset.chat);
+    });
+
+    $("#back").addEventListener("click", closeChat);
+    $("#send").addEventListener("click", sendMsg);
+    $("#msg").addEventListener("keydown", (e)=>{
+      if(e.key === "Enter" && !e.shiftKey){
+        e.preventDefault();
+        sendMsg();
+      }
+    });
+
+    $("#addBtn").addEventListener("click", ()=> alert("Demo: Sonra yeni sohbet ekleriz 🙂"));
+
+    // init
+    renderChats();
+    setTab("messages");
+  </script>
 </body>
 </html>
