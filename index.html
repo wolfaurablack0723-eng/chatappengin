@@ -1,744 +1,267 @@
-<script>
-let deferredPrompt;
-
-window.addEventListener("beforeinstallprompt", (e)=>{
-    e.preventDefault();
-    deferredPrompt = e;
-    document.getElementById("installBtn").style.display = "block";
-});
-
-function installApp(){
-    if(!deferredPrompt) return;
-    deferredPrompt.prompt();
-}
-</script><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>VigoChat Pro</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
-
 <style>
-
 :root{
-    --bg-dark:#0f172a;
-    --card-dark:#1e293b;
+    --bg:#0f172a;
+    --card:#1e293b;
     --accent:#3b82f6;
-    --text-light:#f1f5f9;
-    --text-muted:#94a3b8;
-    --radius:16px;
-    --transition:0.3s ease;
+    --text:#f1f5f9;
 }
 
 body{
     margin:0;
-    font-family:'Poppins',sans-serif;
-    background:var(--bg-dark);
-    color:var(--text-light);
-    display:flex;
-    flex-direction:column;
-    min-height:100vh;
-}
-
-.hidden{
-    display:none !important;
+    font-family:Arial, sans-serif;
+    background:var(--bg);
+    color:var(--text);
 }
 
 header{
     padding:20px;
     font-size:22px;
-    font-weight:700;
+    font-weight:bold;
     display:flex;
     justify-content:space-between;
-    align-items:center;
-    background:linear-gradient(135deg,#1e293b,#0f172a);
-    box-shadow:0 5px 20px rgba(0,0,0,0.4);
+    background:#111827;
 }
 
 .container{
-    flex:1;
     padding:20px;
-    overflow-y:auto;
 }
 
 .card{
-    background:var(--card-dark);
+    background:var(--card);
     padding:20px;
-    border-radius:var(--radius);
+    border-radius:12px;
     margin-bottom:20px;
-    box-shadow:0 8px 25px rgba(0,0,0,0.4);
-    transition:var(--transition);
-}
-
-.card:hover{
-    transform:translateY(-3px);
 }
 
 input{
     width:100%;
-    padding:14px;
-    border-radius:12px;
+    padding:12px;
+    margin-bottom:12px;
     border:none;
-    margin-bottom:15px;
-    font-size:14px;
-    outline:none;
+    border-radius:8px;
 }
 
 button{
     width:100%;
-    padding:14px;
-    border-radius:12px;
+    padding:12px;
     border:none;
-    font-weight:600;
-    font-size:14px;
-    cursor:pointer;
-    transition:var(--transition);
-}
-
-.btn-primary{
+    border-radius:8px;
     background:var(--accent);
     color:white;
+    font-weight:bold;
+    cursor:pointer;
 }
 
-.btn-primary:hover{
-    opacity:0.8;
-}
+.hidden{ display:none; }
 
 .navbar{
     position:fixed;
     bottom:0;
-    left:0;
-    right:0;
-    background:var(--card-dark);
+    width:100%;
+    background:#111827;
     display:flex;
     justify-content:space-around;
     padding:12px 0;
-    box-shadow:0 -5px 20px rgba(0,0,0,0.5);
 }
 
 .nav-item{
-    text-align:center;
-    font-size:12px;
     cursor:pointer;
-    transition:var(--transition);
-}
-
-.nav-item.active{
-    color:var(--accent);
 }
 
 .message{
-    padding:10px;
-    margin-bottom:10px;
-    border-radius:12px;
     background:#334155;
+    padding:10px;
+    margin-bottom:8px;
+    border-radius:8px;
 }
-
-.theme-light{
-    --bg-dark:#f1f5f9;
-    --card-dark:#ffffff;
-    --text-light:#0f172a;
-    --text-muted:#64748b;
-}
-
-.fade-in{
-    animation:fade 0.4s ease;
-}
-
-@keyframes fade{
-    from{opacity:0; transform:translateY(10px);}
-    to{opacity:1; transform:translateY(0);}
-}
-
 </style>
 </head>
 
 <body>
 
 <header>
-    <div>VigoChat Pro</div>
-    <div>
-        <button onclick="toggleTheme()" style="background:none;border:none;color:var(--text-light);font-size:18px;">🌙</button>
-    </div>
+    VigoChat Pro
+    <button onclick="toggleTheme()" style="background:none;border:none;color:white;">Tema</button>
 </header>
 
 <div class="container">
 
+    <!-- AUTH -->
     <div id="authSection" class="card">
         <h3>Giriş / Kayıt</h3>
         <input type="email" id="email" placeholder="Email">
         <input type="password" id="password" placeholder="Şifre">
-        <button class="btn-primary" onclick="register()">Kayıt Ol</button>
-        <button class="btn-primary" onclick="login()">Giriş Yap</button>
+        <button onclick="register()">Kayıt Ol</button>
+        <button onclick="login()">Giriş Yap</button>
         <div id="authError" style="color:red;margin-top:10px;"></div>
     </div>
 
+    <!-- CHAT -->
     <div id="chatSection" class="hidden">
-
         <div class="card">
-            <input type="text" id="messageInput" placeholder="Mesaj yaz...">
-            <button class="btn-primary" onclick="sendMessage()">Gönder</button>
+            <input type="text" id="messageInput" placeholder="Mesaj yaz">
+            <button onclick="sendMessage()">Gönder</button>
         </div>
-
         <div id="messages"></div>
+    </div>
 
+    <!-- PROFILE -->
+    <div id="profileSection" class="hidden card">
+        <h3>Profil</h3>
+        <p id="userEmail"></p>
+        <p id="userStatus"></p>
+        <button onclick="logout()">Çıkış</button>
     </div>
 
 </div>
 
-<div class="navbar">
-    <div class="nav-item active" onclick="switchTab('chat')">Sohbet</div>
-    <div class="nav-item" onclick="switchTab('profile')">Profil</div>
-    <div class="nav-item" onclick="logout()">Çıkış</div>
+<div class="navbar hidden" id="navbar">
+    <div class="nav-item" onclick="showSection('chat')">Sohbet</div>
+    <div class="nav-item" onclick="showSection('profile')">Profil</div>
 </div>
+
 <script type="module">
 
-// Firebase Import
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { 
-    getAuth, 
-    createUserWithEmailAndPassword,
-    signInWithEmailAndPassword,
-    signOut,
-    onAuthStateChanged
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 import { 
-    getDatabase, 
-    ref, 
-    push, 
-    onValue 
+  getDatabase,
+  ref,
+  push,
+  onValue,
+  set,
+  onDisconnect
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-// SENİN FIREBASE CONFIG
 const firebaseConfig = {
   apiKey: "AIzaSyA3--Xy1WrM6WlxurXXr4i5qwMZiafXN4k",
   authDomain: "vigochat-58144.firebaseapp.com",
   databaseURL: "https://vigochat-58144-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "vigo
-      <script type="module">
+  projectId: "vigochat-58144",
+  storageBucket: "vigochat-58144.appspot.com",
+  messagingSenderId: "384136632816",
+  appId: "1:384136632816:web:2bb6d6942680a2e2e6e535"
+};
 
-import { 
-    ref, 
-    set, 
-    get, 
-    update,
-    child,
-    onDisconnect
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
 
-const dbRoot = ref(db);
+window.register = async function(){
+    try{
+        await createUserWithEmailAndPassword(auth,
+            email.value,
+            password.value
+        );
+    }catch(e){
+        authError.innerText = e.message;
+    }
+}
 
-// ONLINE STATUS
+window.login = async function(){
+    try{
+        await signInWithEmailAndPassword(auth,
+            email.value,
+            password.value
+        );
+    }catch(e){
+        authError.innerText = e.message;
+    }
+}
+
+window.logout = function(){
+    signOut(auth);
+}
+
 onAuthStateChanged(auth, (user)=>{
     if(user){
-        const userStatusRef = ref(db, "users/" + user.uid);
-        set(userStatusRef, {
-            email: user.email,
-            online: true,
-            lastSeen: Date.now()
+        authSection.classList.add("hidden");
+        chatSection.classList.remove("hidden");
+        navbar.classList.remove("hidden");
+        userEmail.innerText = user.email;
+
+        const userRef = ref(db,"users/"+user.uid);
+        set(userRef,{
+            email:user.email,
+            online:true,
+            lastSeen:Date.now()
         });
 
-        onDisconnect(userStatusRef).update({
-            online: false,
-            lastSeen: Date.now()
+        onDisconnect(userRef).update({
+            online:false,
+            lastSeen:Date.now()
         });
 
-        loadUsers();
-        loadStatuses();
+        loadMessages();
+    }else{
+        authSection.classList.remove("hidden");
+        chatSection.classList.add("hidden");
+        navbar.classList.add("hidden");
     }
 });
 
-// LOAD USERS
-function loadUsers(){
-    const usersRef = ref(db, "users");
+window.sendMessage = function(){
+    const text = messageInput.value;
+    if(!text) return;
 
-    onValue(usersRef, (snapshot)=>{
-        const data = snapshot.val();
-        const container = document.getElementById("peopleList");
-        if(!container) return;
-
-        container.innerHTML = "";
-
-        for(let uid in data){
-            if(uid === auth.currentUser.uid) continue;
-
-            const user = data[uid];
-
-            const div = document.createElement("div");
-            div.className = "card";
-            div.innerHTML = `
-                <strong>${user.email}</strong><br>
-                ${user.online ? "🟢 Online" : "⚫ Son Görülme: " + new Date(user.lastSeen).toLocaleTimeString()}
-                <br><button onclick="openPrivateChat('${uid}')">Mesaj</button>
-            `;
-            container.appendChild(div);
-        }
+    push(ref(db,"messages"),{
+        uid:auth.currentUser.uid,
+        text:text,
+        time:Date.now()
     });
+
+    messageInput.value="";
 }
 
-// PRIVATE CHAT
-let currentChatUser = null;
-
-window.openPrivateChat = function(uid){
-    currentChatUser = uid;
-    document.getElementById("chatTitle").innerText = "Sohbet";
-    loadPrivateMessages(uid);
-    switchTabReal("messages");
-}
-
-function loadPrivateMessages(uid){
-
-    const chatId = getChatId(auth.currentUser.uid, uid);
-    const messagesRef = ref(db, "privateMessages/" + chatId);
-
-    onValue(messagesRef, (snapshot)=>{
+function loadMessages(){
+    onValue(ref(db,"messages"), snapshot=>{
+        messages.innerHTML="";
         const data = snapshot.val();
-        const container = document.getElementById("messages");
-        container.innerHTML = "";
-
         if(!data) return;
 
         Object.values(data).forEach(msg=>{
             const div = document.createElement("div");
-            div.className = "message";
-
-            const isMe = msg.uid === auth.currentUser.uid;
-
-            div.style.textAlign = isMe ? "right" : "left";
-
-            div.innerHTML = `
-                <div style="
-                    display:inline-block;
-                    padding:10px;
-                    border-radius:10px;
-                    background:${isMe ? '#4c8bf5' : '#2a2a2a'};
-                ">
-                    ${msg.text}
-                    <div style="font-size:10px;opacity:.6">
-                        ${new Date(msg.time).toLocaleTimeString()}
-                    </div>
-                </div>
-            `;
-
-            container.appendChild(div);
+            div.className="message";
+            div.innerText=msg.text;
+            messages.appendChild(div);
         });
-
-        container.scrollTop = container.scrollHeight;
     });
 }
 
-// SEND PRIVATE MESSAGE
-window.sendMessage = function(){
+window.showSection = function(section){
+    chatSection.classList.add("hidden");
+    profileSection.classList.add("hidden");
 
-    const input = document.getElementById("messageInput");
-    const text = input.value;
+    if(section==="chat")
+        chatSection.classList.remove("hidden");
 
-    if(text.trim() === "" || !currentChatUser) return;
-
-    const chatId = getChatId(auth.currentUser.uid, currentChatUser);
-    const messagesRef = ref(db, "privateMessages/" + chatId);
-
-    push(messagesRef, {
-        text: text,
-        uid: auth.currentUser.uid,
-        time: Date.now()
-    });
-
-    input.value = "";
+    if(section==="profile")
+        profileSection.classList.remove("hidden");
 }
 
-// CHAT ID GENERATOR
-function getChatId(uid1, uid2){
-    return uid1 < uid2 ? uid1 + "_" + uid2 : uid2 + "_" + uid1;
-}
-
-// STATUS (DURUM)
-window.addStatus = function(){
-
-    const text = prompt("Durum yaz");
-    if(!text) return;
-
-    const statusRef = ref(db, "statuses/" + auth.currentUser.uid);
-
-    push(statusRef, {
-        text: text,
-        time: Date.now()
-    });
-}
-
-function loadStatuses(){
-    const statusRef = ref(db, "statuses");
-
-    onValue(statusRef, (snapshot)=>{
-        const data = snapshot.val();
-        const container = document.getElementById("statusList");
-        if(!container) return;
-
-        container.innerHTML = "";
-
-        for(let uid in data){
-            const userStatuses = data[uid];
-
-            Object.values(userStatuses).forEach(status=>{
-                const div = document.createElement("div");
-                div.className = "card";
-                div.innerHTML = `
-                    <strong>${uid}</strong><br>
-                    ${status.text}
-                    <div style="font-size:10px">
-                        ${new Date(status.time).toLocaleTimeString()}
-                    </div>
-                `;
-                container.appendChild(div);
-            });
-        }
-    });
-}
-
-// ARAMALAR DEMO
-window.addCall = function(){
-    alert("Arama sistemi BLOK 4'te WebRTC ile eklenecek.");
-}
-
-// GERÇEK SEKME GEÇİŞ
-window.switchTabReal = function(tab){
-
-    document.querySelectorAll(".section").forEach(s=>{
-        s.style.display = "none";
-    });
-
-    document.getElementById(tab + "Section").style.display = "block";
-}
-
-</script>
-<script type="module">
-
-import { remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-
-let typingTimeout = null;
-
-// ===== TYPING =====
-function sendTyping(){
-    if(!currentChatUser) return;
-
-    const typingRef = ref(db, "typing/" + getChatId(auth.currentUser.uid, currentChatUser));
-    set(typingRef, {
-        uid: auth.currentUser.uid,
-        time: Date.now()
-    });
-
-    clearTimeout(typingTimeout);
-    typingTimeout = setTimeout(()=>{
-        remove(typingRef);
-    },2000);
-}
-
-document.getElementById("messageInput")?.addEventListener("input", sendTyping);
-
-// LISTEN TYPING
-function listenTyping(){
-
-    const typingRef = ref(db, "typing");
-
-    onValue(typingRef, (snapshot)=>{
-        const data = snapshot.val();
-        if(!data || !currentChatUser) return;
-
-        const chatId = getChatId(auth.currentUser.uid, currentChatUser);
-        const typingData = data[chatId];
-
-        const indicator = document.getElementById("typingIndicator");
-
-        if(typingData && typingData.uid !== auth.currentUser.uid){
-            indicator.innerText = "Yazıyor...";
-        }else{
-            indicator.innerText = "";
-        }
-    });
-}
-
-listenTyping();
-
-
-// ===== MESSAGE UPDATE =====
-window.editMessage = function(chatId, msgKey){
-
-    const newText = prompt("Mesajı düzenle:");
-    if(!newText) return;
-
-    const msgRef = ref(db, "privateMessages/" + chatId + "/" + msgKey);
-
-    update(msgRef, {
-        text: newText,
-        edited: true
-    });
-};
-
-
-// ===== MESSAGE DELETE =====
-window.deleteMessage = function(chatId, msgKey){
-
-    const confirmDelete = confirm("Mesaj silinsin mi?");
-    if(!confirmDelete) return;
-
-    const msgRef = ref(db, "privateMessages/" + chatId + "/" + msgKey);
-
-    remove(msgRef);
-};
-
-
-// ===== OKUNDU BİLGİSİ =====
-function markAsRead(chatId){
-
-    const readRef = ref(db, "reads/" + chatId + "/" + auth.currentUser.uid);
-
-    set(readRef, {
-        time: Date.now()
-    });
-}
-
-function listenReadStatus(chatId){
-
-    const readRef = ref(db, "reads/" + chatId);
-
-    onValue(readRef, (snapshot)=>{
-        const data = snapshot.val();
-        if(!data) return;
-
-        const otherUserRead = Object.keys(data).find(uid=> uid !== auth.currentUser.uid);
-
-        if(otherUserRead){
-            document.getElementById("readStatus").innerText = "✔✔ Okundu";
-        }
-    });
-}
-
-
-// ===== PROFESYONEL MESSAGE RENDER =====
-function renderPrivateMessage(msg, msgKey, chatId){
-
-    const isMe = msg.uid === auth.currentUser.uid;
-
-    return `
-    <div class="messageWrapper" style="text-align:${isMe?'right':'left'}">
-
-        <div class="bubble ${isMe?'me':''}">
-            ${msg.text}
-            ${msg.edited ? '<span style="font-size:10px;opacity:.5"> (düzenlendi)</span>' : ''}
-            <div style="font-size:10px;opacity:.6">
-                ${new Date(msg.time).toLocaleTimeString()}
-            </div>
-        </div>
-
-        ${isMe ? `
-        <div style="font-size:11px;margin-top:4px">
-            <span onclick="editMessage('${chatId}','${msgKey}')">✏</span>
-            <span onclick="deleteMessage('${chatId}','${msgKey}')">🗑</span>
-        </div>
-        `:''}
-
-    </div>
-    `;
-}
-
-
-// ===== GELİŞMİŞ LOAD PRIVATE =====
-function loadPrivateMessages(uid){
-
-    const chatId = getChatId(auth.currentUser.uid, uid);
-    const messagesRef = ref(db, "privateMessages/" + chatId);
-
-    onValue(messagesRef, (snapshot)=>{
-        const data = snapshot.val();
-        const container = document.getElementById("messages");
-        container.innerHTML = "";
-
-        if(!data) return;
-
-        Object.entries(data).forEach(([key,msg])=>{
-            container.innerHTML += renderPrivateMessage(msg,key,chatId);
-        });
-
-        markAsRead(chatId);
-        listenReadStatus(chatId);
-
-        container.scrollTop = container.scrollHeight;
-    });
-}
-
-
-// ===== BİLDİRİM SESİ =====
-function playNotification(){
-    const audio = new Audio("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg");
-    audio.play();
-}
-
-function listenNewMessages(){
-
-    const rootRef = ref(db, "privateMessages");
-
-    onValue(rootRef, (snapshot)=>{
-        playNotification();
-    });
-}
-
-listenNewMessages();
-
-
-// ===== LAST MESSAGE PREVIEW =====
-function updateLastMessage(chatId, text){
-
-    const lastRef = ref(db, "lastMessages/" + chatId);
-
-    set(lastRef, {
-        text: text,
-        time: Date.now()
-    });
-}
-
-
-// ===== PERFORMANS OPTİMİZASYON =====
-function listenLimitedMessages(uid){<button id="installBtn" onclick="installApp()" style="display:none">Uygulamayı Yükle</button>
-
-    const chatId = getChatId(auth.currentUser.uid, uid);
-    const messagesRef = ref(db, "privateMessages/" + chatId);
-
-    onValue(messagesRef, (snapshot)=>{
-        const data = snapshot.val();
-        if(!data) return;
-
-        const last50 = Object.entries(data).slice(-50);
-
-        const container = document.getElementById("messages");
-        container.innerHTML = "";
-
-        last50.forEach(([key,msg])=>{
-            container.innerHTML += renderPrivateMessage(msg,key,chatId);
-        });
-
-        container.scrollTop = container.scrollHeight;
-    });
-}
-
-</script>
-self.addEventListener("install", event=>{
-    event.waitUntil(
-        caches.open("vigo-cache").then(cache=>{
-            return cache.addAll([
-                "/",
-                "/index.html"
-            ]);
-        })
-    );
-});
-
-self.addEventListener("fetch", event=>{
-    event.respondWith(
-        caches.match(event.request).then(res=>{
-            return res || fetch(event.request);
-        })
-    );
-});
-    <script>
-if("serviceWorker" in navigator){
-    navigator.serviceWorker.register("sw.js");
-}
-    </script>
-    <script>
-const themes = {
-    dark:{
-        bg:"#0f172a",
-        card:"#1e293b",
-        accent:"#3b82f6"
-    },
-    light:{
-        bg:"#f1f5f9",
-        card:"#ffffff",
-        accent:"#2563eb"
-    },
-    neon:{
-        bg:"#000000",
-        card:"#111111",
-        accent:"#00ff88"
-    }
-};
-
-function applyTheme(name){
-    const t = themes[name];
-    document.body.style.background = t.bg;
-    document.documentElement.style.setProperty("--card", t.card);
-    document.documentElement.style.setProperty("--accent", t.accent);
-    localStorage.setItem("theme", name);
-}
-
-applyTheme(localStorage.getItem("theme") || "dark");
-        
-    </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-
-<script>
-const SECRET_KEY = "VIGO_SECURE_KEY";
-
-function encrypt(text){
-    return CryptoJS.AES.encrypt(text, SECRET_KEY).toString();
-}
-
-function decrypt(text){
-    const bytes = CryptoJS.AES.decrypt(text, SECRET_KEY);
-    return bytes.toString(CryptoJS.enc.Utf8);
-}
-</script>
-<script>
-function requestNotificationPermission(){
-    if("Notification" in window){
-        Notification.requestPermission();
+window.toggleTheme = function(){
+    if(document.body.style.background==="white"){
+        document.body.style.background="var(--bg)";
+    }else{
+        document.body.style.background="white";
     }
 }
 
-function showNotification(text){
-    if(Notification.permission === "granted"){
-        new Notification("Yeni Mesaj", {
-            body: text,
-            icon: "/icon.png"
-        });
-    }
-}
-
-requestNotificationPermission();
 </script>
-<script>
-let localStream;
-let peerConnection;
 
-async function startCall(){
-
-    localStream = await navigator.mediaDevices.getUserMedia({video:true,audio:true});
-
-    document.getElementById("localVideo").srcObject = localStream;
-
-    peerConnection = new RTCPeerConnection();
-
-    localStream.getTracks().forEach(track=>{
-        peerConnection.addTrack(track, localStream);
-    });
-
-    peerConnection.ontrack = event=>{
-        document.getElementById("remoteVideo").srcObject = event.streams[0];
-    };
-}
-</script>
-    <video id="localVideo" autoplay muted></video>
-<video id="remoteVideo" autoplay></video>
-<button onclick="startCall()">Arama Başlat</button>
-    .view{
-    transition: all .3s ease;
-    opacity:0;
-    transform:translateX(20px);
-}
-.view.active{
-    opacity:1;
-    transform:translateX(0);
-}
+</body>
+</html>
