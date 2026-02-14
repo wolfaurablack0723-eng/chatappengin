@@ -1,162 +1,187 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<title>VigoChatt</title>
+
+<style>
+:root{
+  --bg:#efe7db;
+  --card:rgba(0,0,0,.06);
+  --text:#1b1b1b;
+  --muted:rgba(0,0,0,.55);
+  --border:rgba(0,0,0,.10);
+  --accent:#2b6cff;
+  --radius:18px;
+}
+body{
+  margin:0;
+  font-family:system-ui;
+  background:var(--bg);
+  color:var(--text);
+}
+.app{max-width:520px;margin:auto;height:100vh;display:flex;flex-direction:column;}
+.header{padding:16px;display:flex;justify-content:space-between;}
+.view{display:none;padding:10px;flex:1;overflow:auto;}
+.view.active{display:block;}
+.card{background:var(--card);padding:12px;border-radius:var(--radius);margin-bottom:10px;}
+.list{display:flex;flex-direction:column;gap:10px;}
+.item{background:white;padding:10px;border-radius:12px;cursor:pointer;}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;}
+.overlay.show{display:block;}
+.chat{background:white;height:100%;display:flex;flex-direction:column;}
+.chatBody{flex:1;overflow:auto;padding:10px;}
+.bubble{padding:8px 12px;margin:6px 0;border-radius:12px;background:#eee;}
+.bubble.me{background:#cfe2ff;text-align:right;}
+.composer{display:flex;padding:10px;border-top:1px solid #ccc;}
+.composer textarea{flex:1;}
+.send{background:var(--accent);color:white;padding:10px 16px;border:none;border-radius:10px;}
+.bottom{position:fixed;bottom:0;width:100%;display:flex;justify-content:center;}
+.nav{display:flex;width:100%;max-width:520px;}
+.tab{flex:1;text-align:center;padding:10px;cursor:pointer;}
+.tab.active{background:#ddd;}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<div class="header">
+<h2>VigoChatt</h2>
+<button onclick="logout()">Çıkış</button>
+</div>
+
+<section class="view active" id="view-messages">
+<div class="card">Sohbetler</div>
+<div class="list" id="chatList"></div>
+</section>
+
+<section class="view" id="view-profile">
+<div class="card">
+<h3>Profil</h3>
+<input id="profileName" placeholder="Adınız">
+<button onclick="saveProfile()">Kaydet</button>
+</div>
+</section>
+
+</div>
+
+<div class="overlay" id="overlay">
+<div class="chat">
+<div class="chatBody" id="chatBody"></div>
+<div class="composer">
+<textarea id="msg"></textarea>
+<button class="send" onclick="sendMsg()">Gönder</button>
+</div>
+</div>
+</div>
+
+<div class="bottom">
+<div class="nav">
+<div class="tab active" onclick="setTab('messages')">Mesaj</div>
+<div class="tab" onclick="setTab('profile')">Profil</div>
+</div>
+</div>
+
+<!-- FIREBASE -->
 <script type="module">
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import {
-  getAuth,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-
-import {
-  getFirestore,
-  collection,
-  addDoc,
-  query,
-  orderBy,
-  onSnapshot
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getDatabase, ref, push, onValue, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyA3--Xy1WrM6WlxurXXr4i5qwMZiafXN4k",
   authDomain: "vigochat-58144.firebaseapp.com",
-  projectId: "vigochat-58144"
+  databaseURL: "https://vigochat-58144-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "vigochat-58144",
+  storageBucket: "vigochat-58144.firebasestorage.app",
+  messagingSenderId: "384136632816",
+  appId: "1:384136632816:web:2bb6d6942680a2e2e6e535"
 };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const db = getFirestore(app);
+const db = getDatabase(app);
 
 let currentUser = null;
-let currentChatEmail = null;
-let currentChatId = null;
+let currentChat = null;
 
-/* ---------------- AUTH EKRANI EKLE ---------------- */
-
-const authCard = document.createElement("div");
-authCard.className="card";
-authCard.innerHTML = `
-  <h3>Giriş / Kayıt</h3>
-  <input id="emailInput" placeholder="Email">
-  <input id="passInput" type="password" placeholder="Şifre">
-  <button id="registerBtn">Kayıt Ol</button>
-  <button id="loginBtn">Giriş Yap</button>
-  <div id="authError" style="color:red"></div>
-`;
-document.getElementById("view-profile").prepend(authCard);
-
-document.getElementById("registerBtn").onclick = async ()=>{
-  try{
-    await createUserWithEmailAndPassword(auth,
-      emailInput.value, passInput.value);
-  }catch(e){
-    authError.innerText=e.message;
-  }
-};
-
-document.getElementById("loginBtn").onclick = async ()=>{
-  try{
-    await signInWithEmailAndPassword(auth,
-      emailInput.value, passInput.value);
-  }catch(e){
-    authError.innerText=e.message;
-  }
-};
-
-onAuthStateChanged(auth,user=>{
+onAuthStateChanged(auth,(user)=>{
   if(user){
-    currentUser=user;
-    authCard.style.display="none";
+    currentUser = user;
     loadUsers();
   }else{
-    authCard.style.display="block";
+    location.href="login.html";
   }
 });
 
-/* ---------------- KULLANICILARI YÜKLE ---------------- */
-
 function loadUsers(){
-  const usersRef = collection(db,"users");
-
-  onSnapshot(usersRef,snap=>{
+  const usersRef = ref(db,"users");
+  onValue(usersRef,(snapshot)=>{
+    const data = snapshot.val();
     const list = document.getElementById("chatList");
     list.innerHTML="";
-
-    snap.forEach(doc=>{
-      const data=doc.data();
-      if(data.email===currentUser.email) return;
-
+    for(let uid in data){
+      if(uid===currentUser.uid) continue;
       const div=document.createElement("div");
       div.className="item";
-      div.innerHTML=`
-        <div class="avatar">${data.email[0].toUpperCase()}</div>
-        <div class="meta">
-          <b>${data.email}</b>
-          <span>Sohbet aç</span>
-        </div>
-      `;
-      div.onclick=()=>openChat(data.email);
+      div.innerText=data[uid].name || "Kullanıcı";
+      div.onclick=()=>openChat(uid);
       list.appendChild(div);
-    });
-  });
-
-  // kullanıcıyı kaydet
-  addDoc(usersRef,{
-    email:currentUser.email
+    }
   });
 }
 
-/* ---------------- CHAT ---------------- */
-
-function openChat(targetEmail){
-  currentChatEmail=targetEmail;
-  currentChatId=[currentUser.email,targetEmail].sort().join("_");
-
+function openChat(uid){
+  currentChat=uid;
   document.getElementById("overlay").classList.add("show");
-  document.getElementById("chatName").innerText=targetEmail;
-
-  listenMessages();
-}
-
-function listenMessages(){
-  const q=query(
-    collection(db,"chats",currentChatId,"messages"),
-    orderBy("time")
-  );
-
-  onSnapshot(q,snap=>{
+  const chatRef = ref(db,"messages/"+getChatId(currentUser.uid,uid));
+  onValue(chatRef,(snapshot)=>{
+    const data=snapshot.val();
     const box=document.getElementById("chatBody");
     box.innerHTML="";
-
-    snap.forEach(doc=>{
-      const data=doc.data();
+    if(!data) return;
+    Object.values(data).forEach(msg=>{
       const div=document.createElement("div");
-      div.className="bubble";
-      if(data.uid===currentUser.uid) div.classList.add("me");
-      div.innerText=data.text;
+      div.className="bubble "+(msg.uid===currentUser.uid?"me":"");
+      div.innerText=msg.text;
       box.appendChild(div);
     });
-
     box.scrollTop=box.scrollHeight;
   });
 }
 
-document.getElementById("send").onclick=async ()=>{
-  if(!currentChatId) return;
-  const text=document.getElementById("msg").value.trim();
+window.sendMsg=function(){
+  const text=document.getElementById("msg").value;
   if(!text) return;
-
-  await addDoc(
-    collection(db,"chats",currentChatId,"messages"),
-    {
-      text:text,
-      uid:currentUser.uid,
-      time:Date.now()
-    }
-  );
-
+  const chatRef=ref(db,"messages/"+getChatId(currentUser.uid,currentChat));
+  push(chatRef,{
+    text:text,
+    uid:currentUser.uid
+  });
   document.getElementById("msg").value="";
-};
+}
+
+function getChatId(a,b){
+  return a<b?a+"_"+b:b+"_"+a;
+}
+
+window.logout=function(){
+  signOut(auth);
+}
+
+window.setTab=function(tab){
+  document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
+  document.getElementById("view-"+tab).classList.add("active");
+}
+
+window.saveProfile=function(){
+  const name=document.getElementById("profileName").value;
+  set(ref(db,"users/"+currentUser.uid),{name:name});
+}
 
 </script>
+</body>
+</html>
