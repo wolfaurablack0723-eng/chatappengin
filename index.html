@@ -1,210 +1,116 @@
 <!doctype html>
-<html lang="tr">
+<html>
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta charset="utf-8">
 <title>VigoChatt</title>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
 <style>
-/* TASARIM AYNEN KALDI */
-:root{
-  --bg:#efe7db;
-  --card:rgba(0,0,0,.06);
-  --text:#1b1b1b;
-  --muted:rgba(0,0,0,.55);
-  --border:rgba(0,0,0,.10);
-  --accent:#2b6cff;
-  --radius:18px;
-}
-body{
-  margin:0;
-  font-family:system-ui;
-  background:var(--bg);
-  color:var(--text);
-}
-.app{max-width:520px;margin:auto;padding:16px}
-.card{
-  background:white;
-  border-radius:var(--radius);
-  padding:16px;
-  margin-bottom:15px;
-}
-input,textarea{
-  width:100%;
-  padding:12px;
-  margin-bottom:10px;
-  border-radius:12px;
-  border:1px solid #ccc;
-}
-button{
-  padding:12px;
-  border:none;
-  border-radius:12px;
-  background:var(--accent);
-  color:white;
-  width:100%;
-  font-weight:bold;
-}
-.message{
-  background:#f1f1f1;
-  padding:8px;
-  border-radius:10px;
-  margin-bottom:6px;
-}
+body{font-family:sans-serif;background:#efe7db;margin:0;padding:20px}
+.card{background:white;padding:15px;border-radius:12px;margin-bottom:15px}
+input,textarea{width:100%;padding:10px;margin-bottom:10px}
+button{padding:10px;width:100%;background:#2b6cff;color:white;border:none;border-radius:8px}
+.msg{padding:6px;background:#f1f1f1;margin-bottom:5px;border-radius:8px}
 .me{background:#cfe2ff;text-align:right}
-.hidden{display:none}
 </style>
 </head>
 
 <body>
-<div class="app">
 
 <h2>VigoChatt</h2>
 
-<div id="authBox" class="card">
-  <input type="email" id="email" placeholder="Email">
-  <input type="password" id="pass" placeholder="Şifre">
-  <button onclick="login()">Giriş / Kayıt</button>
+<div id="loginBox" class="card">
+<input id="email" placeholder="Email">
+<input id="pass" type="password" placeholder="Şifre">
+<button onclick="login()">Giriş / Kayıt</button>
 </div>
 
-<div id="chatBox" class="hidden">
+<div id="chatBox" style="display:none">
 
-  <div class="card">
-    <b>Profil</b>
-    <input id="profileName" placeholder="İsim">
-    <input id="profileBio" placeholder="Durum">
-    <button onclick="saveProfile()">Kaydet</button>
-  </div>
-
-  <div class="card">
-    <b>Yeni Sohbet</b>
-    <input id="targetEmail" placeholder="Email ile sohbet başlat">
-    <button onclick="startChat()">Başlat</button>
-  </div>
-
-  <div class="card">
-    <b>Sohbet</b>
-    <div id="messages"></div>
-    <textarea id="msgInput" placeholder="Mesaj yaz"></textarea>
-    <button onclick="sendMessage()">Gönder</button>
-  </div>
-
-</div>
+<div class="card">
+<input id="target" placeholder="Sohbet başlatılacak email">
+<button onclick="startChat()">Sohbet Başlat</button>
 </div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import {
-  getAuth,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+<div class="card">
+<div id="messages"></div>
+<textarea id="msg"></textarea>
+<button onclick="send()">Gönder</button>
+</div>
 
-import {
-  getFirestore,
-  doc,
-  setDoc,
-  getDoc,
-  collection,
-  addDoc,
-  query,
-  orderBy,
-  onSnapshot,
-  where,
-  getDocs
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+</div>
 
-const firebaseConfig = {
-  apiKey: "AIzaSyA3--Xy1WrM6WlxurXXr4i5qwMZiafXN4k",
-  authDomain: "vigochat-58144.firebaseapp.com",
-  projectId: "vigochat-58144"
+<script>
+var firebaseConfig = {
+apiKey: "AIzaSyA3--Xy1WrM6WlxurXXr4i5qwMZiafXN4k",
+authDomain: "vigochat-58144.firebaseapp.com",
+projectId: "vigochat-58144"
 };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+firebase.initializeApp(firebaseConfig);
+var auth = firebase.auth();
+var db = firebase.firestore();
 
-let currentUser = null;
-let currentChatId = null;
+var currentUser=null;
+var chatId=null;
 
-window.login = async function(){
-  const email = emailInput.value;
-  const pass = pass.value;
+function login(){
+var e=email.value;
+var p=pass.value;
 
-  try{
-    await signInWithEmailAndPassword(auth,email,pass);
-  }catch{
-    await createUserWithEmailAndPassword(auth,email,pass);
-  }
-};
+auth.signInWithEmailAndPassword(e,p)
+.catch(function(){
+auth.createUserWithEmailAndPassword(e,p);
+});
+}
 
-onAuthStateChanged(auth, async user=>{
-  if(user){
-    currentUser = user;
-    authBox.classList.add("hidden");
-    chatBox.classList.remove("hidden");
-    loadProfile();
-  }
+auth.onAuthStateChanged(function(user){
+if(user){
+currentUser=user;
+loginBox.style.display="none";
+chatBox.style.display="block";
+}
 });
 
-async function loadProfile(){
-  const ref = doc(db,"users",currentUser.uid);
-  const snap = await getDoc(ref);
-  if(snap.exists()){
-    profileName.value = snap.data().name || "";
-    profileBio.value = snap.data().bio || "";
-  }
+function startChat(){
+var targetEmail=target.value;
+
+db.collection("users").where("email","==",targetEmail).get()
+.then(function(snap){
+if(snap.empty){alert("Kullanıcı yok");return;}
+var other=snap.docs[0];
+chatId=[currentUser.uid,other.id].sort().join("_");
+listen();
+});
 }
 
-window.saveProfile = async function(){
-  await setDoc(doc(db,"users",currentUser.uid),{
-    name:profileName.value,
-    bio:profileBio.value,
-    email:currentUser.email
-  });
-  alert("Profil kaydedildi");
-};
-
-window.startChat = async function(){
-  const email = targetEmail.value;
-  const q = query(collection(db,"users"),where("email","==",email));
-  const snap = await getDocs(q);
-
-  if(snap.empty){
-    alert("Kullanıcı yok");
-    return;
-  }
-
-  const other = snap.docs[0];
-  currentChatId = [currentUser.uid,other.id].sort().join("_");
-
-  listenMessages();
-};
-
-function listenMessages(){
-  const q = query(collection(db,"messages",currentChatId,"chat"),orderBy("time"));
-  onSnapshot(q,snap=>{
-    messages.innerHTML="";
-    snap.forEach(doc=>{
-      const data=doc.data();
-      const div=document.createElement("div");
-      div.className="message "+(data.uid===currentUser.uid?"me":"");
-      div.textContent=data.text;
-      messages.appendChild(div);
-    });
-  });
+function listen(){
+db.collection("messages").doc(chatId).collection("chat")
+.orderBy("time")
+.onSnapshot(function(snap){
+messages.innerHTML="";
+snap.forEach(function(doc){
+var d=doc.data();
+var div=document.createElement("div");
+div.className="msg"+(d.uid==currentUser.uid?" me":"");
+div.innerText=d.text;
+messages.appendChild(div);
+});
+});
 }
 
-window.sendMessage = async function(){
-  if(!currentChatId) return;
-  await addDoc(collection(db,"messages",currentChatId,"chat"),{
-    text:msgInput.value,
-    uid:currentUser.uid,
-    time:Date.now()
-  });
-  msgInput.value="";
-};
+function send(){
+if(!chatId)return;
+db.collection("messages").doc(chatId).collection("chat").add({
+text:msg.value,
+uid:currentUser.uid,
+time:Date.now()
+});
+msg.value="";
+}
 </script>
+
 </body>
 </html>
