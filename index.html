@@ -1,97 +1,562 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>VigoChatt</title>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+  <title>Basit Mesajlaşma</title>
+  <style>
+    :root{
+      --bg:#efe7db;
+      --card:rgba(0,0,0,.06);
+      --text:#1b1b1b;
+      --muted:rgba(0,0,0,.55);
+      --border:rgba(0,0,0,.10);
+      --accent:#2b6cff;
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --safe-top: env(safe-area-inset-top, 0px);
+      --radius:18px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      background: radial-gradient(900px 600px at 60% 10%, rgba(255,255,255,.75), transparent 60%),
+                  radial-gradient(900px 600px at 10% 90%, rgba(255,255,255,.60), transparent 60%),
+                  var(--bg);
+      color:var(--text);
+    }
 
-<style>
-body{margin:0;font-family:system-ui;background:#f2f2f2;}
-.top{padding:15px;background:#2b6cff;color:#fff;text-align:center;font-weight:bold;}
-.box{padding:15px;background:#fff;}
-input{width:100%;padding:10px;margin-bottom:10px;border:1px solid #ddd;border-radius:6px;}
-button{width:100%;padding:12px;background:#2b6cff;color:#fff;border:none;border-radius:6px;font-weight:bold;}
-#messages{height:50vh;overflow:auto;padding:10px;background:#fff;}
-.msg{padding:8px 10px;margin:5px 0;border-radius:8px;background:#eee;font-size:14px;}
-.me{background:#2b6cff;color:#fff;text-align:right;}
-</style>
+    .app{
+      max-width:520px;
+      margin:0 auto;
+      height:100dvh;
+      display:flex;
+      flex-direction:column;
+      padding-top: var(--safe-top);
+      padding-bottom: calc(84px + var(--safe-bottom));
+    }
+
+    /* Header */
+    .header{
+      padding:16px 16px 10px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .header h1{
+      margin:0;
+      font-size:18px;
+      letter-spacing:.2px;
+    }
+    .header small{color:var(--muted)}
+    .pill{
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.55);
+      padding:10px 12px;
+      border-radius:999px;
+      cursor:pointer;
+      user-select:none;
+      appearance:none; -webkit-appearance:none;
+      font:inherit; color:inherit;
+    }
+    .pill:active{transform:scale(.98)}
+
+    /* Views */
+    .view{
+      display:none;
+      padding: 6px 16px 16px;
+      overflow:auto;
+      flex:1;
+    }
+    .view.active{display:block}
+
+    .card{
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.55);
+      border-radius: var(--radius);
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+    .list{display:flex; flex-direction:column; gap:10px}
+    .item{
+      display:flex; align-items:center; gap:12px;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.55);
+      border-radius: 16px;
+      padding: 12px;
+      cursor:pointer;
+      user-select:none;
+    }
+    .item:active{transform:scale(.99)}
+    .avatar{
+      width:44px;height:44px;border-radius:16px;
+      background: rgba(43,108,255,.12);
+      border:1px solid rgba(43,108,255,.18);
+      display:grid; place-items:center;
+      font-weight:900;
+      color:var(--accent);
+      flex:0 0 auto;
+    }
+    .meta{min-width:0; flex:1}
+    .meta b{display:block; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+    .meta span{display:block; font-size:13px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:3px}
+
+    /* Chat overlay */
+    .overlay{
+      position:fixed; inset:0;
+      background: rgba(0,0,0,.15);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display:none;
+      z-index: 50;
+      padding-top: var(--safe-top);
+      padding-bottom: var(--safe-bottom);
+    }
+    .overlay.show{display:block}
+
+    .chat{
+      max-width:520px;
+      margin:0 auto;
+      height:100%;
+      display:flex;
+      flex-direction:column;
+      background: rgba(255,255,255,.50);
+    }
+    .chatTop{
+      padding: 12px 14px;
+      display:flex; align-items:center; gap:10px;
+      border-bottom:1px solid var(--border);
+      background: rgba(255,255,255,.55);
+    }
+    .btn{
+      width:44px; height:44px;
+      border-radius: 14px;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.65);
+      cursor:pointer;
+      display:grid; place-items:center;
+      user-select:none;
+      appearance:none; -webkit-appearance:none;
+      font:inherit; color:inherit;
+    }
+    .btn:active{transform:scale(.98)}
+    .chatTitle{min-width:0; flex:1}
+    .chatTitle b{display:block; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+    .chatTitle span{display:block; font-size:12px; color:var(--muted)}
+
+    .chatBody{
+      flex:1;
+      overflow:auto;
+      padding: 12px 14px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .bubble{
+      max-width:78%;
+      padding:10px 12px;
+      border-radius: 16px;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.75);
+      font-size:14px;
+      line-height:1.35;
+      white-space:pre-wrap;
+      word-break:break-word;
+    }
+    .bubble.me{
+      margin-left:auto;
+      background: rgba(43,108,255,.12);
+      border-color: rgba(43,108,255,.20);
+    }
+    .composer{
+      padding: 10px 14px calc(10px + var(--safe-bottom));
+      border-top:1px solid var(--border);
+      background: rgba(255,255,255,.55);
+      display:flex;
+      gap:10px;
+      align-items:flex-end;
+    }
+    .composer textarea{
+      flex:1;
+      min-height:44px;
+      max-height:140px;
+      resize:none;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.75);
+      border-radius: 16px;
+      padding: 12px;
+      outline:none;
+      font-size:14px;
+    }
+    .send{
+      width:52px;height:52px;
+      border-radius:16px;
+      border:1px solid rgba(43,108,255,.25);
+      background: rgba(43,108,255,.12);
+      color: var(--accent);
+      font-weight:900;
+      cursor:pointer;
+      display:grid; place-items:center;
+      user-select:none;
+      appearance:none; -webkit-appearance:none;
+      font:inherit;
+    }
+    .send:active{transform:scale(.98)}
+
+    /* Bottom bar */
+    .bottom{
+      position:fixed;
+      left:0; right:0; bottom:0;
+      z-index:9999;
+      padding: 10px 12px calc(10px + var(--safe-bottom));
+      display:flex;
+      justify-content:center;
+    }
+    .nav{
+      width:min(520px, calc(100% - 24px));
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.55);
+      border-radius: 22px;
+      padding: 10px;
+      display:flex;
+      gap:8px;
+    }
+    .tab{
+      flex:1;
+      border-radius: 16px;
+      padding: 10px 6px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:6px;
+      cursor:pointer;
+      user-select:none;
+      color:var(--muted);
+      border:1px solid transparent;
+    }
+    .tab.active{
+      color: var(--text);
+      background: rgba(43,108,255,.10);
+      border-color: rgba(43,108,255,.18);
+    }
+    .tab .ico{font-size:20px; line-height:1}
+    .tab .lbl{font-size:12px; font-weight:800}
+  </style>
 </head>
 
 <body>
+  <div class="app">
+    <div class="header">
+      <div>
+        <h1 id="title">Mesajlar</h1>
+        <small id="sub">Bağlanıyor…</small>
+      </div>
+      <button class="pill" id="addBtn" type="button">＋</button>
+    </div>
 
-<div class="top">VigoChatt</div>
+    <!-- Aramalar -->
+    <section class="view" id="view-calls">
+      <div class="card">
+        <b>Aramalar</b>
+        <div style="margin-top:6px; color:var(--muted); font-size:13px">
+          Son aramalar burada görünecek (demo).
+        </div>
+      </div>
+      <div class="list">
+        <div class="item"><div class="avatar">👤</div><div class="meta"><b>Ahmet</b><span>Bugün 12:05 • Gelen</span></div></div>
+        <div class="item"><div class="avatar">👤</div><div class="meta"><b>Zeynep</b><span>Dün 21:18 • Giden</span></div></div>
+      </div>
+    </section>
 
-<div class="box">
-<input id="name" placeholder="Takma ad"/>
-<input id="room" placeholder="Oda adı (örn: genel)"/>
-<button onclick="join()">Sohbete Gir</button>
-</div>
+    <!-- Durum -->
+    <section class="view" id="view-status">
+      <div class="card">
+        <b>Durum</b>
+        <div style="margin-top:6px; color:var(--muted); font-size:13px">
+          Buraya hikaye/durum mantığı eklenir (demo).
+        </div>
+      </div>
+      <div class="list">
+        <div class="item"><div class="avatar">✨</div><div class="meta"><b>Senin durumun</b><span>Durum ekle</span></div></div>
+        <div class="item"><div class="avatar">📌</div><div class="meta"><b>Ahmet</b><span>“Dışarıdayım”</span></div></div>
+      </div>
+    </section>
 
-<div id="chat" style="display:none;">
-<div id="messages"></div>
-<div class="box">
-<input id="messageInput" placeholder="Mesaj yaz..."/>
-<button onclick="sendMessage()">Gönder</button>
-</div>
-</div>
+    <!-- Mesajlar -->
+    <section class="view active" id="view-messages">
+      <div class="card">
+        <b>Mesajlar</b>
+        <div style="margin-top:6px; color:var(--muted); font-size:13px">
+          Bir sohbet seç — mesaj yazıp gönderebilirsin.
+        </div>
+      </div>
+      <div class="list" id="chatList"></div>
+    </section>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-import { getFirestore, collection, addDoc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+    <!-- Profil -->
+    <section class="view" id="view-profile">
+      <div class="card">
+        <b>Profil</b>
+        <div style="margin-top:6px; color:var(--muted); font-size:13px">
+          Basit profil ekranı (demo).
+        </div>
+      </div>
+      <div class="list">
+        <div class="item" style="cursor:default"><div class="avatar">🙂</div><div class="meta"><b id="meName">Engin</b><span id="meStatus">Durum: çevrimiçi</span></div></div>
+        <div class="item" style="cursor:default"><div class="avatar">⚙️</div><div class="meta"><b>Ayarlar</b><span>Bildirim / Gizlilik (demo)</span></div></div>
+      </div>
+    </section>
+  </div>
 
-const firebaseConfig = {
-  apiKey: "AIzaSyB1qovN4BNfaFlvE-KvURhX31AshxLuc0",
-  authDomain: "vigochatt.firebaseapp.com",
-  projectId: "vigochatt",
-  storageBucket: "vigochatt.firebasestorage.app",
-  messagingSenderId: "12259504636",
-  appId: "1:12259504636:web:d6ee79daceac8834d70279"
-};
+  <!-- Chat overlay -->
+  <div class="overlay" id="overlay">
+    <div class="chat">
+      <div class="chatTop">
+        <button class="btn" id="back" type="button">←</button>
+        <div class="chatTitle">
+          <b id="chatName">Sohbet</b>
+          <span id="chatSub">çevrimiçi</span>
+        </div>
+        <button class="btn" id="more" type="button">⋯</button>
+      </div>
+      <div class="chatBody" id="chatBody"></div>
+      <div class="composer">
+        <textarea id="msg" rows="1" placeholder="Mesaj yaz..."></textarea>
+        <button class="send" id="send" type="button">➤</button>
+      </div>
+    </div>
+  </div>
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+  <!-- Bottom nav -->
+  <div class="bottom">
+    <nav class="nav">
+      <div class="tab" data-tab="calls"><div class="ico">👥</div><div class="lbl">Aramalar</div></div>
+      <div class="tab" data-tab="status"><div class="ico">❗</div><div class="lbl">Durum</div></div>
+      <div class="tab active" data-tab="messages"><div class="ico">📶</div><div class="lbl">Mesajlar</div></div>
+      <div class="tab" data-tab="profile"><div class="ico">🤔</div><div class="lbl">Profil</div></div>
+    </nav>
+  </div>
 
-let currentRoom = "";
-let currentName = "";
+  <!-- Firebase + Uygulama -->
+  <script type="module">
+    const $ = (s, el=document)=> el.querySelector(s);
+    const $$ = (s, el=document)=> Array.from(el.querySelectorAll(s));
 
-window.join = function(){
-  currentName = document.getElementById("name").value.trim();
-  currentRoom = document.getElementById("room").value.trim();
-  if(!currentName || !currentRoom) return alert("Bilgileri doldur");
+    // ✅ Firebase SDK
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+    import { getFirestore, collection, addDoc, serverTimestamp, query, orderBy, limit, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-  document.querySelector(".box").style.display="none";
-  document.getElementById("chat").style.display="block";
+    // 🔥 SENİN FIREBASE CONFIG (DEĞİŞTİRME)
+    const firebaseConfig = {
+      apiKey: "AIzaSyB1qovN4BNfaFlvE-KvURhX31AshxLuc0",
+      authDomain: "vigochatt.firebaseapp.com",
+      projectId: "vigochatt",
+      storageBucket: "vigochatt.firebasestorage.app",
+      messagingSenderId: "12259504636",
+      appId: "1:12259504636:web:d6ee79daceac8834d70279"
+    };
 
-  const q = query(collection(db,"rooms",currentRoom,"messages"), orderBy("time"));
-  onSnapshot(q,(snapshot)=>{
-    const messagesDiv = document.getElementById("messages");
-    messagesDiv.innerHTML="";
-    snapshot.forEach(doc=>{
-      const data = doc.data();
-      const div = document.createElement("div");
-      div.className="msg";
-      if(data.name===currentName) div.classList.add("me");
-      div.innerText = data.name + ": " + data.text;
-      messagesDiv.appendChild(div);
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // --- yardımcılar
+    function escapeHtml(s){
+      return String(s).replace(/[&<>"']/g, c => ({
+        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+      }[c]));
+    }
+
+    function ensureNick(){
+      let nick = localStorage.getItem("vigo_nick") || "";
+      nick = nick.trim();
+      if(!nick){
+        nick = prompt("Takma adın ne olsun? (örn: Engin)") || "Anon";
+        nick = nick.trim() || "Anon";
+        localStorage.setItem("vigo_nick", nick);
+      }
+      $("#meName").textContent = nick;
+      return nick;
+    }
+
+    let uid = null;
+    let nick = ensureNick();
+
+    // --- Demo sohbet listesi (UI aynı kalsın)
+    const chats = [
+      {id:"c1", name:"Ahmet", last:"", msgs:[]},
+      {id:"c2", name:"Zeynep", last:"", msgs:[]},
+      {id:"c3", name:"Mert", last:"", msgs:[]}
+    ];
+
+    function renderChats(){
+      const el = $("#chatList");
+      el.innerHTML = chats.map(c=>`
+        <div class="item" data-chat="${c.id}">
+          <div class="avatar">${escapeHtml((c.name[0]||"•"))}</div>
+          <div class="meta">
+            <b>${escapeHtml(c.name)}</b>
+            <span>${escapeHtml(c.last || "Sohbete gir…")}</span>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    // --- Tab geçiş (aynı)
+    function setTab(tab){
+      $$(".tab").forEach(t=> t.classList.toggle("active", t.dataset.tab === tab));
+      ["calls","status","messages","profile"].forEach(v=>{
+        const view = $("#view-" + v);
+        if(view) view.classList.toggle("active", v === tab);
+      });
+
+      const titles = {calls:"Aramalar", status:"Durum", messages:"Mesajlar", profile:"Profil"};
+      $("#title").textContent = titles[tab] || "Mesajlar";
+      closeChat();
+    }
+
+    // --- Firebase login
+    $("#sub").textContent = "Bağlanıyor…";
+    signInAnonymously(auth).catch(()=>{});
+    onAuthStateChanged(auth, (user)=>{
+      if(user){
+        uid = user.uid;
+        $("#sub").textContent = "Bağlandı ✅";
+        $("#meStatus").textContent = "Durum: çevrimiçi";
+      }else{
+        uid = null;
+        $("#sub").textContent = "Bağlantı yok…";
+        $("#meStatus").textContent = "Durum: çevrimdışı";
+      }
     });
-    messagesDiv.scrollTop = messagesDiv.scrollHeight;
-  });
-}
 
-window.sendMessage = async function(){
-  const input = document.getElementById("messageInput");
-  const text = input.value.trim();
-  if(!text) return;
+    // --- Chat realtime
+    let current = null;
+    let unsubMessages = null;
 
-  await addDoc(collection(db,"rooms",currentRoom,"messages"),{
-    name: currentName,
-    text: text,
-    time: Date.now()
-  });
+    function renderChatFromFirestore(list){
+      const box = $("#chatBody");
+      box.innerHTML = list.map(m =>
+        `<div class="bubble ${m.uid === uid ? "me":""}">${escapeHtml(m.text)}</div>`
+      ).join("");
+      box.scrollTop = box.scrollHeight;
+    }
 
-  input.value="";
-}
-</script>
+    function openChat(id){
+      current = chats.find(c=>c.id===id) || null;
+      if(!current) return;
 
+      $("#chatName").textContent = current.name;
+      $("#chatSub").textContent = "çevrimiçi";
+
+      // önceki dinlemeyi kapat
+      if(unsubMessages) { unsubMessages(); unsubMessages = null; }
+
+      // Firestore path: rooms/{chatId}/messages
+      const msgsRef = collection(db, "rooms", id, "messages");
+      const q = query(msgsRef, orderBy("createdAt","asc"), limit(250));
+
+      unsubMessages = onSnapshot(q, (snap)=>{
+        const arr = [];
+        snap.forEach(d=>{
+          const m = d.data();
+          arr.push({
+            uid: m.uid || "",
+            nick: m.nick || "Anon",
+            text: m.text || ""
+          });
+        });
+
+        // son mesajı listede göster
+        const last = arr.length ? arr[arr.length-1].text : "";
+        current.last = last;
+        renderChats();
+
+        renderChatFromFirestore(arr);
+      }, (err)=>{
+        $("#chatSub").textContent = "Hata";
+        console.log(err);
+      });
+
+      $("#overlay").classList.add("show");
+      setTimeout(()=> $("#msg")?.focus?.(), 50);
+    }
+
+    function closeChat(){
+      $("#overlay").classList.remove("show");
+      $("#msg").value = "";
+      current = null;
+      if(unsubMessages) { unsubMessages(); unsubMessages = null; }
+    }
+
+    async function sendMsg(){
+      if(!current || !uid) return;
+
+      const t = $("#msg").value.trim();
+      if(!t) return;
+
+      $("#msg").value = "";
+
+      try{
+        await addDoc(collection(db, "rooms", current.id, "messages"), {
+          uid,
+          nick,
+          text: t.slice(0, 1000),
+          createdAt: serverTimestamp()
+        });
+      }catch(e){
+        alert("Mesaj gönderilemedi. Firestore/Rules kontrol et.");
+        console.log(e);
+      }
+    }
+
+    // --- click + touch garanti
+    function bindMulti(el, fn){
+      ["click","touchend","pointerup"].forEach(ev=>{
+        el.addEventListener(ev, (e)=>{
+          e.preventDefault();
+          e.stopPropagation();
+          fn();
+        }, {passive:false});
+      });
+    }
+
+    // --- olaylar
+    document.addEventListener("click", (e)=>{
+      const tab = e.target.closest(".tab");
+      if(tab) setTab(tab.dataset.tab);
+
+      const chatItem = e.target.closest("#chatList .item");
+      if(chatItem) openChat(chatItem.dataset.chat);
+    });
+
+    bindMulti($("#back"), closeChat);
+    bindMulti($("#send"), sendMsg);
+
+    $("#msg").addEventListener("keydown", (e)=>{
+      if((e.key === "Enter" || e.key === "NumpadEnter") && !e.shiftKey){
+        e.preventDefault();
+        sendMsg();
+      }
+    });
+
+    $("#addBtn").addEventListener("click", ()=>{
+      const n = prompt("Takma ad değiştir (isteğe bağlı):", nick || "");
+      if(n !== null){
+        nick = (n.trim() || "Anon");
+        localStorage.setItem("vigo_nick", nick);
+        $("#meName").textContent = nick;
+      }
+    });
+
+    $("#more").addEventListener("click", ()=> alert("Demo"));
+
+    // init
+    renderChats();
+    setTab("messages");
+  </script>
 </body>
 </html>
