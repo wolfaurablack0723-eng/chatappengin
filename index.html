@@ -3,133 +3,24 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VigoChat Pro</title>
-
-<style>
-:root{
-  --bg:#0f172a;
-  --card:#1e293b;
-  --accent:#3b82f6;
-  --text:#f1f5f9;
-}
-
-body{
-  margin:0;
-  font-family:Arial, sans-serif;
-  background:var(--bg);
-  color:var(--text);
-}
-
-header{
-  padding:15px;
-  background:var(--card);
-  display:flex;
-  justify-content:space-between;
-}
-
-button{
-  padding:10px;
-  border:none;
-  background:var(--accent);
-  color:white;
-  cursor:pointer;
-  border-radius:8px;
-}
-
-input{
-  padding:10px;
-  width:100%;
-  margin-bottom:10px;
-  border-radius:8px;
-  border:none;
-}
-
-.section{
-  padding:15px;
-  display:none;
-}
-
-.active{
-  display:block;
-}
-
-.message{
-  background:#334155;
-  padding:8px;
-  margin-bottom:8px;
-  border-radius:8px;
-}
-
-.nav{
-  position:fixed;
-  bottom:0;
-  width:100%;
-  background:var(--card);
-  display:flex;
-  justify-content:space-around;
-  padding:10px;
-}
-
-.nav div{
-  cursor:pointer;
-}
-</style>
-</head>
-
-<body>
-
-<header>
-  <div>VigoChat</div>
-  <button onclick="toggleTheme()">Tema</button>
-</header>
-
-<!-- AUTH -->
-<div id="auth" class="section active">
-  <h3>Giriş / Kayıt</h3>
-  <input type="email" id="email" placeholder="Email">
-  <input type="password" id="password" placeholder="Şifre">
-  <button onclick="register()">Kayıt Ol</button>
-  <button onclick="login()">Giriş Yap</button>
-  <p id="authError" style="color:red;"></p>
-</div>
-
-<!-- CHAT -->
-<div id="chat" class="section">
-  <h3>Sohbet</h3>
-  <div id="messages"></div>
-  <input type="text" id="messageInput" placeholder="Mesaj yaz">
-  <button onclick="sendMessage()">Gönder</button>
-</div>
-
-<!-- PROFILE -->
-<div id="profile" class="section">
-  <h3>Profil</h3>
-  <p id="userEmail"></p>
-  <button onclick="logout()">Çıkış</button>
-</div>
-
-<div class="nav">
-  <div onclick="showSection('chat')">Sohbet</div>
-  <div onclick="showSection('profile')">Profil</div>
-</div>
+<title>Vigo Chat</title>
 
 <script type="module">
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { 
   getAuth,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged
+  onAuthStateChanged,
+  signOut
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 import {
   getDatabase,
   ref,
+  set,
   push,
-  onValue,
-  set
+  onValue
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
 const firebaseConfig = {
@@ -137,7 +28,7 @@ const firebaseConfig = {
   authDomain: "vigochat-58144.firebaseapp.com",
   databaseURL: "https://vigochat-58144-default-rtdb.europe-west1.firebasedatabase.app",
   projectId: "vigochat-58144",
-  storageBucket: "vigochat-58144.firebasestorage.app",
+  storageBucket: "vigochat-58144.appspot.com",
   messagingSenderId: "384136632816",
   appId: "1:384136632816:web:2bb6d6942680a2e2e6e535"
 };
@@ -146,97 +37,131 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
 
-let currentUser = null;
+window.register = async () => {
+  const email = document.getElementById("email").value;
+  const pass = document.getElementById("pass").value;
+  try{
+    await createUserWithEmailAndPassword(auth,email,pass);
+  }catch(e){ alert(e.message); }
+};
 
-// AUTH STATE
-onAuthStateChanged(auth, user=>{
+window.login = async () => {
+  const email = document.getElementById("email").value;
+  const pass = document.getElementById("pass").value;
+  try{
+    await signInWithEmailAndPassword(auth,email,pass);
+  }catch(e){ alert(e.message); }
+};
+
+window.logout = () => signOut(auth);
+
+onAuthStateChanged(auth,(user)=>{
   if(user){
-    currentUser = user;
-    document.getElementById("auth").classList.remove("active");
-    document.getElementById("chat").classList.add("active");
-    document.getElementById("userEmail").innerText = user.email;
-    listenMessages();
-    set(ref(db, "users/"+user.uid), {
-      email:user.email,
-      online:true
-    });
+    document.getElementById("authBox").style.display="none";
+    document.getElementById("appBox").style.display="block";
+    loadMessages();
   }else{
-    document.getElementById("auth").classList.add("active");
-    document.getElementById("chat").classList.remove("active");
+    document.getElementById("authBox").style.display="block";
+    document.getElementById("appBox").style.display="none";
   }
 });
 
-// REGISTER
-window.register = async function(){
-  const email = document.getElementById("email").value;
-  const pass = document.getElementById("password").value;
-  try{
-    await createUserWithEmailAndPassword(auth,email,pass);
-  }catch(e){
-    document.getElementById("authError").innerText = e.message;
-  }
-}
-
-// LOGIN
-window.login = async function(){
-  const email = document.getElementById("email").value;
-  const pass = document.getElementById("password").value;
-  try{
-    await signInWithEmailAndPassword(auth,email,pass);
-  }catch(e){
-    document.getElementById("authError").innerText = e.message;
-  }
-}
-
-// LOGOUT
-window.logout = async function(){
-  await signOut(auth);
-}
-
-// SEND MESSAGE
-window.sendMessage = function(){
-  const text = document.getElementById("messageInput").value;
-  if(!text || !currentUser) return;
+window.sendMessage = () => {
+  const text = document.getElementById("msg").value;
+  if(!text) return;
   push(ref(db,"messages"),{
+    uid:auth.currentUser.uid,
+    email:auth.currentUser.email,
     text:text,
-    uid:currentUser.uid,
-    email:currentUser.email,
     time:Date.now()
   });
-  document.getElementById("messageInput").value="";
-}
+  document.getElementById("msg").value="";
+};
 
-// LISTEN MESSAGES
-function listenMessages(){
-  onValue(ref(db,"messages"), snapshot=>{
-    const data = snapshot.val();
-    const container = document.getElementById("messages");
-    container.innerHTML="";
+function loadMessages(){
+  onValue(ref(db,"messages"),(snap)=>{
+    const data=snap.val();
+    const box=document.getElementById("chat");
+    box.innerHTML="";
     if(!data) return;
-    Object.values(data).forEach(msg=>{
+    Object.values(data).forEach(m=>{
       const div=document.createElement("div");
-      div.className="message";
-      div.innerText=msg.email+": "+msg.text;
-      container.appendChild(div);
+      div.className="bubble";
+      if(m.uid===auth.currentUser.uid) div.classList.add("me");
+      div.innerText=m.text;
+      box.appendChild(div);
     });
+    box.scrollTop=box.scrollHeight;
   });
 }
+</script>
 
-// NAVIGATION
-window.showSection=function(id){
-  document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
+<style>
+body{margin:0;font-family:sans-serif;background:#efe7db;}
+.hidden{display:none}
+.header{background:#111;color:#fff;padding:15px;font-weight:bold}
+.view{display:none;padding:15px}
+.view.active{display:block}
+.nav{position:fixed;bottom:0;left:0;right:0;background:#fff;display:flex}
+.nav div{flex:1;padding:12px;text-align:center;cursor:pointer}
+.nav .active{background:#ddd}
+.card{background:#fff;padding:15px;border-radius:15px;margin-bottom:10px}
+.bubble{background:#fff;padding:10px;border-radius:15px;margin-bottom:8px;max-width:70%}
+.me{background:#cfe2ff;margin-left:auto}
+</style>
+</head>
+
+<body>
+
+<div id="authBox" style="padding:20px">
+  <h2>Giriş / Kayıt</h2>
+  <input id="email" placeholder="Email"><br><br>
+  <input id="pass" type="password" placeholder="Şifre"><br><br>
+  <button onclick="register()">Kayıt Ol</button>
+  <button onclick="login()">Giriş Yap</button>
+</div>
+
+<div id="appBox" class="hidden">
+
+<div class="header">Vigo Chat ⭐</div>
+
+<div id="view-messages" class="view active">
+  <div id="chat" style="height:60vh;overflow:auto"></div>
+  <textarea id="msg" placeholder="Mesaj yaz"></textarea>
+  <button onclick="sendMessage()">Gönder</button>
+</div>
+
+<div id="view-profile" class="view">
+  <div class="card">
+    <b>Email:</b> <span id="userEmail"></span><br><br>
+    <button onclick="logout()">Çıkış</button>
+  </div>
+</div>
+
+<div id="view-status" class="view">
+  <div class="card">Durum sistemi eklenebilir.</div>
+</div>
+
+<div id="view-calls" class="view">
+  <div class="card">Arama sistemi eklenebilir.</div>
+</div>
+
+<div class="nav">
+  <div onclick="switchTab('calls')">Aramalar</div>
+  <div onclick="switchTab('status')">Durum</div>
+  <div onclick="switchTab('messages')" class="active">Mesajlar</div>
+  <div onclick="switchTab('profile')">Profil</div>
+</div>
+
+</div>
+
+<script>
+function switchTab(tab){
+  document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
+  document.getElementById("view-"+tab).classList.add("active");
+  document.querySelectorAll(".nav div").forEach(n=>n.classList.remove("active"));
+  event.target.classList.add("active");
 }
-
-// THEME
-window.toggleTheme=function(){
-  if(document.body.style.background=="white"){
-    document.body.style.background="#0f172a";
-  }else{
-    document.body.style.background="white";
-  }
-}
-
 </script>
 
 </body>
