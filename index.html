@@ -1,44 +1,12 @@
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, signInAnonymously, onAuthStateChanged }
-from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import {
-  getFirestore,
-  collection,
-  addDoc,
-  query,
-  orderBy,
-  onSnapshot,
-  serverTimestamp,
-  doc,
-  setDoc,
-  getDocs
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
+<script>
 const firebaseConfig = {
   apiKey: "AIzaSyA3--Xy1WrM6WlxurXXr4i5qwMZiafXN4k",
   authDomain: "vigochat-58144.firebaseapp.com",
   projectId: "vigochat-58144",
-  storageBucket: "vigochat-58144.firebasestorage.app",
-  messagingSenderId: "384136632816",
-  appId: "1:384136632816:web:2bb6d6942680a2e2e6e535"
 };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-
-let userId = null;
+let app, db, auth, userId = null;
 let currentRoom = null;
-
-signInAnonymously(auth);
-
-onAuthStateChanged(auth, (user)=>{
-  if(user){
-    userId = user.uid;
-    loadRooms();
-  }
-});
 
 const chatList = document.getElementById("chatList");
 const chatBody = document.getElementById("chatBody");
@@ -47,24 +15,55 @@ const sendBtn = document.getElementById("send");
 const overlay = document.getElementById("overlay");
 const backBtn = document.getElementById("back");
 
-async function loadRooms(){
+function initFirebase() {
+  const s1 = document.createElement("script");
+  s1.src = "https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js";
+  document.body.appendChild(s1);
+
+  s1.onload = () => {
+    const s2 = document.createElement("script");
+    s2.src = "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js";
+    document.body.appendChild(s2);
+
+    const s3 = document.createElement("script");
+    s3.src = "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js";
+    document.body.appendChild(s3);
+
+    s3.onload = startApp;
+  };
+}
+
+function startApp() {
+  app = firebase.initializeApp(firebaseConfig);
+  auth = firebase.auth();
+  db = firebase.firestore();
+
+  auth.signInAnonymously().then((res)=>{
+    userId = res.user.uid;
+    loadRooms();
+  }).catch(()=> {
+    console.log("Auth hatası ama görüntü var");
+  });
+}
+
+function loadRooms() {
   chatList.innerHTML = "";
 
-  const snapshot = await getDocs(collection(db,"rooms"));
-
-  snapshot.forEach(docSnap=>{
-    const data = docSnap.data();
-    const div = document.createElement("div");
-    div.className = "item";
-    div.innerHTML = `
-      <div class="avatar">${data.name[0]}</div>
-      <div class="meta">
-        <b>${data.name}</b>
-        <span>Sohbete gir</span>
-      </div>
-    `;
-    div.onclick = ()=> openChat(docSnap.id, data.name);
-    chatList.appendChild(div);
+  db.collection("rooms").get().then((snapshot)=>{
+    snapshot.forEach(doc=>{
+      const data = doc.data();
+      const div = document.createElement("div");
+      div.className = "item";
+      div.innerHTML = `
+        <div class="avatar">${data.name[0]}</div>
+        <div class="meta">
+          <b>${data.name}</b>
+          <span>Sohbete gir</span>
+        </div>
+      `;
+      div.onclick = ()=> openChat(doc.id, data.name);
+      chatList.appendChild(div);
+    });
   });
 }
 
@@ -72,40 +71,36 @@ function openChat(roomId, name){
   currentRoom = roomId;
   document.getElementById("chatName").textContent = name;
   overlay.classList.add("show");
-  loadMessages(roomId);
-}
 
-function loadMessages(roomId){
-  const q = query(
-    collection(db,"rooms",roomId,"messages"),
-    orderBy("createdAt")
-  );
-
-  onSnapshot(q, (snapshot)=>{
-    chatBody.innerHTML = "";
-    snapshot.forEach(doc=>{
-      const data = doc.data();
-      const div = document.createElement("div");
-      div.className = "bubble " + (data.uid === userId ? "me":"");
-      div.textContent = data.text;
-      chatBody.appendChild(div);
+  db.collection("rooms")
+    .doc(roomId)
+    .collection("messages")
+    .orderBy("createdAt")
+    .onSnapshot((snapshot)=>{
+      chatBody.innerHTML = "";
+      snapshot.forEach(doc=>{
+        const data = doc.data();
+        const div = document.createElement("div");
+        div.className = "bubble " + (data.uid === userId ? "me":"");
+        div.textContent = data.text;
+        chatBody.appendChild(div);
+      });
+      chatBody.scrollTop = chatBody.scrollHeight;
     });
-    chatBody.scrollTop = chatBody.scrollHeight;
-  });
 }
 
-sendBtn.onclick = async ()=>{
+sendBtn.onclick = ()=>{
   const text = msgInput.value.trim();
   if(!text || !currentRoom) return;
 
-  await addDoc(
-    collection(db,"rooms",currentRoom,"messages"),
-    {
+  db.collection("rooms")
+    .doc(currentRoom)
+    .collection("messages")
+    .add({
       text: text,
       uid: userId,
-      createdAt: serverTimestamp()
-    }
-  );
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
 
   msgInput.value = "";
 };
@@ -114,4 +109,6 @@ backBtn.onclick = ()=>{
   overlay.classList.remove("show");
   currentRoom = null;
 };
+
+initFirebase();
 </script>
