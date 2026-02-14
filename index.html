@@ -5,11 +5,99 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Vigo Chat</title>
 
+<style>
+body{
+  margin:0;
+  font-family:sans-serif;
+  background:#efe7db;
+}
+
+.header{
+  background:#111;
+  color:#fff;
+  padding:15px;
+  font-size:20px;
+  font-weight:bold;
+}
+
+.container{
+  padding:20px;
+  padding-bottom:90px;
+}
+
+.message{
+  background:#fff;
+  padding:12px;
+  border-radius:16px;
+  margin-bottom:10px;
+}
+
+.inputBox{
+  position:fixed;
+  bottom:70px;
+  left:0;
+  right:0;
+  padding:10px;
+  display:flex;
+  gap:10px;
+  background:#efe7db;
+}
+
+input{
+  flex:1;
+  padding:12px;
+  border-radius:12px;
+  border:1px solid #ccc;
+}
+
+button{
+  padding:12px 18px;
+  border-radius:12px;
+  border:none;
+  background:#2b6cff;
+  color:#fff;
+  font-weight:bold;
+}
+
+.nav{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  background:#fff;
+  display:flex;
+  padding:10px;
+}
+
+.nav div{
+  flex:1;
+  text-align:center;
+  font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">Vigo Chat ⭐</div>
+
+<div class="container" id="messages"></div>
+
+<div class="inputBox">
+  <input id="msg" placeholder="Mesaj yaz">
+  <button onclick="send()">Gönder</button>
+</div>
+
+<div class="nav">
+  <div>Aramalar</div>
+  <div>Durum</div>
+  <div>Mesajlar</div>
+  <div>Profil</div>
+</div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut }
-from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getDatabase, ref, push, onValue, set }
+import { getDatabase, ref, push, onValue }
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
 const firebaseConfig = {
@@ -23,155 +111,33 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
 const db = getDatabase(app);
 
-window.register = async () => {
-  const email=emailInput.value;
-  const pass=passInput.value;
-  await createUserWithEmailAndPassword(auth,email,pass);
-};
-
-window.login = async () => {
-  const email=emailInput.value;
-  const pass=passInput.value;
-  await signInWithEmailAndPassword(auth,email,pass);
-};
-
-window.logout = () => signOut(auth);
-
-onAuthStateChanged(auth,(user)=>{
-  if(user){
-    authBox.style.display="none";
-    appBox.style.display="block";
-    userEmail.innerText=user.email;
-    loadMessages();
-    loadStatus();
-  }else{
-    authBox.style.display="block";
-    appBox.style.display="none";
-  }
-});
-
-window.sendMessage=()=>{
-  const text=msg.value.trim();
+window.send = function(){
+  const text = document.getElementById("msg").value.trim();
   if(!text) return;
+
   push(ref(db,"messages"),{
-    uid:auth.currentUser.uid,
     text:text,
     time:Date.now()
   });
-  msg.value="";
+
+  document.getElementById("msg").value="";
 };
 
-function loadMessages(){
-  onValue(ref(db,"messages"),(snap)=>{
-    chatList.innerHTML="";
-    const data=snap.val();
-    if(!data) return;
-    Object.values(data).forEach(m=>{
-      const div=document.createElement("div");
-      div.className="chatItem";
-      div.innerHTML=`<b>${m.text}</b>`;
-      chatList.appendChild(div);
-    });
+onValue(ref(db,"messages"), (snap)=>{
+  const box=document.getElementById("messages");
+  box.innerHTML="";
+  const data=snap.val();
+  if(!data) return;
+
+  Object.values(data).forEach(m=>{
+    const div=document.createElement("div");
+    div.className="message";
+    div.innerText=m.text;
+    box.appendChild(div);
   });
-}
-
-window.addStatus=()=>{
-  const text=prompt("Durum yaz");
-  if(!text) return;
-  push(ref(db,"status"),{
-    user:auth.currentUser.email,
-    text:text
-  });
-};
-
-function loadStatus(){
-  onValue(ref(db,"status"),(snap)=>{
-    statusList.innerHTML="";
-    const data=snap.val();
-    if(!data) return;
-    Object.values(data).forEach(s=>{
-      statusList.innerHTML+=`
-      <div class="card">
-        <b>${s.user}</b><br>${s.text}
-      </div>`;
-    });
-  });
-}
-</script>
-
-<style>
-body{margin:0;font-family:sans-serif;background:#efe7db;}
-.header{background:#111;color:#fff;padding:15px;font-size:20px;font-weight:bold;display:flex;justify-content:space-between}
-.view{display:none;padding:15px}
-.view.active{display:block}
-.card{background:#fff;padding:15px;border-radius:18px;margin-bottom:12px}
-.nav{position:fixed;bottom:0;left:0;right:0;background:#fff;padding:10px;display:flex;border-radius:20px 20px 0 0}
-.nav div{flex:1;text-align:center;padding:10px;cursor:pointer}
-.nav .active{background:#dbeafe;border-radius:15px}
-.chatItem{background:#fff;padding:12px;border-radius:16px;margin-bottom:10px}
-</style>
-</head>
-
-<body>
-
-<div id="authBox" style="padding:20px">
-<h2>Giriş / Kayıt</h2>
-<input id="emailInput" placeholder="Email"><br><br>
-<input id="passInput" type="password" placeholder="Şifre"><br><br>
-<button onclick="register()">Kayıt Ol</button>
-<button onclick="login()">Giriş Yap</button>
-</div>
-
-<div id="appBox" style="display:none">
-
-<div class="header">
-Vigo Chat ⭐
-</div>
-
-<div id="view-messages" class="view active">
-<div class="card"><b>Mesajlar</b></div>
-<div id="chatList"></div>
-<textarea id="msg" placeholder="Mesaj yaz"></textarea>
-<button onclick="sendMessage()">Gönder</button>
-</div>
-
-<div id="view-status" class="view">
-<div class="card"><b>Durum</b></div>
-<button onclick="addStatus()">Durum Ekle</button>
-<div id="statusList"></div>
-</div>
-
-<div id="view-calls" class="view">
-<div class="card">Aramalar (demo)</div>
-</div>
-
-<div id="view-profile" class="view">
-<div class="card">
-<b>Profil</b><br>
-Email: <span id="userEmail"></span><br><br>
-<button onclick="logout()">Çıkış</button>
-</div>
-</div>
-
-<div class="nav">
-<div onclick="switchTab('calls')">Aramalar</div>
-<div onclick="switchTab('status')">Durum</div>
-<div onclick="switchTab('messages')" class="active">Mesajlar</div>
-<div onclick="switchTab('profile')">Profil</div>
-</div>
-
-</div>
-
-<script>
-function switchTab(tab){
-document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
-document.getElementById("view-"+tab).classList.add("active");
-document.querySelectorAll(".nav div").forEach(n=>n.classList.remove("active"));
-event.target.classList.add("active");
-}
+});
 </script>
 
 </body>
