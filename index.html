@@ -1,116 +1,130 @@
-<!doctype html>
-<html>
-<head>
-<meta charset="utf-8">
-<title>VigoChatt</title>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
-<style>
-body{font-family:sans-serif;background:#efe7db;margin:0;padding:20px}
-.card{background:white;padding:15px;border-radius:12px;margin-bottom:15px}
-input,textarea{width:100%;padding:10px;margin-bottom:10px}
-button{padding:10px;width:100%;background:#2b6cff;color:white;border:none;border-radius:8px}
-.msg{padding:6px;background:#f1f1f1;margin-bottom:5px;border-radius:8px}
-.me{background:#cfe2ff;text-align:right}
-</style>
-</head>
-
-<body>
-
-<h2>VigoChatt</h2>
-
-<div id="loginBox" class="card">
-<input id="email" placeholder="Email">
-<input id="pass" type="password" placeholder="Şifre">
-<button onclick="login()">Giriş / Kayıt</button>
-</div>
-
-<div id="chatBox" style="display:none">
-
-<div class="card">
-<input id="target" placeholder="Sohbet başlatılacak email">
-<button onclick="startChat()">Sohbet Başlat</button>
-</div>
-
-<div class="card">
-<div id="messages"></div>
-<textarea id="msg"></textarea>
-<button onclick="send()">Gönder</button>
-</div>
-
-</div>
-
 <script>
 var firebaseConfig = {
-apiKey: "AIzaSyA3--Xy1WrM6WlxurXXr4i5qwMZiafXN4k",
-authDomain: "vigochat-58144.firebaseapp.com",
-projectId: "vigochat-58144"
+  apiKey: "AIzaSyA3--Xy1WrM6WlxurXXr4i5qwMZiafXN4k",
+  authDomain: "vigochat-58144.firebaseapp.com",
+  projectId: "vigochat-58144"
 };
 
 firebase.initializeApp(firebaseConfig);
 var auth = firebase.auth();
 var db = firebase.firestore();
 
-var currentUser=null;
-var chatId=null;
+let currentUser = null;
+let currentChat = null;
 
-function login(){
-var e=email.value;
-var p=pass.value;
-
-auth.signInWithEmailAndPassword(e,p)
-.catch(function(){
-auth.createUserWithEmailAndPassword(e,p);
-});
-}
+auth.signInAnonymously();
 
 auth.onAuthStateChanged(function(user){
-if(user){
-currentUser=user;
-loginBox.style.display="none";
-chatBox.style.display="block";
-}
+  if(user){
+    currentUser = user;
+    loadChats();
+    loadStatus();
+    loadProfile();
+  }
 });
 
-function startChat(){
-var targetEmail=target.value;
-
-db.collection("users").where("email","==",targetEmail).get()
-.then(function(snap){
-if(snap.empty){alert("Kullanıcı yok");return;}
-var other=snap.docs[0];
-chatId=[currentUser.uid,other.id].sort().join("_");
-listen();
-});
+function loadChats(){
+  db.collection("chats")
+  .where("users","array-contains",currentUser.uid)
+  .onSnapshot(function(snapshot){
+    const el = document.getElementById("chatList");
+    el.innerHTML = "";
+    snapshot.forEach(function(doc){
+      const data = doc.data();
+      const div = document.createElement("div");
+      div.className="item";
+      div.innerHTML = `
+        <div class="avatar">${data.name[0]}</div>
+        <div class="meta">
+          <b>${data.name}</b>
+          <span>${data.last || ""}</span>
+        </div>
+      `;
+      div.onclick = function(){ openChat(doc.id,data.name); };
+      el.appendChild(div);
+    });
+  });
 }
 
-function listen(){
-db.collection("messages").doc(chatId).collection("chat")
-.orderBy("time")
-.onSnapshot(function(snap){
-messages.innerHTML="";
-snap.forEach(function(doc){
-var d=doc.data();
-var div=document.createElement("div");
-div.className="msg"+(d.uid==currentUser.uid?" me":"");
-div.innerText=d.text;
-messages.appendChild(div);
-});
-});
+function openChat(id,name){
+  currentChat = id;
+  document.getElementById("chatName").innerText = name;
+  document.getElementById("overlay").classList.add("show");
+
+  db.collection("chats").doc(id)
+  .collection("messages")
+  .orderBy("time")
+  .onSnapshot(function(snapshot){
+    const box = document.getElementById("chatBody");
+    box.innerHTML="";
+    snapshot.forEach(function(doc){
+      const d = doc.data();
+      const div = document.createElement("div");
+      div.className="bubble"+(d.uid==currentUser.uid?" me":"");
+      div.innerText=d.text;
+      box.appendChild(div);
+    });
+    box.scrollTop = box.scrollHeight;
+  });
 }
 
-function send(){
-if(!chatId)return;
-db.collection("messages").doc(chatId).collection("chat").add({
-text:msg.value,
-uid:currentUser.uid,
-time:Date.now()
-});
-msg.value="";
+function sendMsg(){
+  const msg = document.getElementById("msg").value;
+  if(!msg || !currentChat) return;
+
+  db.collection("chats").doc(currentChat)
+  .collection("messages")
+  .add({
+    text: msg,
+    uid: currentUser.uid,
+    time: Date.now()
+  });
+
+  db.collection("chats").doc(currentChat).update({
+    last: msg
+  });
+
+  document.getElementById("msg").value="";
 }
+
+function loadStatus(){
+  db.collection("status").onSnapshot(function(snapshot){
+    const list = document.querySelector("#view-status .list");
+    list.innerHTML="";
+    snapshot.forEach(function(doc){
+      const d = doc.data();
+      const div=document.createElement("div");
+      div.className="item";
+      div.innerHTML=`
+        <div class="avatar">✨</div>
+        <div class="meta">
+          <b>${d.name}</b>
+          <span>${d.text}</span>
+        </div>
+      `;
+      list.appendChild(div);
+    });
+  });
+}
+
+function loadProfile(){
+  db.collection("users").doc(currentUser.uid).get()
+  .then(function(doc){
+    if(!doc.exists){
+      db.collection("users").doc(currentUser.uid).set({
+        name:"Kullanıcı",
+        about:""
+      });
+    }
+  });
+}
+
+document.getElementById("send").onclick = sendMsg;
+document.getElementById("back").onclick = function(){
+  document.getElementById("overlay").classList.remove("show");
+};
 </script>
-
-</body>
-</html>
