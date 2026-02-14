@@ -3,121 +3,121 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VigoChatt</title>
-
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<title>VigoChat</title>
 
 <style>
 body{font-family:Arial;margin:0;background:#f2f2f2}
-.wrap{max-width:500px;margin:auto;padding:20px}
-.card{background:white;padding:20px;border-radius:10px;margin-bottom:15px}
-input,button{width:100%;padding:10px;margin:5px 0}
-button{background:#2b6cff;color:white;border:none;border-radius:5px}
-.msg{padding:8px;background:#e9e9e9;margin:5px 0;border-radius:5px}
-.me{background:#cfe2ff}
+.container{padding:20px}
+input,button{width:100%;padding:12px;margin:6px 0;border-radius:8px;border:1px solid #ccc}
+button{background:#2b6cff;color:white;border:none}
+#chat{display:none}
+#messages{height:300px;overflow:auto;background:white;padding:10px;border-radius:8px}
+.msg{margin:5px 0}
+.top{display:flex;justify-content:space-between;align-items:center}
 </style>
 </head>
+
 <body>
 
-<div class="wrap">
-
-<div class="card">
+<div class="container" id="auth">
 <h2>Giriş / Kayıt</h2>
 <input id="email" placeholder="Email">
-<input id="pass" type="password" placeholder="Şifre">
-<button onclick="login()">Giriş</button>
-<button onclick="signup()">Kayıt</button>
-<div id="authErr" style="color:red"></div>
+<input id="password" type="password" placeholder="Şifre">
+<button onclick="register()">Kayıt Ol</button>
+<button onclick="login()">Giriş Yap</button>
+<p id="error" style="color:red;"></p>
 </div>
 
-<div class="card">
-<h2>Sohbet</h2>
-<div id="messages"></div>
-<input id="msgInput" placeholder="Mesaj yaz">
-<button onclick="sendMsg()">Gönder</button>
+<div class="container" id="chat">
+<div class="top">
+<h3>VigoChat</h3>
 <button onclick="logout()">Çıkış</button>
 </div>
 
+<input id="roomInput" placeholder="Oda adı (örn: genel)">
+<button onclick="joinRoom()">Odaya Gir</button>
+
+<div id="messages"></div>
+
+<input id="messageInput" placeholder="Mesaj yaz...">
+<button onclick="sendMessage()">Gönder</button>
 </div>
 
-<script>
+<script type="module">
 
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } 
+from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+import { getDatabase, ref, push, onValue } 
+from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+
+
+// 🔥 BURAYI KENDİ FIREBASE CONFIGİNLE DEĞİŞTİR
 const firebaseConfig = {
-  apiKey: "AZASYBLiQkV4BNrAFILe-VkURhx31AsnxLQ8",
-  authDomain: "vigochatt.firebaseapp.com",
-  projectId: "vigochatt",
-  storageBucket: "vigochatt.firebasestorage.app",
-  messagingSenderId: "12259504636",
-  appId: "1:12259504636:web:d6ee79daceac8834d70279"
+  apiKey: "BURAYA_APIKEY",
+  authDomain: "BURAYA_AUTHDOMAIN",
+  databaseURL: "BURAYA_DATABASEURL",
+  projectId: "BURAYA_PROJECTID",
+  storageBucket: "BURAYA_STORAGE",
+  messagingSenderId: "BURAYA_SENDERID",
+  appId: "BURAYA_APPID"
 };
 
-firebase.initializeApp(firebaseConfig);
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
 
-const auth = firebase.auth();
-const db = firebase.firestore();
+let currentRoom = null;
 
-let currentUser = null;
+window.register = function(){
+const email = emailInput.value;
+const pass = password.value;
+createUserWithEmailAndPassword(auth,email,pass)
+.catch(e=> error.innerText=e.message);
+}
 
-auth.onAuthStateChanged(user=>{
-    if(user){
-        currentUser = user;
-        loadMessages();
-    }else{
-        currentUser = null;
-        document.getElementById("messages").innerHTML="";
-    }
+window.login = function(){
+const email = emailInput.value;
+const pass = password.value;
+signInWithEmailAndPassword(auth,email,pass)
+.catch(e=> error.innerText=e.message);
+}
+
+window.logout = function(){
+signOut(auth);
+}
+
+onAuthStateChanged(auth,user=>{
+if(user){
+auth.style.display="none";
+chat.style.display="block";
+}else{
+auth.style.display="block";
+chat.style.display="none";
+}
 });
 
-function login(){
-    const email = document.getElementById("email").value;
-    const pass = document.getElementById("pass").value;
-    auth.signInWithEmailAndPassword(email,pass)
-    .catch(e=>document.getElementById("authErr").innerText=e.message);
+window.joinRoom = function(){
+currentRoom = roomInput.value;
+messages.innerHTML="";
+const messagesRef = ref(db,"rooms/"+currentRoom);
+onValue(messagesRef,(snapshot)=>{
+messages.innerHTML="";
+snapshot.forEach(child=>{
+const msg = child.val();
+messages.innerHTML += "<div class='msg'><b>"+msg.user+":</b> "+msg.text+"</div>";
+});
+});
 }
 
-function signup(){
-    const email = document.getElementById("email").value;
-    const pass = document.getElementById("pass").value;
-    auth.createUserWithEmailAndPassword(email,pass)
-    .catch(e=>document.getElementById("authErr").innerText=e.message);
-}
-
-function logout(){
-    auth.signOut();
-}
-
-function sendMsg(){
-    if(!currentUser) return alert("Önce giriş yap");
-    const text = document.getElementById("msgInput").value;
-    if(!text) return;
-
-    db.collection("messages").add({
-        uid: currentUser.uid,
-        email: currentUser.email,
-        text: text,
-        created: firebase.firestore.FieldValue.serverTimestamp()
-    });
-
-    document.getElementById("msgInput").value="";
-}
-
-function loadMessages(){
-    db.collection("messages")
-    .orderBy("created")
-    .onSnapshot(snapshot=>{
-        const container=document.getElementById("messages");
-        container.innerHTML="";
-        snapshot.forEach(doc=>{
-            const m=doc.data();
-            const div=document.createElement("div");
-            div.className="msg";
-            if(m.uid===currentUser.uid) div.classList.add("me");
-            div.innerText=m.email+": "+m.text;
-            container.appendChild(div);
-        });
-    });
+window.sendMessage = function(){
+if(!currentRoom) return;
+const msgRef = ref(db,"rooms/"+currentRoom);
+push(msgRef,{
+user:auth.currentUser.email,
+text:messageInput.value
+});
+messageInput.value="";
 }
 
 </script>
