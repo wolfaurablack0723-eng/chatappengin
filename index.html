@@ -24,3 +24,62 @@
   </section>
 
 </div>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+
+<script>
+let auth;
+let db;
+
+function initFirebase(){
+  firebase.initializeApp({
+    apiKey: "AIzaSyA3--Xy1WrM6WlxurXXr4i5qwMZiafXN4k",
+    authDomain: "vigochat-58144.firebaseapp.com",
+    projectId: "vigochat-58144",
+    storageBucket: "vigochat-58144.firebasestorage.app",
+    messagingSenderId: "384136632816",
+    appId: "1:384136632816:web:2bb6d6942680a2e2e6e535"
+  });
+
+  auth = firebase.auth();
+  db = firebase.firestore();
+
+  auth.onAuthStateChanged(user=>{
+    if(user){
+      document.getElementById("view-auth").classList.remove("active");
+      document.getElementById("view-chats").classList.add("active");
+    }else{
+      document.getElementById("view-auth").classList.add("active");
+      document.getElementById("view-chats").classList.remove("active");
+    }
+  });
+}
+
+async function login(){
+  const email = document.getElementById("email").value;
+  const pass = document.getElementById("pass").value;
+
+  try{
+    await auth.signInWithEmailAndPassword(email, pass);
+  }catch(e){
+    document.getElementById("authErr").innerText = e.message;
+  }
+}
+
+async function signup(){
+  const email = document.getElementById("email").value;
+  const pass = document.getElementById("pass").value;
+
+  try{
+    await auth.createUserWithEmailAndPassword(email, pass);
+  }catch(e){
+    document.getElementById("authErr").innerText = e.message;
+  }
+}
+
+document.getElementById("loginBtn").addEventListener("click", login);
+document.getElementById("signupBtn").addEventListener("click", signup);
+
+initFirebase();
+</script>
