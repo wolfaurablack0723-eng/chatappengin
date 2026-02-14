@@ -4,8 +4,6 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
   <title>VigoChatt</title>
-  <meta name="theme-color" content="#efe7db"/>
-
   <style>
     :root{
       --bg:#efe7db;
@@ -17,35 +15,16 @@
       --safe-bottom: env(safe-area-inset-bottom, 0px);
       --safe-top: env(safe-area-inset-top, 0px);
       --radius:18px;
-      --shadow: 0 10px 28px rgba(0,0,0,.08);
     }
-    [data-theme="dark"]{
-      --bg:#0b1220;
-      --card:rgba(255,255,255,.06);
-      --text:#eef2ff;
-      --muted:rgba(255,255,255,.60);
-      --border:rgba(255,255,255,.12);
-      --accent:#6aa2ff;
-      --shadow: 0 10px 28px rgba(0,0,0,.30);
-    }
-
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
       margin:0;
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
-      background:
-        radial-gradient(900px 600px at 60% 10%, rgba(255,255,255,.75), transparent 60%),
-        radial-gradient(900px 600px at 10% 90%, rgba(255,255,255,.60), transparent 60%),
-        var(--bg);
+      background: radial-gradient(900px 600px at 60% 10%, rgba(255,255,255,.75), transparent 60%),
+                  radial-gradient(900px 600px at 10% 90%, rgba(255,255,255,.60), transparent 60%),
+                  var(--bg);
       color:var(--text);
-      overflow:hidden;
-    }
-    [data-theme="dark"] body{
-      background:
-        radial-gradient(900px 600px at 60% 10%, rgba(106,162,255,.18), transparent 60%),
-        radial-gradient(900px 600px at 10% 90%, rgba(255,255,255,.05), transparent 60%),
-        var(--bg);
     }
 
     .app{
@@ -60,37 +39,18 @@
 
     /* Header */
     .header{
-      padding:14px 16px 10px;
+      padding:16px 16px 10px;
       display:flex;
       align-items:center;
       justify-content:space-between;
       gap:10px;
     }
-    .brand{
-      display:flex; align-items:center; gap:10px;
-      min-width:0;
-    }
-    .logo{
-      width:42px;height:42px;border-radius:14px;
-      display:grid;place-items:center;
-      background: rgba(43,108,255,.12);
-      border:1px solid rgba(43,108,255,.22);
-      box-shadow: var(--shadow);
-      font-weight:1000;
-      color:var(--accent);
-      flex:0 0 auto;
-    }
     .header h1{
       margin:0;
       font-size:18px;
       letter-spacing:.2px;
-      line-height:1.1;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
     }
     .header small{color:var(--muted)}
-    .hdrActions{display:flex; gap:8px; align-items:center;}
     .pill{
       border:1px solid var(--border);
       background: rgba(255,255,255,.55);
@@ -98,18 +58,8 @@
       border-radius:999px;
       cursor:pointer;
       user-select:none;
-      box-shadow: var(--shadow);
     }
-    [data-theme="dark"] .pill{background: rgba(255,255,255,.08)}
     .pill:active{transform:scale(.98)}
-    .pill.icon{padding:10px 11px; width:44px; display:grid; place-items:center;}
-    .dot{
-      width:8px;height:8px;border-radius:999px;
-      background:#22c55e;
-      box-shadow:0 0 0 3px rgba(34,197,94,.18);
-      display:inline-block;
-      margin-left:6px;
-    }
 
     /* Views */
     .view{
@@ -117,7 +67,6 @@
       padding: 6px 16px 16px;
       overflow:auto;
       flex:1;
-      -webkit-overflow-scrolling: touch;
     }
     .view.active{display:block}
 
@@ -127,12 +76,7 @@
       border-radius: var(--radius);
       padding: 14px;
       margin-bottom: 12px;
-      box-shadow: var(--shadow);
     }
-    [data-theme="dark"] .card{background: rgba(255,255,255,.06)}
-    .card h2{margin:0 0 10px; font-size:16px}
-    .muted{color:var(--muted); font-size:13px; line-height:1.35}
-
     .list{display:flex; flex-direction:column; gap:10px}
     .item{
       display:flex; align-items:center; gap:12px;
@@ -142,9 +86,7 @@
       padding: 12px;
       cursor:pointer;
       user-select:none;
-      box-shadow: var(--shadow);
     }
-    [data-theme="dark"] .item{background: rgba(255,255,255,.06)}
     .item:active{transform:scale(.99)}
     .avatar{
       width:44px;height:44px;border-radius:16px;
@@ -156,81 +98,21 @@
       flex:0 0 auto;
       overflow:hidden;
     }
-    .avatar .aTxt{font-weight:1000}
     .meta{min-width:0; flex:1}
     .meta b{display:block; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
     .meta span{display:block; font-size:13px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:3px}
-    .badge{
-      font-size:12px;
-      padding:6px 10px;
-      border-radius:999px;
-      border:1px solid var(--border);
-      background: rgba(255,255,255,.55);
-      color:var(--muted);
-      flex:0 0 auto;
-    }
-    [data-theme="dark"] .badge{background: rgba(255,255,255,.06)}
-    .badge.ok{color:var(--text); border-color: rgba(34,197,94,.35); background: rgba(34,197,94,.12)}
-
-    /* Inputs */
-    .row{display:flex; gap:10px; flex-wrap:wrap}
-    .field{display:flex; flex-direction:column; gap:6px; flex:1; min-width:140px}
-    input, textarea, select{
-      width:100%;
-      border:1px solid var(--border);
-      background: rgba(255,255,255,.75);
-      border-radius: 14px;
-      padding: 12px;
-      outline:none;
-      font-size:14px;
-      color:var(--text);
-    }
-    [data-theme="dark"] input,
-    [data-theme="dark"] textarea,
-    [data-theme="dark"] select{
-      background: rgba(255,255,255,.06);
-    }
-    textarea{min-height:90px; resize:none}
-
-    .btn{
-      border:1px solid var(--border);
-      background: rgba(255,255,255,.65);
-      padding:12px 14px;
-      border-radius: 14px;
-      cursor:pointer;
-      user-select:none;
-      font-weight:900;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:8px;
-      box-shadow: var(--shadow);
-    }
-    [data-theme="dark"] .btn{background: rgba(255,255,255,.06)}
-    .btn:active{transform:scale(.99)}
-    .btn.primary{
-      border-color: rgba(43,108,255,.30);
-      background: rgba(43,108,255,.12);
-      color: var(--accent);
-    }
-    .btn.danger{
-      border-color: rgba(239,68,68,.30);
-      background: rgba(239,68,68,.10);
-      color: #ef4444;
-    }
 
     /* Chat overlay */
     .overlay{
       position:fixed; inset:0;
       background: rgba(0,0,0,.15);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
       display:none;
       z-index: 50;
       padding-top: var(--safe-top);
       padding-bottom: var(--safe-bottom);
     }
-    [data-theme="dark"] .overlay{background: rgba(0,0,0,.35)}
     .overlay.show{display:block}
 
     .chat{
@@ -240,18 +122,14 @@
       display:flex;
       flex-direction:column;
       background: rgba(255,255,255,.50);
-      border-left:1px solid var(--border);
-      border-right:1px solid var(--border);
     }
-    [data-theme="dark"] .chat{background: rgba(255,255,255,.06)}
     .chatTop{
       padding: 12px 14px;
       display:flex; align-items:center; gap:10px;
       border-bottom:1px solid var(--border);
       background: rgba(255,255,255,.55);
     }
-    [data-theme="dark"] .chatTop{background: rgba(255,255,255,.06)}
-    .iconBtn{
+    .btn{
       width:44px; height:44px;
       border-radius: 14px;
       border:1px solid var(--border);
@@ -259,11 +137,8 @@
       cursor:pointer;
       display:grid; place-items:center;
       user-select:none;
-      box-shadow: var(--shadow);
-      flex:0 0 auto;
     }
-    [data-theme="dark"] .iconBtn{background: rgba(255,255,255,.06)}
-    .iconBtn:active{transform:scale(.98)}
+    .btn:active{transform:scale(.98)}
     .chatTitle{min-width:0; flex:1}
     .chatTitle b{display:block; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
     .chatTitle span{display:block; font-size:12px; color:var(--muted)}
@@ -275,7 +150,6 @@
       display:flex;
       flex-direction:column;
       gap:10px;
-      -webkit-overflow-scrolling: touch;
     }
     .bubble{
       max-width:78%;
@@ -287,15 +161,18 @@
       line-height:1.35;
       white-space:pre-wrap;
       word-break:break-word;
-      box-shadow: var(--shadow);
     }
-    [data-theme="dark"] .bubble{background: rgba(255,255,255,.06)}
     .bubble.me{
       margin-left:auto;
       background: rgba(43,108,255,.12);
       border-color: rgba(43,108,255,.20);
     }
-    .bubble .time{font-size:11px; color:var(--muted); margin-top:6px}
+    .bubble .t{
+      display:block;
+      margin-top:6px;
+      font-size:11px;
+      color:var(--muted);
+    }
     .composer{
       padding: 10px 14px calc(10px + var(--safe-bottom));
       border-top:1px solid var(--border);
@@ -304,7 +181,6 @@
       gap:10px;
       align-items:flex-end;
     }
-    [data-theme="dark"] .composer{background: rgba(255,255,255,.06)}
     .composer textarea{
       flex:1;
       min-height:44px;
@@ -317,22 +193,19 @@
       outline:none;
       font-size:14px;
     }
-    [data-theme="dark"] .composer textarea{background: rgba(255,255,255,.06)}
     .send{
       width:52px;height:52px;
       border-radius:16px;
       border:1px solid rgba(43,108,255,.25);
       background: rgba(43,108,255,.12);
       color: var(--accent);
-      font-weight:1000;
+      font-weight:900;
       cursor:pointer;
       display:grid; place-items:center;
       user-select:none;
-      box-shadow: var(--shadow);
     }
-    .send:active{transform:scale(.99)}
 
-    /* Bottom bar */
+    /* Bottom bar (AYNI) */
     .bottom{
       position:fixed;
       left:0; right:0; bottom:0;
@@ -349,9 +222,7 @@
       padding: 10px;
       display:flex;
       gap:8px;
-      box-shadow: var(--shadow);
     }
-    [data-theme="dark"] .nav{background: rgba(255,255,255,.06)}
     .tab{
       flex:1;
       border-radius: 16px;
@@ -371,53 +242,76 @@
       border-color: rgba(43,108,255,.18);
     }
     .tab .ico{font-size:20px; line-height:1}
-    .tab .lbl{font-size:12px; font-weight:900}
+    .tab .lbl{font-size:12px; font-weight:800}
 
-    /* Modal */
+    /* --- Modallar (tema bozmadan) --- */
     .modal{
       position:fixed; inset:0;
+      z-index: 80;
       display:none;
-      z-index:80;
-      background: rgba(0,0,0,.20);
+      background: rgba(0,0,0,.15);
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
-      padding: calc(14px + var(--safe-top)) 14px calc(14px + var(--safe-bottom));
+      padding-top: var(--safe-top);
+      padding-bottom: var(--safe-bottom);
     }
-    [data-theme="dark"] .modal{background: rgba(0,0,0,.45)}
     .modal.show{display:block}
     .sheet{
       max-width:520px;
-      margin:0 auto;
-      background: rgba(255,255,255,.70);
+      margin: 10px auto 0;
       border:1px solid var(--border);
-      border-radius: 22px;
-      box-shadow: var(--shadow);
+      background: rgba(255,255,255,.70);
+      border-radius: 18px;
       overflow:hidden;
     }
-    [data-theme="dark"] .sheet{background: rgba(255,255,255,.08)}
     .sheetHd{
-      padding:12px 14px;
+      padding: 12px 14px;
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap:10px;
       border-bottom:1px solid var(--border);
+      background: rgba(255,255,255,.55);
     }
-    .sheetHd b{font-size:14px}
     .sheetBd{padding:14px}
+    .field{display:flex; flex-direction:column; gap:6px; margin-bottom:10px}
+    .field label{font-size:12px; color:var(--muted)}
+    .inp{
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.75);
+      border-radius: 16px;
+      padding: 12px;
+      outline:none;
+      font-size:14px;
+    }
+    .row{display:flex; gap:10px; flex-wrap:wrap}
+    .btn2{
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.65);
+      border-radius: 16px;
+      padding: 12px 14px;
+      cursor:pointer;
+      font-weight:900;
+      user-select:none;
+    }
+    .btn2.primary{
+      border-color: rgba(43,108,255,.25);
+      background: rgba(43,108,255,.12);
+      color: var(--accent);
+    }
+    .err{color:#ef4444; font-size:13px; margin-top:6px}
+    .muted{color:var(--muted); font-size:13px; line-height:1.35}
     .hr{height:1px; background:var(--border); margin:12px 0}
 
-    /* Toast */
     .toast{
       position:fixed;
       left:50%;
+      transform:translateX(-50%);
       bottom: calc(92px + var(--safe-bottom));
-      transform: translateX(-50%);
-      z-index: 99999;
+      z-index:99999;
       background: rgba(0,0,0,.78);
-      color:white;
+      color:#fff;
       padding:10px 12px;
-      border-radius: 999px;
+      border-radius:999px;
       font-size:13px;
       display:none;
       max-width: calc(100% - 24px);
@@ -426,141 +320,91 @@
       text-overflow:ellipsis;
     }
     .toast.show{display:block}
-
-    /* Hide */
-    .hidden{display:none !important;}
   </style>
 </head>
 
 <body>
   <div class="toast" id="toast">...</div>
 
-  <div class="app" id="appRoot">
+  <div class="app">
     <div class="header">
-      <div class="brand">
-        <div class="logo" id="logoBox">V</div>
-        <div style="min-width:0">
-          <h1 id="title">VigoChatt</h1>
-          <small id="sub">Bağlanıyor...</small>
-        </div>
+      <div>
+        <h1 id="title">Mesajlar</h1>
+        <small id="sub">VigoChatt</small>
       </div>
-
-      <div class="hdrActions">
-        <div class="pill icon" id="themeBtn" title="Tema">☾</div>
-        <div class="pill" id="addBtn" title="Yeni sohbet">＋</div>
-      </div>
+      <div class="pill" id="addBtn">＋</div>
     </div>
 
-    <!-- AUTH -->
-    <section class="view active" id="view-auth">
-      <div class="card">
-        <h2>Giriş / Kayıt</h2>
-        <div class="muted" style="margin-bottom:10px">
-          VigoChatt’e giriş yap. Arkadaşın da kayıt olursa gerçek mesajlaşırsın.
-        </div>
-
-        <div class="field">
-          <label class="muted">E-posta</label>
-          <input id="email" type="email" placeholder="ornek@mail.com" autocomplete="email">
-        </div>
-        <div class="field">
-          <label class="muted">Şifre</label>
-          <input id="pass" type="password" placeholder="••••••••" autocomplete="current-password">
-        </div>
-
-        <div class="row" style="margin-top:10px">
-          <button class="btn primary" id="loginBtn" type="button">Giriş Yap</button>
-          <button class="btn" id="signupBtn" type="button">Kayıt Ol</button>
-        </div>
-
-        <div class="muted" style="margin-top:10px">
-          Not: Numara ile giriş + rehber + WhatsApp gibi sesli arama için Android native gerekir.
-          Bu sürümde (tek dosya) en sağlam çalışan sistem: e-posta ile gerçek Firebase chat.
-        </div>
-
-        <div id="authErr" style="color:#ef4444;margin-top:10px;font-size:13px"></div>
-      </div>
-    </section>
-
-    <!-- Calls -->
+    <!-- Aramalar -->
     <section class="view" id="view-calls">
       <div class="card">
         <b>Aramalar</b>
         <div class="muted" style="margin-top:6px">
-          Bu sekme hazır. WhatsApp gibi gerçek sesli arama için (WebRTC + signaling server / native) gerekir.
-          APK’de çalışması için “native/Capacitor” kurulum yaparız.
+          Bu ekranda sohbet listenden kişiler görünür.
+          Sesli arama (WhatsApp gibi) için native/Capacitor gerekir.
         </div>
-        <div class="hr"></div>
-        <button class="btn" id="callInfoBtn">Sesli arama nasıl eklenir?</button>
       </div>
       <div class="list" id="callsList"></div>
     </section>
 
-    <!-- Status -->
+    <!-- Durum -->
     <section class="view" id="view-status">
       <div class="card">
         <b>Durum</b>
         <div class="muted" style="margin-top:6px">
-          Durumunu yaz ve paylaş. (Firebase’e kaydolur)
+          Durum yazıp paylaşabilirsin.
         </div>
         <div class="hr"></div>
         <div class="row">
-          <input id="statusInput" placeholder="Durum yaz... (ör: dışarıdayım)">
-          <button class="btn primary" id="statusAddBtn">Paylaş</button>
+          <input class="inp" id="statusText" placeholder="Durum yaz...">
+          <div class="btn2 primary" id="statusSend">Paylaş</div>
         </div>
-      </div>
-
-      <div class="card">
-        <b>Son Durumların</b>
-        <div class="muted" style="margin-top:6px">En son paylaştıkların</div>
       </div>
       <div class="list" id="statusList"></div>
     </section>
 
-    <!-- Messages -->
-    <section class="view" id="view-messages">
+    <!-- Mesajlar -->
+    <section class="view active" id="view-messages">
       <div class="card">
         <b>Mesajlar</b>
         <div class="muted" style="margin-top:6px">
-          “＋” ile arkadaşının e-postasını yaz → sohbet aç → mesaj gönder.
+          “＋” ile yeni sohbet başlat → mesaj gönder.
         </div>
       </div>
       <div class="list" id="chatList"></div>
-      <div class="card hidden" id="emptyInbox">
+      <div class="card" id="emptyChats" style="display:none">
         <b>Henüz sohbet yok</b>
-        <div class="muted" style="margin-top:6px">
-          Üstteki “＋” ile yeni sohbet başlat.
-        </div>
+        <div class="muted" style="margin-top:6px">Üstteki “＋” ile sohbet aç.</div>
       </div>
     </section>
 
-    <!-- Profile -->
+    <!-- Profil -->
     <section class="view" id="view-profile">
       <div class="card">
         <b>Profil</b>
-        <div class="muted" style="margin-top:6px">Profilini düzenle (Firebase’e kaydolur).</div>
+        <div class="muted" style="margin-top:6px">
+          Bilgilerini düzenle.
+        </div>
       </div>
 
       <div class="card">
-        <div class="row">
-          <div class="field">
-            <label class="muted">Ad</label>
-            <input id="pName" placeholder="Adın">
-          </div>
-          <div class="field">
-            <label class="muted">Doğum günü</label>
-            <input id="pBday" type="date">
-          </div>
+        <div class="field">
+          <label>Ad</label>
+          <input class="inp" id="pName" placeholder="Adın">
         </div>
-        <div class="field" style="margin-top:10px">
-          <label class="muted">Hakkında</label>
-          <textarea id="pAbout" placeholder="Kısa biyografi..."></textarea>
+        <div class="field">
+          <label>Doğum günü</label>
+          <input class="inp" id="pBday" type="date">
+        </div>
+        <div class="field">
+          <label>Hakkında</label>
+          <textarea class="inp" id="pAbout" placeholder="Kısa açıklama..." style="min-height:90px"></textarea>
         </div>
 
-        <div class="row" style="margin-top:10px">
-          <button class="btn primary" id="saveProfileBtn">Kaydet</button>
-          <button class="btn" id="openSettingsBtn">Ayarlar</button>
-          <button class="btn danger" id="logoutBtn">Çıkış</button>
+        <div class="row">
+          <div class="btn2 primary" id="saveProfile">Kaydet</div>
+          <div class="btn2" id="openSettings">Ayarlar</div>
+          <div class="btn2" id="logout">Çıkış</div>
         </div>
 
         <div class="hr"></div>
@@ -573,135 +417,145 @@
   <div class="overlay" id="overlay">
     <div class="chat">
       <div class="chatTop">
-        <div class="iconBtn" id="back" title="Geri">←</div>
-
+        <div class="btn" id="back">←</div>
         <div class="chatTitle">
           <b id="chatName">Sohbet</b>
           <span id="chatSub">—</span>
         </div>
-
-        <div class="iconBtn" id="more" title="Menü">⋯</div>
+        <div class="btn" id="more">⋯</div>
       </div>
-
       <div class="chatBody" id="chatBody"></div>
-
       <div class="composer">
         <textarea id="msg" rows="1" placeholder="Mesaj yaz..."></textarea>
-        <div class="send" id="send" title="Gönder">➤</div>
+        <div class="send" id="send">➤</div>
       </div>
     </div>
   </div>
 
-  <!-- Bottom nav -->
+  <!-- Bottom nav (AYNI) -->
   <div class="bottom">
     <nav class="nav">
       <div class="tab" data-tab="calls"><div class="ico">👥</div><div class="lbl">Aramalar</div></div>
       <div class="tab" data-tab="status"><div class="ico">❗</div><div class="lbl">Durum</div></div>
-      <div class="tab active" data-tab="messages"><div class="ico">💬</div><div class="lbl">Mesajlar</div></div>
-      <div class="tab" data-tab="profile"><div class="ico">🙂</div><div class="lbl">Profil</div></div>
+      <div class="tab active" data-tab="messages"><div class="ico">📶</div><div class="lbl">Mesajlar</div></div>
+      <div class="tab" data-tab="profile"><div class="ico">🤔</div><div class="lbl">Profil</div></div>
     </nav>
   </div>
 
-  <!-- Modal: New Chat -->
+  <!-- Login Modal -->
+  <div class="modal" id="authModal">
+    <div class="sheet">
+      <div class="sheetHd">
+        <b>VigoChatt • Giriş</b>
+        <div class="btn" id="closeAuth" style="width:44px;height:44px">✕</div>
+      </div>
+      <div class="sheetBd">
+        <div class="muted">Firebase’e giriş yapınca gerçek kullanıcılarla mesajlaşacaksın.</div>
+        <div class="hr"></div>
+
+        <div class="field">
+          <label>E-posta</label>
+          <input class="inp" id="email" type="email" placeholder="ornek@mail.com">
+        </div>
+        <div class="field">
+          <label>Şifre (min 6)</label>
+          <input class="inp" id="pass" type="password" placeholder="••••••••">
+        </div>
+
+        <div class="row">
+          <div class="btn2 primary" id="loginBtn">Giriş</div>
+          <div class="btn2" id="signupBtn">Kayıt</div>
+        </div>
+
+        <div class="err" id="authErr"></div>
+
+        <div class="hr"></div>
+        <div class="muted">
+          Not: “Numara ile giriş / rehber / sesli arama” WebView-APK’de native gerekir.
+          Bu sürümde en sorunsuz çalışan: Firebase e-posta ile gerçek chat.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- New Chat Modal -->
   <div class="modal" id="newChatModal">
     <div class="sheet">
       <div class="sheetHd">
         <b>Yeni Sohbet</b>
-        <div class="iconBtn" id="closeNewChat" title="Kapat">✕</div>
+        <div class="btn" id="closeNewChat" style="width:44px;height:44px">✕</div>
       </div>
       <div class="sheetBd">
-        <div class="muted">Arkadaşının VigoChatt’te kayıt olduğu <b>e-posta</b> adresini yaz.</div>
+        <div class="muted">Arkadaşının kayıtlı e-postasını yaz (o da VigoChatt’te kayıt olmalı).</div>
         <div class="hr"></div>
 
         <div class="field">
-          <label class="muted">E-posta</label>
-          <input id="newChatEmail" placeholder="arkadas@mail.com" autocomplete="email">
+          <label>E-posta</label>
+          <input class="inp" id="newChatEmail" placeholder="arkadas@mail.com">
         </div>
 
-        <div class="row" style="margin-top:10px">
-          <button class="btn primary" id="startChatBtn">Sohbet Başlat</button>
-          <button class="btn" id="copyMyEmailBtn">Benim e-postamı kopyala</button>
+        <div class="row">
+          <div class="btn2 primary" id="startChat">Sohbet Başlat</div>
+          <div class="btn2" id="copyMyEmail">Benim e-postam</div>
         </div>
 
-        <div id="newChatErr" style="color:#ef4444;margin-top:10px;font-size:13px"></div>
+        <div class="err" id="newChatErr"></div>
       </div>
     </div>
   </div>
 
-  <!-- Modal: Settings -->
+  <!-- Settings Modal -->
   <div class="modal" id="settingsModal">
     <div class="sheet">
       <div class="sheetHd">
         <b>Ayarlar</b>
-        <div class="iconBtn" id="closeSettings" title="Kapat">✕</div>
+        <div class="btn" id="closeSettings" style="width:44px;height:44px">✕</div>
       </div>
       <div class="sheetBd">
         <div class="card" style="margin:0">
-          <b>Görünüm</b>
-          <div class="muted" style="margin-top:6px">Tema seçimi</div>
-          <div class="hr"></div>
-          <div class="row">
-            <button class="btn" id="themeLightBtn">Açık</button>
-            <button class="btn" id="themeDarkBtn">Koyu</button>
-          </div>
-        </div>
-
-        <div class="hr"></div>
-
-        <div class="card" style="margin:0">
-          <b>Hakkında</b>
+          <b>Uygulama</b>
           <div class="muted" style="margin-top:6px">
-            VigoChatt • Firebase gerçek mesajlaşma (tek dosya sürüm)
-          </div>
-          <div class="hr"></div>
-          <div class="muted">
-            Rehber ve sesli arama için Android native gerekir.
+            VigoChatt • Firebase gerçek mesajlaşma
           </div>
         </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal: Chat Menu -->
-  <div class="modal" id="chatMenuModal">
-    <div class="sheet">
-      <div class="sheetHd">
-        <b>Sohbet Menüsü</b>
-        <div class="iconBtn" id="closeChatMenu" title="Kapat">✕</div>
-      </div>
-      <div class="sheetBd">
-        <button class="btn" id="clearChatBtn">Bu cihazda sohbeti temizle</button>
         <div class="hr"></div>
-        <button class="btn danger" id="closeChatBtn2">Sohbeti kapat</button>
+        <div class="btn2" id="howVoice">Sesli arama neden yok?</div>
       </div>
     </div>
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import {
-      getAuth,
-      onAuthStateChanged,
-      createUserWithEmailAndPassword,
-      signInWithEmailAndPassword,
-      signOut
-    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+  <!-- Firebase (ES module yok: APK'de boş ekran yapmasın diye) -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
-    import {
-      getDatabase,
-      ref,
-      set,
-      get,
-      update,
-      push,
-      onValue,
-      query,
-      orderByChild,
-      equalTo,
-      serverTimestamp
-    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+  <script>
+    const $ = (s, el=document)=> el.querySelector(s);
+    const $$ = (s, el=document)=> Array.from(el.querySelectorAll(s));
 
-    // === SENİN FIREBASE CONFIG (Aynen) ===
+    function escapeHtml(s){
+      return String(s ?? "").replace(/[&<>"']/g, c => ({
+        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+      }[c]));
+    }
+    function toast(msg){
+      const t=$("#toast");
+      t.textContent=msg;
+      t.classList.add("show");
+      clearTimeout(toast._tm);
+      toast._tm=setTimeout(()=>t.classList.remove("show"),2200);
+    }
+    function fmtTime(ts){
+      try{
+        const d=new Date(ts);
+        return d.toLocaleTimeString("tr-TR",{hour:"2-digit",minute:"2-digit"});
+      }catch(e){return "";}
+    }
+    function modal(id, on){
+      $(id).classList.toggle("show", !!on);
+    }
+
+    // === Firebase config (SENİN) ===
     const firebaseConfig = {
       apiKey: "AIzaSyA3--Xy1WrM6WlxurXXr4i5qwMZiafXN4k",
       authDomain: "vigochat-58144.firebaseapp.com",
@@ -713,392 +567,280 @@
       measurementId: "G-62VZ3906GS"
     };
 
-    // ===== Helpers =====
-    const $ = (s, el=document)=> el.querySelector(s);
-    const $$ = (s, el=document)=> Array.from(el.querySelectorAll(s));
-    const sleep = (ms)=> new Promise(r=>setTimeout(r,ms));
-    function escapeHtml(s){
-      return String(s ?? "").replace(/[&<>"']/g, c => ({
-        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
-      }[c]));
-    }
-    function toast(msg){
-      const t = $("#toast");
-      t.textContent = msg;
-      t.classList.add("show");
-      clearTimeout(toast._tm);
-      toast._tm = setTimeout(()=> t.classList.remove("show"), 2200);
-    }
-    function fmtTime(ts){
-      try{
-        const d = new Date(ts);
-        return d.toLocaleTimeString("tr-TR",{hour:"2-digit",minute:"2-digit"});
-      }catch{ return ""; }
-    }
-    function themeSet(mode){
-      const root = document.documentElement;
-      root.dataset.theme = mode;
-      localStorage.setItem("vigo_theme", mode);
-      $("#themeBtn").textContent = (mode==="dark") ? "☀" : "☾";
-      document.querySelector('meta[name="theme-color"]')?.setAttribute("content", mode==="dark" ? "#0b1220" : "#efe7db");
-    }
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.database();
 
-    // ===== Init Theme =====
-    themeSet(localStorage.getItem("vigo_theme") || "light");
+    // --- Data model ---
+    // profiles/{uid}: {emailLower, name, about, bday, createdAt, lastSeen}
+    // inbox/{uid}/{threadId}: {otherUid, otherName, lastText, lastAt}
+    // messages/{threadId}/{msgId}: {uid, text, at}
+    // statuses/{uid}/{statusId}: {text, at}
 
-    // ===== Firebase Init =====
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getDatabase(app);
+    let me = null;
+    let myProfile = null;
 
-    // ===== State =====
-    let me = null;                 // auth user
-    let myProfile = null;          // db profile
-    let inboxUnsub = null;         // onValue unsub? (we will just keep reference)
-    let statusUnsub = null;
     let currentThreadId = null;
-    let currentOther = null;       // {uid, name}
-    let messagesUnsub = null;
+    let currentOther = null;
+    let messagesOff = null;
 
-    // Paths:
-    // profiles/{uid} -> {emailLower, name, about, bday, color, online, lastSeen}
-    // inbox/{uid}/{threadId} -> {otherUid, otherName, otherColor, lastText, lastAt}
-    // messages/{threadId}/{msgId} -> {uid, text, at}
-    // statuses/{uid}/{statusId} -> {text, at}
-
-    function uidColor(uid){
-      // stable pastel color
-      let h = 0;
-      for(let i=0;i<uid.length;i++) h = (h*31 + uid.charCodeAt(i)) % 360;
-      return `hsl(${h} 70% 60%)`;
+    function threadIdFor(a,b){
+      return [a,b].sort().join("_");
     }
 
-    function setOnlineSub(){
-      if(!me) return;
-      const pRef = ref(db, `profiles/${me.uid}`);
-      // Basit presence: online true + lastSeen (serverTimestamp)
-      update(pRef, { online:true, lastSeen: Date.now() }).catch(()=>{});
-      window.addEventListener("beforeunload", ()=>{
-        update(pRef, { online:false, lastSeen: Date.now() }).catch(()=>{});
-      });
-    }
-
-    // ===== UI Tabs =====
-    function setTab(tab){
-      $$(".tab").forEach(t=> t.classList.toggle("active", t.dataset.tab === tab));
-      ["calls","status","messages","profile","auth"].forEach(v=>{
-        const view = $("#view-" + v);
-        if(view) view.classList.toggle("active", v === tab);
-      });
-
-      const titles = {calls:"Aramalar", status:"Durum", messages:"VigoChatt", profile:"Profil", auth:"VigoChatt"};
-      $("#title").textContent = titles[tab] || "VigoChatt";
-      $("#sub").textContent = me ? (myProfile?.name ? `Merhaba, ${myProfile.name}` : "Çevrimiçi") : "Basit mesajlaşma";
-
-      closeChat();
-    }
-
-    // ===== Modals =====
-    function modalShow(id, on=true){ $(id).classList.toggle("show", on); }
-    function showNewChat(on=true){
-      $("#newChatErr").textContent = "";
-      $("#newChatEmail").value = "";
-      modalShow("#newChatModal", on);
-      if(on) setTimeout(()=> $("#newChatEmail").focus(), 50);
-    }
-    function showSettings(on=true){ modalShow("#settingsModal", on); }
-    function showChatMenu(on=true){ modalShow("#chatMenuModal", on); }
-
-    // ===== Chat Overlay =====
-    function openChat(threadId, other){
-      currentThreadId = threadId;
-      currentOther = other;
-
-      $("#chatName").textContent = other?.name || "Sohbet";
-      $("#chatSub").textContent = "bağlanıyor...";
-      $("#chatBody").innerHTML = "";
-
-      $("#overlay").classList.add("show");
-      listenMessages(threadId, other.uid);
-      $("#msg").value = "";
-      $("#msg").focus();
-    }
-    function closeChat(){
-      $("#overlay").classList.remove("show");
-      currentThreadId = null;
-      currentOther = null;
-      $("#msg").value = "";
-
-      // stop listening
-      if(messagesUnsub){
-        // onValue returns callback removal via off(), but modular doesn't directly give unsub.
-        // We'll just keep single listener per open; re-open will overwrite and old stays minimal.
-        messagesUnsub = null;
-      }
-    }
-
-    // ===== AUTH =====
-    async function signupEmail(){
-      $("#authErr").textContent = "";
-      const email = $("#email").value.trim();
-      const pass = $("#pass").value;
-      if(!email || !pass || pass.length < 6){
-        $("#authErr").textContent = "E-posta ve en az 6 karakter şifre gir.";
-        return;
-      }
-      try{
-        await createUserWithEmailAndPassword(auth, email, pass);
-      }catch(e){
-        $("#authErr").textContent = (e?.message || "Kayıt hatası");
-      }
-    }
-    async function loginEmail(){
-      $("#authErr").textContent = "";
-      const email = $("#email").value.trim();
-      const pass = $("#pass").value;
-      if(!email || !pass){
-        $("#authErr").textContent = "E-posta ve şifre gir.";
-        return;
-      }
-      try{
-        await signInWithEmailAndPassword(auth, email, pass);
-      }catch(e){
-        $("#authErr").textContent = (e?.message || "Giriş hatası");
-      }
-    }
-    async function logout(){
-      try{
-        if(me){
-          await update(ref(db, `profiles/${me.uid}`), { online:false, lastSeen: Date.now() });
-        }
-      }catch{}
-      await signOut(auth);
-    }
-
-    // ===== Profile load/save =====
     async function ensureProfile(user){
-      const pRef = ref(db, `profiles/${user.uid}`);
-      const snap = await get(pRef);
+      const pRef = db.ref("profiles/"+user.uid);
+      const snap = await pRef.get();
       const emailLower = (user.email || "").toLowerCase();
+
       if(!snap.exists()){
         const base = {
           email: user.email || "",
           emailLower,
-          name: "",
-          about: "",
-          bday: "",
-          color: uidColor(user.uid),
-          online: true,
-          lastSeen: Date.now(),
-          createdAt: Date.now()
+          name:"",
+          about:"",
+          bday:"",
+          createdAt: Date.now(),
+          lastSeen: Date.now()
         };
-        await set(pRef, base);
+        await pRef.set(base);
         return base;
+      }else{
+        const v = snap.val() || {};
+        if(v.emailLower !== emailLower){
+          await pRef.update({email: user.email || "", emailLower});
+        }
+        return Object.assign({}, v, {email: user.email || v.email || ""});
       }
-      const v = snap.val();
-      // keep emailLower updated
-      if(v.emailLower !== emailLower){
-        await update(pRef, { email: user.email || "", emailLower });
-      }
-      return { ...v, email: user.email || v.email || "" };
     }
 
+    function setTab(tab){
+      $$(".tab").forEach(t=> t.classList.toggle("active", t.dataset.tab === tab));
+      ["calls","status","messages","profile"].forEach(v=>{
+        const view = $("#view-" + v);
+        if(view) view.classList.toggle("active", v === tab);
+      });
+
+      const titles = {calls:"Aramalar", status:"Durum", messages:"Mesajlar", profile:"Profil"};
+      $("#title").textContent = titles[tab] || "Mesajlar";
+
+      // sub
+      if(me){
+        $("#sub").textContent = myProfile?.name ? ("VigoChatt • " + myProfile.name) : "VigoChatt • çevrimiçi";
+      }else{
+        $("#sub").textContent = "VigoChatt • giriş gerekli";
+      }
+
+      closeChat();
+    }
+
+    // --- AUTH ---
+    async function loginEmail(){
+      $("#authErr").textContent="";
+      const email = $("#email").value.trim();
+      const pass = $("#pass").value;
+      if(!email || !pass) return $("#authErr").textContent="E-posta ve şifre gir.";
+      try{
+        await auth.signInWithEmailAndPassword(email, pass);
+      }catch(e){
+        $("#authErr").textContent = (e && e.message) ? e.message : "Giriş hatası";
+      }
+    }
+    async function signupEmail(){
+      $("#authErr").textContent="";
+      const email = $("#email").value.trim();
+      const pass = $("#pass").value;
+      if(!email || !pass || pass.length<6) return $("#authErr").textContent="E-posta ve min 6 şifre gir.";
+      try{
+        await auth.createUserWithEmailAndPassword(email, pass);
+      }catch(e){
+        $("#authErr").textContent = (e && e.message) ? e.message : "Kayıt hatası";
+      }
+    }
+    async function logout(){
+      try{ await auth.signOut(); }catch(e){}
+    }
+
+    // --- Profile UI ---
     async function saveProfile(){
       if(!me) return;
       const name = $("#pName").value.trim();
       const about = $("#pAbout").value.trim();
       const bday = $("#pBday").value;
 
-      const pRef = ref(db, `profiles/${me.uid}`);
-      await update(pRef, { name, about, bday, lastSeen: Date.now() });
-      toast("Profil kaydedildi");
+      await db.ref("profiles/"+me.uid).update({
+        name, about, bday, lastSeen: Date.now()
+      });
+
+      toast("Kaydedildi");
     }
 
-    function paintProfileUI(){
+    function paintProfile(){
       $("#pName").value = myProfile?.name || "";
       $("#pAbout").value = myProfile?.about || "";
       $("#pBday").value = myProfile?.bday || "";
-      $("#meInfo").innerHTML = `
-        <div><b>E-posta:</b> ${escapeHtml(me?.email || "-")}</div>
-        <div><b>UID:</b> ${escapeHtml(me?.uid || "-")}</div>
-      `;
-      $("#logoBox").style.borderColor = "rgba(43,108,255,.22)";
-      $("#logoBox").style.color = "var(--accent)";
-      $("#logoBox").textContent = (myProfile?.name?.[0] || "V").toUpperCase();
+      $("#meInfo").innerHTML = "<b>E-posta:</b> "+escapeHtml(me?.email || "-");
     }
 
-    // ===== Inbox / Threads =====
-    function threadIdFor(u1, u2){
-      return [u1, u2].sort().join("_");
-    }
-
+    // --- New Chat: find user by emailLower ---
     async function findUserByEmail(email){
-      const e = email.trim().toLowerCase();
+      const e = (email || "").trim().toLowerCase();
       if(!e) return null;
-      const q = query(ref(db, "profiles"), orderByChild("emailLower"), equalTo(e));
-      const snap = await get(q);
+
+      const q = db.ref("profiles").orderByChild("emailLower").equalTo(e);
+      const snap = await q.get();
       if(!snap.exists()) return null;
+
       const obj = snap.val();
       const uid = Object.keys(obj)[0];
       return { uid, ...obj[uid] };
     }
 
-    async function startChatWithEmail(email){
-      $("#newChatErr").textContent = "";
+    async function startChat(){
+      $("#newChatErr").textContent="";
       if(!me) return;
+
+      const email = $("#newChatEmail").value.trim();
       const other = await findUserByEmail(email);
+
       if(!other){
-        $("#newChatErr").textContent = "Bu e-posta ile kayıtlı kullanıcı yok. Arkadaşın önce kayıt olsun.";
+        $("#newChatErr").textContent="Bu e-posta ile kayıtlı kullanıcı yok. Arkadaşın önce kayıt olsun.";
         return;
       }
       if(other.uid === me.uid){
-        $("#newChatErr").textContent = "Kendi e-postanla sohbet açamazsın 🙂";
+        $("#newChatErr").textContent="Kendi e-postanla sohbet açamazsın.";
         return;
       }
 
       const tid = threadIdFor(me.uid, other.uid);
 
-      // create minimal inbox entries if not exist
-      const myInboxRef = ref(db, `inbox/${me.uid}/${tid}`);
-      const otherInboxRef = ref(db, `inbox/${other.uid}/${tid}`);
-
-      // my view of other
-      await update(myInboxRef, {
+      // inbox for me
+      await db.ref("inbox/"+me.uid+"/"+tid).update({
         otherUid: other.uid,
         otherName: other.name || other.email || "Kullanıcı",
-        otherColor: other.color || uidColor(other.uid),
         lastText: "",
         lastAt: Date.now()
       });
 
-      // other view of me
-      const meName = myProfile?.name || me.email || "Kullanıcı";
-      await update(otherInboxRef, {
+      // inbox for other
+      const myName = myProfile?.name || me.email || "Kullanıcı";
+      await db.ref("inbox/"+other.uid+"/"+tid).update({
         otherUid: me.uid,
-        otherName: meName,
-        otherColor: myProfile?.color || uidColor(me.uid),
+        otherName: myName,
         lastText: "",
         lastAt: Date.now()
       });
 
-      showNewChat(false);
-      toast("Sohbet hazır");
-      openChat(tid, { uid: other.uid, name: other.name || other.email || "Kullanıcı", color: other.color || uidColor(other.uid) });
+      modal("#newChatModal", false);
+      toast("Sohbet açıldı");
+      openChat(tid, {uid: other.uid, name: other.name || other.email || "Kullanıcı"});
       setTab("messages");
     }
 
-    function renderInboxItem(threadId, v){
-      const name = v?.otherName || "Kullanıcı";
-      const last = v?.lastText || "Henüz mesaj yok";
-      const color = v?.otherColor || "rgba(43,108,255,.12)";
-      const onlineMark = v?.otherOnline ? `<span class="dot"></span>` : "";
+    async function copyMyEmail(){
+      try{
+        await navigator.clipboard.writeText(me?.email || "");
+        toast("Kopyalandı");
+      }catch(e){
+        toast(me?.email || "—");
+      }
+    }
 
-      const initials = (name.trim()[0] || "V").toUpperCase();
-      return `
-        <div class="item" data-thread="${escapeHtml(threadId)}" data-ouid="${escapeHtml(v.otherUid||"")}" data-oname="${escapeHtml(name)}">
-          <div class="avatar" style="background:${escapeHtml(color)}22;border-color:${escapeHtml(color)}55">
-            <div class="aTxt">${escapeHtml(initials)}</div>
+    // --- Inbox render ---
+    function renderInbox(list){
+      const el = $("#chatList");
+      const empty = $("#emptyChats");
+
+      if(!list.length){
+        el.innerHTML = "";
+        empty.style.display = "block";
+        $("#callsList").innerHTML = "";
+        return;
+      }
+
+      empty.style.display = "none";
+      el.innerHTML = list.map(x=>{
+        const initial = (x.otherName || "V")[0].toUpperCase();
+        return `
+          <div class="item" data-thread="${escapeHtml(x.tid)}" data-ouid="${escapeHtml(x.otherUid)}" data-oname="${escapeHtml(x.otherName||"Kullanıcı")}">
+            <div class="avatar">${escapeHtml(initial)}</div>
+            <div class="meta">
+              <b>${escapeHtml(x.otherName||"Kullanıcı")}</b>
+              <span>${escapeHtml(x.lastText || "Henüz mesaj yok")}</span>
+            </div>
           </div>
-          <div class="meta">
-            <b>${escapeHtml(name)} ${onlineMark}</b>
-            <span>${escapeHtml(last)}</span>
+        `;
+      }).join("");
+
+      // Calls list uses same people (demo call)
+      $("#callsList").innerHTML = list.map(x=>{
+        const initial = "📞";
+        return `
+          <div class="item" data-call="1">
+            <div class="avatar">${initial}</div>
+            <div class="meta">
+              <b>${escapeHtml(x.otherName||"Kullanıcı")}</b>
+              <span>Sesli arama: native gerekir</span>
+            </div>
           </div>
-          <div class="badge">${v?.lastAt ? escapeHtml(fmtTime(v.lastAt)) : ""}</div>
-        </div>
-      `;
+        `;
+      }).join("");
     }
 
     function listenInbox(){
       if(!me) return;
-      const listEl = $("#chatList");
-      const emptyEl = $("#emptyInbox");
-      listEl.innerHTML = "";
-      emptyEl.classList.add("hidden");
-
-      const inboxRef = ref(db, `inbox/${me.uid}`);
-      onValue(inboxRef, async (snap)=>{
+      db.ref("inbox/"+me.uid).on("value", (snap)=>{
         const data = snap.val() || {};
-        const entries = Object.entries(data)
-          .map(([tid, v])=> ({tid, ...v}))
-          .sort((a,b)=> (b.lastAt||0) - (a.lastAt||0));
+        const arr = Object.entries(data).map(([tid,v])=>({
+          tid,
+          otherUid: v.otherUid || "",
+          otherName: v.otherName || "Kullanıcı",
+          lastText: v.lastText || "",
+          lastAt: v.lastAt || 0
+        })).sort((a,b)=> (b.lastAt||0) - (a.lastAt||0));
 
-        if(entries.length === 0){
-          listEl.innerHTML = "";
-          emptyEl.classList.remove("hidden");
-          $("#callsList").innerHTML = "";
-          return;
-        }
-
-        // Update online statuses (light)
-        // read each other profile online
-        const otherUids = Array.from(new Set(entries.map(e=> e.otherUid).filter(Boolean)));
-        const onlineMap = {};
-        await Promise.all(otherUids.slice(0,30).map(async uid=>{
-          try{
-            const p = await get(ref(db, `profiles/${uid}`));
-            if(p.exists()){
-              onlineMap[uid] = !!p.val().online;
-            }
-          }catch{}
-        }));
-
-        const html = entries.map(e=>{
-          e.otherOnline = onlineMap[e.otherUid] || false;
-          return renderInboxItem(e.tid, e);
-        }).join("");
-        listEl.innerHTML = html;
-
-        // Calls list: show same people as shortcuts
-        $("#callsList").innerHTML = entries.slice(0,12).map(e=>`
-          <div class="item" data-call="${escapeHtml(e.tid)}" data-ouid="${escapeHtml(e.otherUid||"")}" data-oname="${escapeHtml(e.otherName||"Kullanıcı")}">
-            <div class="avatar"><div class="aTxt">📞</div></div>
-            <div class="meta">
-              <b>${escapeHtml(e.otherName || "Kullanıcı")}</b>
-              <span>Sesli arama: native gerekir</span>
-            </div>
-            <div class="badge">Ara</div>
-          </div>
-        `).join("");
+        renderInbox(arr);
       });
     }
 
-    // ===== Messages =====
-    function listenMessages(threadId, otherUid){
-      const box = $("#chatBody");
-      box.innerHTML = "";
+    // --- Messages ---
+    function openChat(tid, other){
+      currentThreadId = tid;
+      currentOther = other;
 
-      const mRef = ref(db, `messages/${threadId}`);
-      onValue(mRef, async (snap)=>{
+      $("#chatName").textContent = other?.name || "Sohbet";
+      $("#chatSub").textContent = "çevrimiçi";
+      $("#overlay").classList.add("show");
+
+      const ref = db.ref("messages/"+tid);
+
+      if(messagesOff){ messagesOff(); messagesOff=null; }
+      const handler = (snap)=>{
         const data = snap.val() || {};
-        const arr = Object.entries(data)
-          .map(([k,v])=> ({k, ...v}))
-          .sort((a,b)=> (a.at||0) - (b.at||0))
+        const arr = Object.entries(data).map(([k,v])=>({k,...v}))
+          .sort((a,b)=> (a.at||0)-(b.at||0))
           .slice(-250);
 
-        // get other online
-        try{
-          const p = await get(ref(db, `profiles/${otherUid}`));
-          if(p.exists()){
-            const pv = p.val();
-            $("#chatSub").textContent = pv.online ? "çevrimiçi" : ("son görülme: " + fmtTime(pv.lastSeen || Date.now()));
-          }else{
-            $("#chatSub").textContent = "—";
-          }
-        }catch{
-          $("#chatSub").textContent = "—";
-        }
-
-        box.innerHTML = arr.map(m=>{
-          const isMe = (m.uid === me.uid);
-          return `
-            <div class="bubble ${isMe ? "me":""}">
-              ${escapeHtml(m.text || "")}
-              <div class="time">${escapeHtml(fmtTime(m.at || Date.now()))}</div>
-            </div>
-          `;
+        $("#chatBody").innerHTML = arr.map(m=>{
+          const meMsg = (m.uid === me.uid);
+          return `<div class="bubble ${meMsg?"me":""}">
+            ${escapeHtml(m.text||"")}
+            <span class="t">${escapeHtml(fmtTime(m.at||Date.now()))}</span>
+          </div>`;
         }).join("");
-        box.scrollTop = box.scrollHeight;
-      });
+        $("#chatBody").scrollTop = $("#chatBody").scrollHeight;
+      };
+
+      ref.on("value", handler);
+      messagesOff = ()=> ref.off("value", handler);
+    }
+
+    function closeChat(){
+      $("#overlay").classList.remove("show");
+      $("#msg").value = "";
+      currentThreadId = null;
+      currentOther = null;
+      if(messagesOff){ messagesOff(); messagesOff=null; }
     }
 
     async function sendMsg(){
@@ -1109,115 +851,88 @@
       $("#msg").value = "";
       const now = Date.now();
 
-      const mRef = ref(db, `messages/${currentThreadId}`);
-      await push(mRef, { uid: me.uid, text: t, at: now });
+      // push message
+      await db.ref("messages/"+currentThreadId).push({
+        uid: me.uid,
+        text: t,
+        at: now
+      });
 
       // update inbox for both
-      const myInboxRef = ref(db, `inbox/${me.uid}/${currentThreadId}`);
-      const otherInboxRef = ref(db, `inbox/${currentOther.uid}/${currentThreadId}`);
-
-      await update(myInboxRef, {
+      await db.ref("inbox/"+me.uid+"/"+currentThreadId).update({
         otherUid: currentOther.uid,
         otherName: currentOther.name || "Kullanıcı",
-        otherColor: currentOther.color || uidColor(currentOther.uid),
         lastText: t,
         lastAt: now
       });
 
-      const meName = myProfile?.name || me.email || "Kullanıcı";
-      await update(otherInboxRef, {
+      const myName = myProfile?.name || me.email || "Kullanıcı";
+      await db.ref("inbox/"+currentOther.uid+"/"+currentThreadId).update({
         otherUid: me.uid,
-        otherName: meName,
-        otherColor: myProfile?.color || uidColor(me.uid),
+        otherName: myName,
         lastText: t,
         lastAt: now
       });
     }
 
-    // ===== Status =====
+    // --- Status ---
     async function addStatus(){
-      if(!me) return;
-      const text = $("#statusInput").value.trim();
+      if(!me) return toast("Giriş yap");
+      const text = $("#statusText").value.trim();
       if(!text) return;
-      $("#statusInput").value = "";
-
-      const sRef = ref(db, `statuses/${me.uid}`);
-      await push(sRef, { text, at: Date.now() });
+      $("#statusText").value = "";
+      await db.ref("statuses/"+me.uid).push({text, at: Date.now()});
       toast("Durum paylaşıldı");
     }
 
-    function listenMyStatuses(){
+    function listenStatus(){
       if(!me) return;
-      const list = $("#statusList");
-      list.innerHTML = "";
-
-      const sRef = ref(db, `statuses/${me.uid}`);
-      onValue(sRef, (snap)=>{
+      db.ref("statuses/"+me.uid).on("value", (snap)=>{
         const data = snap.val() || {};
-        const arr = Object.entries(data)
-          .map(([k,v])=> ({k,...v}))
-          .sort((a,b)=> (b.at||0) - (a.at||0))
+        const arr = Object.entries(data).map(([k,v])=>({k,...v}))
+          .sort((a,b)=> (b.at||0)-(a.at||0))
           .slice(0,30);
 
-        if(arr.length === 0){
-          list.innerHTML = `
-            <div class="card">
-              <b>Durum yok</b>
-              <div class="muted" style="margin-top:6px">Yukarıdan durum paylaş.</div>
-            </div>
-          `;
+        const el = $("#statusList");
+        if(!arr.length){
+          el.innerHTML = `<div class="card"><b>Durum yok</b><div class="muted" style="margin-top:6px">Yukarıdan durum paylaş.</div></div>`;
           return;
         }
-
-        list.innerHTML = arr.map(s=>`
+        el.innerHTML = arr.map(s=>`
           <div class="item" style="cursor:default">
-            <div class="avatar"><div class="aTxt">❗</div></div>
+            <div class="avatar">❗</div>
             <div class="meta">
               <b>${escapeHtml(myProfile?.name || "Sen")}</b>
               <span>${escapeHtml(s.text || "")}</span>
             </div>
-            <div class="badge">${escapeHtml(fmtTime(s.at || Date.now()))}</div>
           </div>
         `).join("");
       });
     }
 
-    // ===== Wire UI events =====
-    $("#loginBtn").addEventListener("click", loginEmail);
-    $("#signupBtn").addEventListener("click", signupEmail);
+    // --- Click + Events ---
+    document.addEventListener("click", (e)=>{
+      const tab = e.target.closest(".tab");
+      if(tab){
+        setTab(tab.dataset.tab);
+        if(!me) modal("#authModal", true);
+        return;
+      }
 
-    $("#logoutBtn").addEventListener("click", logout);
-    $("#saveProfileBtn").addEventListener("click", saveProfile);
+      const chatItem = e.target.closest("#chatList .item");
+      if(chatItem){
+        if(!me){ modal("#authModal", true); return; }
+        openChat(chatItem.dataset.thread, {
+          uid: chatItem.dataset.ouid,
+          name: chatItem.dataset.oname
+        });
+        return;
+      }
 
-    $("#themeBtn").addEventListener("click", ()=>{
-      const cur = document.documentElement.dataset.theme || "light";
-      themeSet(cur === "dark" ? "light" : "dark");
-      toast(cur === "dark" ? "Açık tema" : "Koyu tema");
-    });
-
-    $("#openSettingsBtn").addEventListener("click", ()=> showSettings(true));
-    $("#closeSettings").addEventListener("click", ()=> showSettings(false));
-    $("#settingsModal").addEventListener("click", (e)=>{ if(e.target.id==="settingsModal") showSettings(false); });
-
-    $("#themeLightBtn").addEventListener("click", ()=>{ themeSet("light"); toast("Açık tema"); });
-    $("#themeDarkBtn").addEventListener("click", ()=>{ themeSet("dark"); toast("Koyu tema"); });
-
-    $("#addBtn").addEventListener("click", ()=>{
-      if(!me){ toast("Önce giriş yap"); setTab("auth"); return; }
-      showNewChat(true);
-    });
-    $("#closeNewChat").addEventListener("click", ()=> showNewChat(false));
-    $("#newChatModal").addEventListener("click", (e)=>{ if(e.target.id==="newChatModal") showNewChat(false); });
-
-    $("#startChatBtn").addEventListener("click", ()=> startChatWithEmail($("#newChatEmail").value));
-    $("#newChatEmail").addEventListener("keydown", (e)=>{ if(e.key==="Enter") startChatWithEmail($("#newChatEmail").value); });
-
-    $("#copyMyEmailBtn").addEventListener("click", async ()=>{
-      try{
-        await navigator.clipboard.writeText(me?.email || "");
-        toast("Kopyalandı");
-      }catch{
-        toast("Kopyalanamadı");
+      const callItem = e.target.closest("#callsList .item");
+      if(callItem){
+        alert("Sesli arama için Android native/Capacitor gerekir (WebView tek HTML ile WhatsApp gibi olmaz).");
+        return;
       }
     });
 
@@ -1230,94 +945,72 @@
       }
     });
 
-    $("#more").addEventListener("click", ()=> showChatMenu(true));
-    $("#closeChatMenu").addEventListener("click", ()=> showChatMenu(false));
-    $("#chatMenuModal").addEventListener("click", (e)=>{ if(e.target.id==="chatMenuModal") showChatMenu(false); });
-    $("#closeChatBtn2").addEventListener("click", ()=>{ showChatMenu(false); closeChat(); });
-    $("#clearChatBtn").addEventListener("click", ()=>{
-      $("#chatBody").innerHTML = "";
-      toast("Bu cihazda temizlendi");
-      showChatMenu(false);
+    $("#addBtn").addEventListener("click", ()=>{
+      if(!me){ modal("#authModal", true); return; }
+      $("#newChatErr").textContent="";
+      $("#newChatEmail").value="";
+      modal("#newChatModal", true);
+      setTimeout(()=>$("#newChatEmail").focus(), 50);
     });
 
-    $("#statusAddBtn").addEventListener("click", addStatus);
-    $("#statusInput").addEventListener("keydown", (e)=>{ if(e.key==="Enter"){ e.preventDefault(); addStatus(); } });
+    $("#closeAuth").addEventListener("click", ()=> modal("#authModal", false));
+    $("#closeNewChat").addEventListener("click", ()=> modal("#newChatModal", false));
+    $("#closeSettings").addEventListener("click", ()=> modal("#settingsModal", false));
 
-    $("#callInfoBtn").addEventListener("click", ()=>{
-      toast("Sesli arama için native/Capacitor gerekir");
-      alert("Sesli arama (WhatsApp gibi) tek HTML dosyada olmaz.\nGerekli: WebRTC + signaling server veya Android native/Capacitor.\nİstersen sonraki adımda bunu kurarız.");
+    $("#loginBtn").addEventListener("click", loginEmail);
+    $("#signupBtn").addEventListener("click", signupEmail);
+
+    $("#startChat").addEventListener("click", startChat);
+    $("#newChatEmail").addEventListener("keydown", (e)=>{ if(e.key==="Enter") startChat(); });
+
+    $("#copyMyEmail").addEventListener("click", copyMyEmail);
+
+    $("#saveProfile").addEventListener("click", saveProfile);
+    $("#logout").addEventListener("click", logout);
+    $("#openSettings").addEventListener("click", ()=> modal("#settingsModal", true));
+    $("#howVoice").addEventListener("click", ()=>{
+      alert("Sesli arama (WhatsApp gibi) için native uygulama gerekir.\nİstersen sonraki adımda Capacitor/Android projesi kurup ekleriz.");
     });
 
-    // Delegation for tabs and list clicks
-    document.addEventListener("click", async (e)=>{
-      const tab = e.target.closest(".tab");
-      if(tab){
-        if(!me && tab.dataset.tab !== "profile"){ // profile also needs auth, but show auth anyway
-          setTab("auth");
-          toast("Önce giriş yap");
-          return;
-        }
-        setTab(tab.dataset.tab);
-        return;
-      }
+    $("#statusSend").addEventListener("click", addStatus);
+    $("#statusText").addEventListener("keydown", (e)=>{ if(e.key==="Enter"){ e.preventDefault(); addStatus(); } });
 
-      const inboxItem = e.target.closest("#chatList .item");
-      if(inboxItem){
-        const thread = inboxItem.dataset.thread;
-        const ouid = inboxItem.dataset.ouid;
-        const oname = inboxItem.dataset.oname;
-        // fetch other profile for color/online
-        let other = { uid: ouid, name: oname, color: uidColor(ouid) };
-        try{
-          const ps = await get(ref(db, `profiles/${ouid}`));
-          if(ps.exists()){
-            const pv = ps.val();
-            other = { uid: ouid, name: pv.name || pv.email || oname, color: pv.color || uidColor(ouid) };
-          }
-        }catch{}
-        openChat(thread, other);
-        return;
-      }
-
-      const callItem = e.target.closest("#callsList .item");
-      if(callItem){
-        toast("Sesli arama: native gerekir");
-        alert("Bu sürümde arama demo.\nGerçek sesli arama için Android native/Capacitor kurmak gerekir.");
-        return;
-      }
+    // Close modals by tapping background
+    ["#authModal","#newChatModal","#settingsModal"].forEach(id=>{
+      $(id).addEventListener("click",(e)=>{ if(e.target.id === id.slice(1)) modal(id,false); });
     });
 
-    // ===== Auth State =====
-    onAuthStateChanged(auth, async (user)=>{
+    // --- Auth state ---
+    auth.onAuthStateChanged(async (user)=>{
       me = user || null;
 
       if(!me){
         myProfile = null;
-        $("#sub").textContent = "Basit mesajlaşma";
-        setTab("auth");
-        $("#addBtn").classList.add("hidden");
+        $("#chatList").innerHTML = "";
+        $("#callsList").innerHTML = "";
+        $("#statusList").innerHTML = "";
+        $("#emptyChats").style.display = "block";
+        $("#sub").textContent = "VigoChatt • giriş gerekli";
+        modal("#authModal", true);
         return;
       }
 
-      $("#addBtn").classList.remove("hidden");
-      $("#authErr").textContent = "";
-
       myProfile = await ensureProfile(me);
-      paintProfileUI();
-      setOnlineSub();
+      paintProfile();
+      $("#sub").textContent = myProfile?.name ? ("VigoChatt • " + myProfile.name) : "VigoChatt • çevrimiçi";
 
-      // Show messages by default
-      setTab("messages");
-      toast("Giriş başarılı");
-
-      // Listen inbox + statuses
+      // Listen data
       listenInbox();
-      listenMyStatuses();
+      listenStatus();
+
+      modal("#authModal", false);
+      toast("Giriş başarılı");
+      setTab("messages");
     });
 
-    // Start UI
+    // Init
     setTab("messages");
-    $("#sub").textContent = "Giriş yaparak başlayın";
+    $("#emptyChats").style.display = "block";
   </script>
 </body>
 </html>
