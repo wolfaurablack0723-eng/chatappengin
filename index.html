@@ -1,4 +1,17 @@
-<!DOCTYPE html>
+<script>
+let deferredPrompt;
+
+window.addEventListener("beforeinstallprompt", (e)=>{
+    e.preventDefault();
+    deferredPrompt = e;
+    document.getElementById("installBtn").style.display = "block";
+});
+
+function installApp(){
+    if(!deferredPrompt) return;
+    deferredPrompt.prompt();
+}
+</script><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -588,7 +601,7 @@ function updateLastMessage(chatId, text){
 
 
 // ===== PERFORMANS OPTİMİZASYON =====
-function listenLimitedMessages(uid){
+function listenLimitedMessages(uid){<button id="installBtn" onclick="installApp()" style="display:none">Uygulamayı Yükle</button>
 
     const chatId = getChatId(auth.currentUser.uid, uid);
     const messagesRef = ref(db, "privateMessages/" + chatId);
@@ -611,3 +624,121 @@ function listenLimitedMessages(uid){
 }
 
 </script>
+self.addEventListener("install", event=>{
+    event.waitUntil(
+        caches.open("vigo-cache").then(cache=>{
+            return cache.addAll([
+                "/",
+                "/index.html"
+            ]);
+        })
+    );
+});
+
+self.addEventListener("fetch", event=>{
+    event.respondWith(
+        caches.match(event.request).then(res=>{
+            return res || fetch(event.request);
+        })
+    );
+});
+    <script>
+if("serviceWorker" in navigator){
+    navigator.serviceWorker.register("sw.js");
+}
+    </script>
+    <script>
+const themes = {
+    dark:{
+        bg:"#0f172a",
+        card:"#1e293b",
+        accent:"#3b82f6"
+    },
+    light:{
+        bg:"#f1f5f9",
+        card:"#ffffff",
+        accent:"#2563eb"
+    },
+    neon:{
+        bg:"#000000",
+        card:"#111111",
+        accent:"#00ff88"
+    }
+};
+
+function applyTheme(name){
+    const t = themes[name];
+    document.body.style.background = t.bg;
+    document.documentElement.style.setProperty("--card", t.card);
+    document.documentElement.style.setProperty("--accent", t.accent);
+    localStorage.setItem("theme", name);
+}
+
+applyTheme(localStorage.getItem("theme") || "dark");
+        
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+
+<script>
+const SECRET_KEY = "VIGO_SECURE_KEY";
+
+function encrypt(text){
+    return CryptoJS.AES.encrypt(text, SECRET_KEY).toString();
+}
+
+function decrypt(text){
+    const bytes = CryptoJS.AES.decrypt(text, SECRET_KEY);
+    return bytes.toString(CryptoJS.enc.Utf8);
+}
+</script>
+<script>
+function requestNotificationPermission(){
+    if("Notification" in window){
+        Notification.requestPermission();
+    }
+}
+
+function showNotification(text){
+    if(Notification.permission === "granted"){
+        new Notification("Yeni Mesaj", {
+            body: text,
+            icon: "/icon.png"
+        });
+    }
+}
+
+requestNotificationPermission();
+</script>
+<script>
+let localStream;
+let peerConnection;
+
+async function startCall(){
+
+    localStream = await navigator.mediaDevices.getUserMedia({video:true,audio:true});
+
+    document.getElementById("localVideo").srcObject = localStream;
+
+    peerConnection = new RTCPeerConnection();
+
+    localStream.getTracks().forEach(track=>{
+        peerConnection.addTrack(track, localStream);
+    });
+
+    peerConnection.ontrack = event=>{
+        document.getElementById("remoteVideo").srcObject = event.streams[0];
+    };
+}
+</script>
+    <video id="localVideo" autoplay muted></video>
+<video id="remoteVideo" autoplay></video>
+<button onclick="startCall()">Arama Başlat</button>
+    .view{
+    transition: all .3s ease;
+    opacity:0;
+    transform:translateX(20px);
+}
+.view.active{
+    opacity:1;
+    transform:translateX(0);
+}
