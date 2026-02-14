@@ -1,83 +1,43 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>VigoChatt</title>
-  <style>
-    body{
-      margin:0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto;
-      background:#f2f2f2;
-    }
-    .top{
-      padding:15px;
-      background:#2b6cff;
-      color:white;
-      font-weight:bold;
-      text-align:center;
-    }
-    .box{
-      padding:15px;
-      background:white;
-    }
-    input{
-      width:100%;
-      padding:10px;
-      margin-bottom:10px;
-      border:1px solid #ddd;
-      border-radius:6px;
-    }
-    button{
-      width:100%;
-      padding:12px;
-      background:#2b6cff;
-      color:white;
-      border:none;
-      border-radius:6px;
-      font-weight:bold;
-    }
-    #messages{
-      padding:10px;
-      height:50vh;
-      overflow:auto;
-      background:#fff;
-    }
-    .msg{
-      padding:8px 10px;
-      margin:5px 0;
-      border-radius:8px;
-      background:#eee;
-      font-size:14px;
-    }
-    .me{
-      background:#2b6cff;
-      color:white;
-      text-align:right;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>VigoChatt</title>
+
+<style>
+body{margin:0;font-family:system-ui;background:#f2f2f2;}
+.top{padding:15px;background:#2b6cff;color:#fff;text-align:center;font-weight:bold;}
+.box{padding:15px;background:#fff;}
+input{width:100%;padding:10px;margin-bottom:10px;border:1px solid #ddd;border-radius:6px;}
+button{width:100%;padding:12px;background:#2b6cff;color:#fff;border:none;border-radius:6px;font-weight:bold;}
+#messages{height:50vh;overflow:auto;padding:10px;background:#fff;}
+.msg{padding:8px 10px;margin:5px 0;border-radius:8px;background:#eee;font-size:14px;}
+.me{background:#2b6cff;color:#fff;text-align:right;}
+</style>
 </head>
+
 <body>
 
 <div class="top">VigoChatt</div>
 
 <div class="box">
-  <input id="nick" placeholder="Takma ad">
-  <input id="room" placeholder="Oda adı (örn: genel)" value="genel">
-  <button onclick="joinRoom()">Odaya Gir</button>
+<input id="name" placeholder="Takma ad"/>
+<input id="room" placeholder="Oda adı (örn: genel)"/>
+<button onclick="join()">Sohbete Gir</button>
 </div>
 
+<div id="chat" style="display:none;">
 <div id="messages"></div>
-
 <div class="box">
-  <input id="msg" placeholder="Mesaj yaz...">
-  <button onclick="sendMsg()">Gönder</button>
+<input id="messageInput" placeholder="Mesaj yaz..."/>
+<button onclick="sendMessage()">Gönder</button>
+</div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-import { getFirestore, collection, addDoc, serverTimestamp, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+import { getFirestore, collection, addDoc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyB1qovN4BNfaFlvE-KvURhX31AshxLuc0",
@@ -89,56 +49,47 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
 const db = getFirestore(app);
 
-let uid = null;
-let currentRoom = "genel";
-let unsubscribe = null;
+let currentRoom = "";
+let currentName = "";
 
-signInAnonymously(auth);
+window.join = function(){
+  currentName = document.getElementById("name").value.trim();
+  currentRoom = document.getElementById("room").value.trim();
+  if(!currentName || !currentRoom) return alert("Bilgileri doldur");
 
-onAuthStateChanged(auth, user=>{
-  if(user){
-    uid = user.uid;
-  }
-});
+  document.querySelector(".box").style.display="none";
+  document.getElementById("chat").style.display="block";
 
-window.joinRoom = function(){
-  const room = document.getElementById("room").value.trim();
-  if(!room) return;
-  currentRoom = room;
-
-  if(unsubscribe) unsubscribe();
-
-  const q = query(collection(db,"rooms",room,"messages"), orderBy("createdAt"));
-  unsubscribe = onSnapshot(q, snapshot=>{
-    const box = document.getElementById("messages");
-    box.innerHTML = "";
+  const q = query(collection(db,"rooms",currentRoom,"messages"), orderBy("time"));
+  onSnapshot(q,(snapshot)=>{
+    const messagesDiv = document.getElementById("messages");
+    messagesDiv.innerHTML="";
     snapshot.forEach(doc=>{
-      const m = doc.data();
+      const data = doc.data();
       const div = document.createElement("div");
-      div.className = "msg" + (m.uid===uid ? " me":"");
-      div.innerText = m.nick + ": " + m.text;
-      box.appendChild(div);
+      div.className="msg";
+      if(data.name===currentName) div.classList.add("me");
+      div.innerText = data.name + ": " + data.text;
+      messagesDiv.appendChild(div);
     });
-    box.scrollTop = box.scrollHeight;
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
   });
 }
 
-window.sendMsg = async function(){
-  const text = document.getElementById("msg").value.trim();
-  const nick = document.getElementById("nick").value.trim() || "Anon";
+window.sendMessage = async function(){
+  const input = document.getElementById("messageInput");
+  const text = input.value.trim();
   if(!text) return;
 
   await addDoc(collection(db,"rooms",currentRoom,"messages"),{
-    text:text,
-    nick:nick,
-    uid:uid,
-    createdAt: serverTimestamp()
+    name: currentName,
+    text: text,
+    time: Date.now()
   });
 
-  document.getElementById("msg").value="";
+  input.value="";
 }
 </script>
 
