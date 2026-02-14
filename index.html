@@ -390,7 +390,7 @@
     const esc = (s)=> String(s ?? "").replace(/[&<>"']/g, c => ({
       "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
     }[c]));
-
+let auth = null;   //
     function setView(id){
       ["auth","chats","status","settings"].forEach(v=>{
         $("#view-"+v).classList.toggle("active", v===id);
@@ -427,20 +427,7 @@
       $("#mustLoginSettings").textContent = msg;
       $("#logoutBtn").style.display = state.uid ? "inline-block" : "none";
     }
-// ---- Firebase init (compat)
-    function initFirebaseWhenReady(){
-      try{
-        // 1) Firebase uygulamasını başlat
-        firebase.initializeApp({
-          apiKey: "AIzaSyA3--Xy1WrM6WlxurXXr4i5qwMZiafXN4k",
-          authDomain: "vigochat-58144.firebaseapp.com",
-          databaseURL: "https://vigochat-58144-default-rtdb.europe-west1.firebasedatabase.app",
-          projectId: "vigochat-58144",
-          storageBucket: "vigochat-58144.firebasestorage.app",
-          messagingSenderId: "384136632816",
-          appId: "1:384136632816:web:2bb6d6942680a2e2e6e535",
-          measurementId: "G-62VZ3906GS"
-        });
+
 
         $("#fbState").textContent = "OK ✅";
         $("#fbState").className = "ok";
@@ -459,7 +446,75 @@
             renderMustLoginHints();
             return;
           }
+// ---- Firebase init (compat)
+    function initFirebaseWhenReady(){
+      try{
+        // 1) Firebase uygulamasını başlat
+        firebase.initializeApp({
+          apiKey: "AIzaSyA3--Xy1WrM6WlxurXXr4i5qwMZiafXN4k",
+          authDomain: "vigochat-58144.firebaseapp.com",
+          databaseURL: "https://vigochat-58144-default-rtdb.europe-west1.firebasedatabase.app",
+          projectId: "vigochat-58144",
+          storageBucket: "vigochat-58144.firebasestorage.app",
+          messagingSenderId: "384136632816",
+          appId: "1:384136632816:web:2bb6d6942680a2e2e6e535",
+          measurementId: "G-62VZ3906GS"
+        });
 
+        // Firebase OK durumunu göster
+        $("#fbState").textContent = "OK ✅";
+        $("#fbState").className = "ok";
+        $("#sub").textContent = "Hazır";
+
+        // 2) Auth + Firestore referansları (GLOBAL auth kullanıyoruz)
+        auth = firebase.auth();
+        state.db = firebase.firestore();
+
+        // 3) Kullanıcı giriş durumu
+        auth.onAuthStateChanged(async (user)=>{
+          if(!user){
+            state.uid = null;
+            state.email = "";
+            $("#sub").textContent = "Giriş gerekli";
+            renderMustLoginHints();
+            return;
+          }
+
+          state.uid = user.uid;
+          state.email = user.email || "";
+          $("#sub").textContent = "Online ✅";
+          renderMustLoginHints();
+          await ensureUserDoc();
+          setView("chats");
+        });
+
+        // 4) Buton / event bağlama
+        $("#loginBtn").addEventListener("click", login);
+        $("#signupBtn").addEventListener("click", signup);
+        $("#logoutBtn").addEventListener("click", ()=> auth.signOut());
+
+        $("#saveProfile").addEventListener("click", saveProfile);
+        $("#saveAbout").addEventListener("click", saveAbout);
+        $("#startBtn").addEventListener("click", startChat);
+
+        $("#msg").addEventListener("input", (e)=> autoGrow(e.target));
+        $("#send").addEventListener("click", sendMsg);
+        $("#msg").addEventListener("keydown", (e)=>{
+          if(e.key==="Enter" && !e.shiftKey){
+            e.preventDefault();
+            sendMsg();
+          }
+        });
+
+        $("#back").addEventListener("click", closeChat);
+
+      }catch(e){
+        console.log(e);
+        $("#fbState").textContent = "HATA ❌";
+        $("#fbState").className = "danger";
+        $("#authErr").textContent = "Firebase başlatılamadı: " + (e.message || e);
+      }
+    }
           state.uid = user.uid;
           state.email = user.email || "";
           $("#sub").textContent = "Online ✅";
