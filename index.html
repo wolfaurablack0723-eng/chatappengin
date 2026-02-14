@@ -3,202 +3,247 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VigoChat Pro</title>
-
-<!-- Firebase CDN -->
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<title>VigoChatt</title>
 
 <style>
 :root{
-  --bg:#f4f6fb;
-  --card:#ffffff;
-  --text:#111;
-  --accent:#2b6cff;
+--bg:#0f172a;
+--card:#1e293b;
+--text:#ffffff;
+--accent:#3b82f6;
 }
-body.dark{
-  --bg:#0f172a;
-  --card:#1e293b;
-  --text:#fff;
+body.light{
+--bg:#f1f5f9;
+--card:#ffffff;
+--text:#0f172a;
+--accent:#2563eb;
 }
 body{
-  margin:0;
-  font-family:Arial;
-  background:var(--bg);
-  color:var(--text);
+margin:0;
+font-family:Arial;
+background:var(--bg);
+color:var(--text);
 }
 .container{
-  max-width:500px;
-  margin:auto;
-  padding:20px;
+max-width:500px;
+margin:auto;
+padding:15px;
 }
 .card{
-  background:var(--card);
-  padding:20px;
-  border-radius:15px;
-  margin-bottom:15px;
+background:var(--card);
+padding:15px;
+border-radius:15px;
+margin-bottom:15px;
 }
-input, textarea{
-  width:100%;
-  padding:12px;
-  margin:6px 0;
-  border-radius:10px;
-  border:1px solid #ccc;
+input,textarea{
+width:100%;
+padding:12px;
+border-radius:10px;
+border:none;
+margin-bottom:10px;
 }
 button{
-  width:100%;
-  padding:12px;
-  margin-top:6px;
-  border:none;
-  border-radius:10px;
-  background:var(--accent);
-  color:white;
-  font-weight:bold;
-  cursor:pointer;
+width:100%;
+padding:12px;
+border:none;
+border-radius:10px;
+background:var(--accent);
+color:#fff;
+font-weight:bold;
+cursor:pointer;
+margin-bottom:10px;
 }
-button:active{opacity:0.8}
-.messages{
-  height:250px;
-  overflow:auto;
-  margin-bottom:10px;
+.nav{
+position:fixed;
+bottom:0;
+left:0;
+right:0;
+background:var(--card);
+display:flex;
+justify-content:space-around;
+padding:10px;
 }
-.msg{
-  padding:8px 12px;
-  margin:5px 0;
-  border-radius:12px;
-  background:#e5e7eb;
+.nav button{
+width:auto;
+flex:1;
+margin:0 5px;
 }
-.me{
-  background:#93c5fd;
-  text-align:right;
+.hidden{display:none;}
+.user{
+padding:10px;
+background:#334155;
+margin-bottom:8px;
+border-radius:8px;
+cursor:pointer;
 }
-.topbar{
-  display:flex;
-  justify-content:space-between;
-  margin-bottom:10px;
+.message{
+padding:8px;
+margin:5px 0;
+border-radius:8px;
 }
-.error{
-  color:red;
-  font-size:14px;
-}
-.hidden{display:none}
+.me{background:#3b82f6;text-align:right;}
+.other{background:#475569;}
 </style>
 </head>
-
 <body>
 
 <div class="container">
 
-  <!-- AUTH -->
-  <div id="authBox" class="card">
-    <h2>Giriş / Kayıt</h2>
-    <input type="email" id="email" placeholder="Email">
-    <input type="password" id="password" placeholder="Şifre">
-    <button onclick="login()">Giriş Yap</button>
-    <button onclick="register()">Kayıt Ol</button>
-    <div id="authError" class="error"></div>
-  </div>
+<div id="authSection" class="card">
+<h2>Giriş / Kayıt</h2>
+<input id="email" placeholder="Email">
+<input id="password" type="password" placeholder="Şifre">
+<button onclick="register()">Kayıt Ol</button>
+<button onclick="login()">Giriş Yap</button>
+<p id="authError" style="color:red;"></p>
+</div>
 
-  <!-- CHAT -->
-  <div id="chatBox" class="card hidden">
-    <div class="topbar">
-      <strong>VigoChat</strong>
-      <div>
-        <button onclick="toggleTheme()" style="width:auto;padding:6px 10px">Tema</button>
-        <button onclick="logout()" style="width:auto;padding:6px 10px">Çıkış</button>
-      </div>
-    </div>
+<div id="appSection" class="hidden">
 
-    <div id="messages" class="messages"></div>
-    <textarea id="messageInput" placeholder="Mesaj yaz..."></textarea>
-    <button onclick="sendMessage()">Gönder</button>
-  </div>
+<div class="card">
+<h2>VigoChatt</h2>
+<button onclick="toggleTheme()">Tema</button>
+<button onclick="logout()">Çıkış</button>
+</div>
+
+<div id="usersSection" class="card">
+<h3>Kişiler</h3>
+<div id="usersList"></div>
+</div>
+
+<div id="chatSection" class="card hidden">
+<h3 id="chatTitle">Sohbet</h3>
+<div id="messages"></div>
+<textarea id="messageInput" placeholder="Mesaj yaz"></textarea>
+<button onclick="sendMessage()">Gönder</button>
+</div>
 
 </div>
 
-<script>
+</div>
+
+<div class="nav hidden" id="navBar">
+<button onclick="showUsers()">Kişiler</button>
+<button onclick="showChat()">Sohbet</button>
+</div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getDatabase, ref, set, onValue, push } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
 const firebaseConfig = {
-  apiKey: "AIzaSyA3--Xy1WrM6WlxurXXr4i5qwMZiafXN4k",
-  authDomain: "vigochat-58144.firebaseapp.com",
-  databaseURL: "https://vigochat-58144-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "vigochat-58144",
-  storageBucket: "vigochat-58144.firebasestorage.app",
-  messagingSenderId: "384136632816",
-  appId: "1:384136632816:web:2bb6d6942680a2e2e6e535"
+apiKey: "AIzaSyA3--Xy1WrM6WlxurXXr4i5qwMZiafXN4k",
+authDomain: "vigochat-58144.firebaseapp.com",
+databaseURL: "https://vigochat-58144-default-rtdb.europe-west1.firebasedatabase.app",
+projectId: "vigochat-58144",
+storageBucket: "vigochat-58144.appspot.com",
+messagingSenderId: "384136632816",
+appId: "1:384136632816:web:2bb6d6942680a2e2e6e535"
 };
 
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.database();
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
 
-const authBox = document.getElementById("authBox");
-const chatBox = document.getElementById("chatBox");
-const messagesDiv = document.getElementById("messages");
+let currentUser;
+let currentChatId;
 
-auth.onAuthStateChanged(user=>{
-  if(user){
-    authBox.classList.add("hidden");
-    chatBox.classList.remove("hidden");
-    loadMessages();
-  }else{
-    authBox.classList.remove("hidden");
-    chatBox.classList.add("hidden");
-  }
+window.register = async function(){
+try{
+const userCred = await createUserWithEmailAndPassword(auth,email.value,password.value);
+await set(ref(db,'users/'+userCred.user.uid),{
+email:email.value
+});
+}catch(err){
+authError.innerText=err.message;
+}
+}
+
+window.login = async function(){
+try{
+await signInWithEmailAndPassword(auth,email.value,password.value);
+}catch(err){
+authError.innerText=err.message;
+}
+}
+
+window.logout = function(){
+signOut(auth);
+}
+
+onAuthStateChanged(auth,user=>{
+if(user){
+currentUser=user;
+authSection.classList.add("hidden");
+appSection.classList.remove("hidden");
+navBar.classList.remove("hidden");
+loadUsers();
+}else{
+authSection.classList.remove("hidden");
+appSection.classList.add("hidden");
+navBar.classList.add("hidden");
+}
 });
 
-function register(){
-  const email = emailInput.value;
-  const pass = password.value;
-  auth.createUserWithEmailAndPassword(email,pass)
-  .catch(e=> authError.innerText = e.message);
+function loadUsers(){
+const usersRef=ref(db,'users');
+onValue(usersRef,snapshot=>{
+usersList.innerHTML="";
+snapshot.forEach(child=>{
+if(child.key!==currentUser.uid){
+const div=document.createElement("div");
+div.className="user";
+div.innerText=child.val().email;
+div.onclick=()=>startChat(child.key,child.val().email);
+usersList.appendChild(div);
+}
+});
+});
 }
 
-function login(){
-  const email = emailInput.value;
-  const pass = password.value;
-  auth.signInWithEmailAndPassword(email,pass)
-  .catch(e=> authError.innerText = e.message);
+function startChat(uid,email){
+currentChatId=[currentUser.uid,uid].sort().join("_");
+chatTitle.innerText=email;
+chatSection.classList.remove("hidden");
+const messagesRef=ref(db,'messages/'+currentChatId);
+onValue(messagesRef,snapshot=>{
+messages.innerHTML="";
+snapshot.forEach(child=>{
+const msg=child.val();
+const div=document.createElement("div");
+div.className="message "+(msg.sender===currentUser.uid?"me":"other");
+div.innerText=msg.text;
+messages.appendChild(div);
+});
+});
 }
 
-function logout(){
-  auth.signOut();
+window.sendMessage=function(){
+if(!messageInput.value)return;
+push(ref(db,'messages/'+currentChatId),{
+text:messageInput.value,
+sender:currentUser.uid,
+timestamp:Date.now()
+});
+messageInput.value="";
 }
 
-function sendMessage(){
-  const text = messageInput.value.trim();
-  if(!text) return;
-  const user = auth.currentUser;
-  db.ref("messages").push({
-    uid:user.uid,
-    email:user.email,
-    text:text,
-    time:Date.now()
-  });
-  messageInput.value="";
+window.toggleTheme=function(){
+document.body.classList.toggle("light");
 }
 
-function loadMessages(){
-  db.ref("messages").limitToLast(50).on("value",snapshot=>{
-    messagesDiv.innerHTML="";
-    snapshot.forEach(child=>{
-      const data = child.val();
-      const div = document.createElement("div");
-      div.className="msg";
-      if(data.uid===auth.currentUser.uid){
-        div.classList.add("me");
-      }
-      div.innerText=data.text;
-      messagesDiv.appendChild(div);
-    });
-    messagesDiv.scrollTop=messagesDiv.scrollHeight;
-  });
+window.showUsers=function(){
+usersSection.classList.remove("hidden");
+chatSection.classList.add("hidden");
 }
 
-function toggleTheme(){
-  document.body.classList.toggle("dark");
+window.showChat=function(){
+chatSection.classList.remove("hidden");
+usersSection.classList.add("hidden");
 }
+
 </script>
-
 </body>
 </html>
