@@ -6,21 +6,19 @@
   <title>Vigo Chat</title>
   <style>
     :root{
-      --bg1:#fff7ee;
-      --bg2:#f7efe6;
-      --card: rgba(255,255,255,.78);
-      --stroke: rgba(0,0,0,.08);
-      --text:#151515;
+      --bg1:#f7efe4;
+      --bg2:#f3e7d8;
+      --card: rgba(255,255,255,.75);
+      --stroke: rgba(0,0,0,.07);
+      --text:#141414;
       --muted: rgba(0,0,0,.55);
       --accent:#2a7cff;
       --accent2:#ffb347;
-      --shadow: 0 10px 30px rgba(0,0,0,.07);
-      --radius: 18px;
-
-      --safe-top: env(safe-area-inset-top, 0px);
+      --shadow: 0 10px 30px rgba(0,0,0,.08);
+      --radius:18px;
       --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --safe-top: env(safe-area-inset-top, 0px);
     }
-
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
@@ -28,339 +26,247 @@
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
       color:var(--text);
       background:
-        radial-gradient(900px 600px at 60% 10%, rgba(255,255,255,.9), transparent 60%),
-        radial-gradient(900px 600px at 10% 90%, rgba(255,255,255,.7), transparent 60%),
+        radial-gradient(900px 600px at 20% 5%, rgba(255,255,255,.9), transparent 60%),
+        radial-gradient(900px 600px at 90% 15%, rgba(255,255,255,.75), transparent 60%),
         linear-gradient(180deg, var(--bg1), var(--bg2));
-      overflow:hidden;
     }
 
     .app{
-      height:100%;
       max-width:520px;
       margin:0 auto;
+      height:100vh;
       display:flex;
       flex-direction:column;
-      padding-top: calc(10px + var(--safe-top));
-      padding-bottom: calc(86px + var(--safe-bottom));
+      padding-top:calc(10px + var(--safe-top));
+      padding-bottom:calc(86px + var(--safe-bottom));
     }
 
-    /* Header */
     header{
-      padding: 10px 14px 8px;
+      padding:14px 16px 10px;
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap:10px;
+      gap:12px;
     }
-    .title{
-      display:flex;
-      flex-direction:column;
-      gap:2px;
-      min-width:0;
-    }
-    .title h1{
-      margin:0;
-      font-size:20px;
-      letter-spacing:.2px;
-      line-height:1.1;
-    }
-    .title small{
-      color:var(--muted);
-      font-size:12px;
-    }
+    header .title{display:flex; flex-direction:column; gap:2px; min-width:0}
+    header h1{margin:0; font-size:22px; letter-spacing:.2px}
+    header small{color:var(--muted)}
     .pill{
       border:1px solid var(--stroke);
-      background: rgba(255,255,255,.55);
-      padding: 9px 12px;
-      border-radius: 999px;
-      display:flex;
-      align-items:center;
-      gap:8px;
+      background:rgba(255,255,255,.55);
+      padding:9px 12px;
+      border-radius:999px;
       cursor:pointer;
       user-select:none;
       box-shadow: 0 6px 18px rgba(0,0,0,.05);
-      font-weight:600;
+      display:flex;
+      align-items:center;
+      gap:8px;
+      font-weight:700;
     }
     .pill:active{transform:scale(.98)}
-    .pill .dot{
-      width:10px;height:10px;border-radius:50%;
-      background: #31c46f;
-      box-shadow: 0 0 0 3px rgba(49,196,111,.15);
-    }
 
-    /* Views */
-    .view{
-      flex:1;
-      overflow:auto;
-      padding: 6px 14px 14px;
-      display:none;
-      -webkit-overflow-scrolling: touch;
-    }
+    .views{flex:1; overflow:hidden; padding:0 12px;}
+    .view{display:none; height:100%; overflow:auto; padding:6px 4px 10px;}
     .view.active{display:block}
 
     .card{
+      background:var(--card);
       border:1px solid var(--stroke);
-      background: var(--card);
-      border-radius: var(--radius);
+      border-radius:var(--radius);
       box-shadow: var(--shadow);
-      padding: 12px;
-      margin-bottom: 12px;
+      padding:14px;
+      margin-bottom:12px;
     }
+    .card h3{margin:0 0 6px; font-size:18px}
+    .muted{color:var(--muted)}
+
+    .list{display:flex; flex-direction:column; gap:10px; margin-top:8px}
     .row{
       display:flex;
       align-items:center;
-      justify-content:space-between;
-      gap:10px;
-    }
-    .muted{color:var(--muted)}
-    .btn{
-      border:1px solid var(--stroke);
-      background: rgba(255,255,255,.75);
-      border-radius: 14px;
-      padding: 10px 12px;
-      font-weight:700;
-      cursor:pointer;
-      user-select:none;
-      box-shadow: 0 6px 18px rgba(0,0,0,.05);
-    }
-    .btn:active{transform:scale(.98)}
-    .btn.primary{
-      border-color: rgba(42,124,255,.25);
-      background: linear-gradient(180deg, rgba(42,124,255,.16), rgba(255,255,255,.82));
-    }
-    .btn.orange{
-      border-color: rgba(255,179,71,.35);
-      background: linear-gradient(180deg, rgba(255,179,71,.20), rgba(255,255,255,.82));
-    }
-
-    .list{display:flex; flex-direction:column; gap:10px}
-    .item{
-      border:1px solid var(--stroke);
-      background: rgba(255,255,255,.62);
-      border-radius: 18px;
-      padding: 12px;
-      display:flex;
-      align-items:center;
       gap:12px;
+      padding:12px;
+      border-radius:16px;
+      border:1px solid var(--stroke);
+      background:rgba(255,255,255,.55);
       cursor:pointer;
       user-select:none;
     }
-    .item:active{transform:scale(.99)}
+    .row:active{transform:scale(.99)}
     .avatar{
-      width:42px;height:42px;border-radius: 14px;
+      width:44px; height:44px; border-radius:14px;
       display:grid; place-items:center;
-      font-weight:900;
-      color: #1f4aa3;
-      background: rgba(42,124,255,.12);
+      background:rgba(42,124,255,.12);
       border:1px solid rgba(42,124,255,.18);
+      font-weight:900;
+      color:var(--accent);
       flex:0 0 auto;
     }
-    .item .meta{
-      min-width:0; flex:1;
-      display:flex; flex-direction:column; gap:4px;
-    }
-    .item .meta .name{font-weight:900}
-    .item .meta .preview{
-      font-size:13px;
-      color:var(--muted);
-      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-    }
-    .badge{
-      font-size:12px;
-      padding:6px 10px;
-      border-radius:999px;
-      border:1px solid var(--stroke);
-      background: rgba(255,255,255,.7);
-      color: var(--muted);
-      flex:0 0 auto;
-    }
+    .row .meta{min-width:0; flex:1}
+    .row .meta .name{font-weight:900}
+    .row .meta .sub{color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+    .row .time{color:var(--muted); font-size:12px; flex:0 0 auto}
 
     /* Bottom nav */
     .nav{
-      position: fixed;
+      position:fixed;
       left:50%;
-      transform: translateX(-50%);
-      bottom: 10px;
-      bottom: calc(10px + var(--safe-bottom));
-      width: min(520px, calc(100% - 24px));
+      transform:translateX(-50%);
+      bottom:calc(12px + var(--safe-bottom));
+      width:min(520px, calc(100vw - 24px));
+      background:rgba(255,255,255,.65);
       border:1px solid var(--stroke);
-      background: rgba(255,255,255,.78);
-      backdrop-filter: blur(10px);
-      border-radius: 24px;
       box-shadow: var(--shadow);
+      border-radius:22px;
       display:flex;
-      padding: 8px;
-      gap: 6px;
-      z-index: 50;
+      padding:8px;
+      gap:8px;
+      backdrop-filter: blur(10px);
     }
-    .tab{
+    .nav button{
       flex:1;
-      border-radius: 18px;
-      padding: 10px 8px;
+      border:0;
+      background:transparent;
+      padding:10px 10px;
+      border-radius:18px;
+      cursor:pointer;
+      font-weight:800;
+      color:var(--muted);
       display:flex;
       flex-direction:column;
       align-items:center;
-      gap:4px;
-      cursor:pointer;
+      gap:6px;
       user-select:none;
-      color: var(--muted);
-      font-weight:800;
-      font-size:12px;
     }
-    .tab.active{
-      color: var(--text);
-      background: linear-gradient(180deg, rgba(42,124,255,.10), rgba(255,255,255,.65));
-      border: 1px solid rgba(42,124,255,.18);
+    .nav button .ico{font-size:18px; line-height:1}
+    .nav button.active{
+      background:rgba(42,124,255,.14);
+      color:var(--accent);
+      border:1px solid rgba(42,124,255,.22);
     }
-    .ico{font-size:18px; line-height:1}
+    .nav button:active{transform:scale(.98)}
 
     /* Chat screen */
-    .chatHeader{
-      position: sticky;
-      top: 0;
-      z-index: 5;
-      padding: 10px 12px;
-      margin: 0 0 10px;
+    .chatTop{
+      display:flex; align-items:center; gap:10px;
+      padding:10px 12px;
+      border-radius:18px;
       border:1px solid var(--stroke);
-      background: rgba(255,255,255,.84);
-      backdrop-filter: blur(8px);
-      border-radius: 18px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-    }
-    .chatHeader .left{
-      display:flex; align-items:center; gap:10px; min-width:0;
+      background:rgba(255,255,255,.55);
+      margin-bottom:10px;
+      position:sticky; top:0;
+      backdrop-filter: blur(10px);
+      z-index:5;
     }
     .backBtn{
-      width:40px;height:40px;
-      border-radius: 14px;
+      border:0;
+      background:rgba(0,0,0,.06);
       border:1px solid var(--stroke);
-      background: rgba(255,255,255,.75);
-      display:grid; place-items:center;
+      border-radius:14px;
+      padding:10px 12px;
       cursor:pointer;
-      user-select:none;
+      font-weight:900;
     }
     .backBtn:active{transform:scale(.98)}
-    .chatTitle{min-width:0}
-    .chatTitle .n{font-weight:900}
-    .chatTitle .s{font-size:12px;color:var(--muted)}
-
-    .bubbles{
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-      padding-bottom: 84px; /* input bar space */
-    }
-    .bubble{
-      max-width: 78%;
-      padding: 10px 12px;
-      border-radius: 18px;
+    .chatName{font-weight:900}
+    .chatSub{font-size:12px; color:var(--muted)}
+    .bubbleWrap{display:flex; flex-direction:column; gap:8px; padding:6px 2px 12px}
+    .b{
+      max-width:82%;
+      padding:10px 12px;
+      border-radius:18px;
       border:1px solid var(--stroke);
+      background:rgba(255,255,255,.72);
       box-shadow: 0 6px 18px rgba(0,0,0,.05);
-      font-size: 14px;
-      line-height: 1.35;
-      background: rgba(255,255,255,.75);
-      word-wrap: break-word;
     }
-    .bubble.me{
+    .b.me{
       margin-left:auto;
-      border-color: rgba(42,124,255,.18);
-      background: linear-gradient(180deg, rgba(42,124,255,.14), rgba(255,255,255,.78));
+      background:rgba(42,124,255,.14);
+      border-color:rgba(42,124,255,.18);
     }
-    .bubble .time{
-      margin-top:6px;
-      font-size:11px;
-      color: var(--muted);
-      text-align:right;
-    }
+    .b .t{font-size:14px; line-height:1.35}
+    .b .s{margin-top:4px; font-size:11px; color:var(--muted)}
 
     .composer{
-      position: fixed;
-      left:50%;
-      transform: translateX(-50%);
-      bottom: calc(92px + var(--safe-bottom));
-      width: min(520px, calc(100% - 24px));
-      border:1px solid var(--stroke);
-      background: rgba(255,255,255,.84);
-      backdrop-filter: blur(10px);
-      border-radius: 22px;
-      box-shadow: var(--shadow);
-      padding: 8px;
-      display:none;
-      gap:8px;
-      z-index: 60;
+      position:sticky;
+      bottom:0;
+      padding:10px 0 2px;
+      background:linear-gradient(180deg, transparent, rgba(243,231,216,.85) 35%, rgba(243,231,216,1));
+      z-index:6;
     }
-    .composer.active{display:flex}
-    .composer input{
+    .composeRow{
+      display:flex; gap:8px; align-items:center;
+      padding:10px;
+      border-radius:18px;
+      border:1px solid var(--stroke);
+      background:rgba(255,255,255,.65);
+      backdrop-filter: blur(10px);
+    }
+    .composeRow input{
       flex:1;
-      border:none;
+      border:0;
       outline:none;
+      background:transparent;
       font-size:15px;
-      padding: 10px 12px;
-      border-radius: 16px;
-      background: rgba(255,255,255,.65);
-      border:1px solid rgba(0,0,0,.06);
+      padding:8px;
     }
     .sendBtn{
-      width:48px;height:48px;
-      border-radius: 16px;
-      border:1px solid rgba(42,124,255,.22);
-      background: linear-gradient(180deg, rgba(42,124,255,.22), rgba(255,255,255,.85));
+      border:0;
       cursor:pointer;
-      user-select:none;
       font-weight:900;
-      display:grid;
-      place-items:center;
+      padding:10px 12px;
+      border-radius:14px;
+      background:rgba(42,124,255,.16);
+      color:var(--accent);
+      border:1px solid rgba(42,124,255,.22);
     }
     .sendBtn:active{transform:scale(.98)}
 
     /* Modal */
-    .modalWrap{
-      position: fixed;
-      inset:0;
-      background: rgba(0,0,0,.25);
+    .modalBg{
+      position:fixed; inset:0;
+      background:rgba(0,0,0,.28);
       display:none;
-      align-items:flex-end;
-      justify-content:center;
-      padding: 14px;
-      z-index: 999;
+      align-items:center; justify-content:center;
+      padding:18px;
+      z-index:50;
     }
-    .modalWrap.show{display:flex}
-    .sheet{
+    .modalBg.show{display:flex}
+    .modal{
       width:min(520px, 100%);
+      background:rgba(255,255,255,.92);
       border:1px solid var(--stroke);
-      background: rgba(255,255,255,.92);
-      backdrop-filter: blur(10px);
-      border-radius: 22px;
-      box-shadow: 0 18px 50px rgba(0,0,0,.18);
-      padding: 12px;
+      border-radius:22px;
+      box-shadow: var(--shadow);
+      padding:14px;
     }
-    .sheet h3{margin:6px 4px 8px; font-size:16px}
-    .sheet .field{
-      display:flex; flex-direction:column; gap:6px;
-      margin: 10px 4px;
-    }
-    .sheet label{font-size:12px;color:var(--muted); font-weight:700}
-    .sheet input{
+    .modal h3{margin:0 0 10px}
+    .modal input{
+      width:100%;
       border:1px solid var(--stroke);
-      border-radius: 16px;
-      padding: 12px;
-      font-size: 15px;
-      outline: none;
-      background: rgba(255,255,255,.8);
+      border-radius:14px;
+      padding:12px;
+      font-size:15px;
+      outline:none;
+      background:rgba(255,255,255,.8);
     }
-    .sheet .actions{
-      display:flex;
-      gap:10px;
-      margin-top: 10px;
-      padding: 4px;
+    .modalActions{display:flex; gap:10px; margin-top:12px}
+    .btn{
+      flex:1;
+      border:1px solid var(--stroke);
+      background:rgba(0,0,0,.06);
+      border-radius:14px;
+      padding:12px;
+      font-weight:900;
+      cursor:pointer;
     }
-    .sheet .actions .btn{flex:1}
-    .hint{
-      font-size:12px;color:var(--muted); margin: 8px 6px 0;
+    .btn.primary{
+      background:rgba(42,124,255,.16);
+      border-color:rgba(42,124,255,.22);
+      color:var(--accent);
     }
+    .btn:active{transform:scale(.99)}
   </style>
 </head>
 
@@ -371,300 +277,376 @@
         <h1 id="headerTitle">Mesajlar</h1>
         <small id="headerSub">Basit mesajlaşma</small>
       </div>
-      <div class="pill" id="headerAction">
-        <span class="dot"></span>
-        <span id="headerActionText">Yeni</span>
-        <span style="opacity:.6">＋</span>
+      <div class="pill" id="newBtn" title="Yeni sohbet">
+        <span style="font-size:18px">＋</span> Yeni
       </div>
     </header>
 
-    <!-- ARAMALAR -->
-    <section class="view" id="view-calls" aria-label="Aramalar">
-      <div class="card">
-        <div class="row">
-          <div>
-            <div style="font-weight:900">Aramalar</div>
-            <div class="muted" style="font-size:13px">Son aramalar burada görünecek (demo).</div>
-          </div>
-          <button class="btn orange" id="btnAddCall">+ Arama</button>
-        </div>
-      </div>
-      <div class="list" id="callsList"></div>
-    </section>
-
-    <!-- DURUM -->
-    <section class="view" id="view-status" aria-label="Durum">
-      <div class="card">
-        <div class="row">
-          <div>
-            <div style="font-weight:900">Durum</div>
-            <div class="muted" style="font-size:13px">Buraya hikaye/durum mantığı eklenir (demo).</div>
-          </div>
-          <button class="btn orange" id="btnAddStatus">+ Durum</button>
-        </div>
-      </div>
-      <div class="list" id="statusList"></div>
-    </section>
-
-    <!-- MESAJLAR -->
-    <section class="view active" id="view-chats" aria-label="Mesajlar">
-      <div class="card">
-        <div style="font-weight:900">Mesajlar</div>
-        <div class="muted" style="font-size:13px">Bir sohbet seç — mesaj yazıp gönderebilirsin.</div>
-      </div>
-      <div class="list" id="chatList"></div>
-    </section>
-
-    <!-- PROFIL -->
-    <section class="view" id="view-profile" aria-label="Profil">
-      <div class="card">
-        <div style="font-weight:900">Profil</div>
-        <div class="muted" style="font-size:13px">Basit profil ekranı (demo).</div>
-      </div>
-
-      <div class="list">
-        <div class="item" id="meCard">
-          <div class="avatar">🙂</div>
-          <div class="meta">
-            <div class="name" id="meName">Engin</div>
-            <div class="preview" id="meStatus">Durum: çevrimiçi</div>
-          </div>
-          <div class="badge">Ayarla</div>
-        </div>
-
-        <div class="item" id="settingsCard">
-          <div class="avatar">⚙️</div>
-          <div class="meta">
-            <div class="name">Ayarlar</div>
-            <div class="preview">Bildirim / Gizlilik (demo)</div>
-          </div>
-          <div class="badge">→</div>
-        </div>
-
+    <div class="views">
+      <!-- MESSAGES -->
+      <section class="view active" id="view-messages">
         <div class="card">
-          <div class="row">
-            <div>
-              <div style="font-weight:900">Veriler</div>
-              <div class="muted" style="font-size:13px">Bu demo cihazda saklanır (localStorage).</div>
+          <h3>Mesajlar</h3>
+          <div class="muted">Bir sohbet seç — mesaj yazıp gönderebilirsin.</div>
+        </div>
+        <div class="list" id="chatList"></div>
+      </section>
+
+      <!-- STATUS -->
+      <section class="view" id="view-status">
+        <div class="card">
+          <h3>Durum</h3>
+          <div class="muted">Buraya hikaye/durum mantığı eklenir (demo).</div>
+        </div>
+
+        <div class="list">
+          <div class="row" id="addStatus">
+            <div class="avatar">✨</div>
+            <div class="meta">
+              <div class="name">Senin durumun</div>
+              <div class="sub">Durum ekle</div>
             </div>
-            <button class="btn" id="btnReset">Sıfırla</button>
           </div>
-          <div class="hint">Not: Bu sürüm gerçek kullanıcılarla mesajlaşmaz. Sonraki adımda Firebase eklenir.</div>
-        </div>
-      </div>
-    </section>
 
-    <!-- CHAT (tek sohbet ekranı) -->
-    <section class="view" id="view-chat" aria-label="Sohbet">
-      <div class="chatHeader">
-        <div class="left">
-          <div class="backBtn" id="btnBack">←</div>
-          <div class="chatTitle">
-            <div class="n" id="chatWithName">Kişi</div>
-            <div class="s" id="chatWithSub">Çevrimiçi</div>
+          <div class="row">
+            <div class="avatar" style="background:rgba(255,180,71,.18); border-color:rgba(255,180,71,.25); color:#9a5a00;">📌</div>
+            <div class="meta">
+              <div class="name">Ahmet</div>
+              <div class="sub">“Dışarıdayım”</div>
+            </div>
           </div>
         </div>
-        <div class="badge" id="chatBadge">Sohbet</div>
-      </div>
-      <div class="bubbles" id="bubbleList"></div>
-    </section>
-  </div>
+      </section>
 
-  <!-- Composer -->
-  <div class="composer" id="composer">
-    <input id="msgInput" type="text" placeholder="Mesaj yaz..." autocomplete="off"/>
-    <div class="sendBtn" id="btnSend">➤</div>
-  </div>
+      <!-- CALLS -->
+      <section class="view" id="view-calls">
+        <div class="card">
+          <h3>Aramalar</h3>
+          <div class="muted">Son aramalar burada görünecek (demo).</div>
+        </div>
 
-  <!-- Modal -->
-  <div class="modalWrap" id="modalWrap" role="dialog" aria-modal="true">
-    <div class="sheet">
-      <h3 id="modalTitle">Yeni</h3>
-      <div class="field">
-        <label id="modalLabel">İsim</label>
-        <input id="modalInput" type="text" placeholder="Yaz..."/>
-      </div>
-      <div class="actions">
-        <button class="btn" id="modalCancel">Vazgeç</button>
-        <button class="btn primary" id="modalOk">Kaydet</button>
-      </div>
-      <div class="hint" id="modalHint"></div>
+        <div class="list">
+          <div class="row">
+            <div class="avatar">👤</div>
+            <div class="meta">
+              <div class="name">Ahmet</div>
+              <div class="sub">Bugün 12:05 • Gelen</div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="avatar">👤</div>
+            <div class="meta">
+              <div class="name">Zeynep</div>
+              <div class="sub">Dün 21:18 • Giden</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PROFILE -->
+      <section class="view" id="view-profile">
+        <div class="card">
+          <h3>Profil</h3>
+          <div class="muted">Basit profil ekranı (demo).</div>
+        </div>
+
+        <div class="list">
+          <div class="row">
+            <div class="avatar" style="background:rgba(0,0,0,.06); border-color:rgba(0,0,0,.09); color:#111;">🙂</div>
+            <div class="meta">
+              <div class="name">Engin</div>
+              <div class="sub">Durum: çevrimiçi</div>
+            </div>
+          </div>
+
+          <div class="row" id="openSettings">
+            <div class="avatar" style="background:rgba(0,0,0,.06); border-color:rgba(0,0,0,.09); color:#111;">⚙️</div>
+            <div class="meta">
+              <div class="name">Ayarlar</div>
+              <div class="sub">Bildirim / Gizlilik (demo)</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CHAT SCREEN -->
+      <section class="view" id="view-chat">
+        <div class="chatTop">
+          <button class="backBtn" id="backToList">←</button>
+          <div style="min-width:0">
+            <div class="chatName" id="chatTitle">Sohbet</div>
+            <div class="chatSub" id="chatSubtitle">yazışma</div>
+          </div>
+        </div>
+
+        <div class="bubbleWrap" id="bubbleWrap"></div>
+
+        <div class="composer">
+          <div class="composeRow">
+            <input id="msgInput" placeholder="Mesaj yaz..." autocomplete="off"/>
+            <button class="sendBtn" id="sendBtn">Gönder</button>
+          </div>
+        </div>
+      </section>
     </div>
   </div>
 
   <!-- Bottom Nav -->
-  <nav class="nav" aria-label="Alt Menü">
-    <div class="tab" data-tab="calls">
-      <div class="ico">👥</div>
-      <div>Aramalar</div>
-    </div>
-    <div class="tab" data-tab="status">
-      <div class="ico">❗</div>
-      <div>Durum</div>
-    </div>
-    <div class="tab active" data-tab="chats">
-      <div class="ico">💬</div>
-      <div>Mesajlar</div>
-    </div>
-    <div class="tab" data-tab="profile">
-      <div class="ico">🤔</div>
-      <div>Profil</div>
-    </div>
+  <nav class="nav" id="bottomNav">
+    <button class="active" data-go="messages"><div class="ico">💬</div><div>Mesajlar</div></button>
+    <button data-go="status"><div class="ico">❗</div><div>Durum</div></button>
+    <button data-go="calls"><div class="ico">👥</div><div>Aramalar</div></button>
+    <button data-go="profile"><div class="ico">🤔</div><div>Profil</div></button>
   </nav>
 
-  <script>
-    // ========== STATE ==========
-    const KEY = "vigo_chat_demo_v1";
-    const state = load() || seed();
+  <!-- Modal -->
+  <div class="modalBg" id="modalBg">
+    <div class="modal">
+      <h3>Yeni sohbet</h3>
+      <input id="newName" placeholder="Kişi adı (ör: Ali)"/>
+      <div class="modalActions">
+        <button class="btn" id="cancelModal">Vazgeç</button>
+        <button class="btn primary" id="createChat">Oluştur</button>
+      </div>
+    </div>
+  </div>
 
-    function seed(){
-      return {
-        me: { name: "Engin", status: "çevrimiçi" },
-        chats: [
-          { id:"ahmet", name:"Ahmet", last:"Nasılsın?", online:true, messages:[
-            { by:"them", text:"Nasılsın?", ts: Date.now()-1000*60*40 },
-            { by:"me", text:"İyiyim, sen?", ts: Date.now()-1000*60*38 }
-          ]},
-          { id:"zeynep", name:"Zeynep", last:"Yarın görüşürüz.", online:false, messages:[
-            { by:"them", text:"Yarın görüşürüz.", ts: Date.now()-1000*60*60*5 }
-          ]},
-          { id:"mert", name:"Mert", last:"Tamamdır.", online:true, messages:[
-            { by:"them", text:"Tamamdır.", ts: Date.now()-1000*60*10 }
-          ]},
-        ],
-        calls: [
-          { id: cryptoId(), name:"Ahmet", when: "Bugün 12:05", type:"Gelen" },
-          { id: cryptoId(), name:"Zeynep", when: "Dün 21:18", type:"Giden" },
-        ],
-        statuses: [
-          { id: cryptoId(), name:"Senin durumun", text:"Durum ekle", mine:true },
-          { id: cryptoId(), name:"Ahmet", text:"“Dışarıdayım”", mine:false },
-        ],
-        ui: { activeTab:"chats", activeChatId:null }
-      };
+  <script>
+    // --------- Helpers ----------
+    const $ = (q)=>document.querySelector(q);
+    const $$ = (q)=>Array.from(document.querySelectorAll(q));
+    const storeKey = "vigo_chat_v1";
+
+    function nowTime(){
+      const d = new Date();
+      const hh = String(d.getHours()).padStart(2,"0");
+      const mm = String(d.getMinutes()).padStart(2,"0");
+      return `${hh}:${mm}`;
     }
 
-    function load(){
+    function loadState(){
       try{
-        const raw = localStorage.getItem(KEY);
+        const raw = localStorage.getItem(storeKey);
         if(!raw) return null;
         return JSON.parse(raw);
       }catch(e){ return null; }
     }
-    function save(){
-      localStorage.setItem(KEY, JSON.stringify(state));
-    }
-    function cryptoId(){
-      return Math.random().toString(16).slice(2) + Date.now().toString(16);
+
+    function saveState(s){
+      localStorage.setItem(storeKey, JSON.stringify(s));
     }
 
-    // ========== DOM ==========
-    const headerTitle = document.getElementById("headerTitle");
-    const headerSub   = document.getElementById("headerSub");
-    const headerAction= document.getElementById("headerAction");
-    const headerActionText = document.getElementById("headerActionText");
-
-    const views = {
-      calls: document.getElementById("view-calls"),
-      status: document.getElementById("view-status"),
-      chats: document.getElementById("view-chats"),
-      profile: document.getElementById("view-profile"),
-      chat: document.getElementById("view-chat"),
+    // --------- App State ----------
+    let state = loadState() || {
+      chats: [
+        { id:"ahmet", name:"Ahmet", last:"Nasılsın?", messages:[
+          {me:false, text:"Nasılsın?", time:"12:03"},
+        ]},
+        { id:"zeynep", name:"Zeynep", last:"Yarın görüşürüz.", messages:[
+          {me:false, text:"Yarın görüşürüz.", time:"21:18"},
+        ]},
+        { id:"mert", name:"Mert", last:"Tamamdır.", messages:[
+          {me:false, text:"Tamamdır.", time:"09:40"},
+        ]},
+      ]
     };
 
-    const tabs = Array.from(document.querySelectorAll(".tab"));
+    let currentChatId = null;
 
-    const chatList = document.getElementById("chatList");
-    const callsList = document.getElementById("callsList");
-    const statusList = document.getElementById("statusList");
+    // --------- UI refs ----------
+    const headerTitle = $("#headerTitle");
+    const headerSub = $("#headerSub");
+    const views = {
+      messages: $("#view-messages"),
+      status: $("#view-status"),
+      calls: $("#view-calls"),
+      profile: $("#view-profile"),
+      chat: $("#view-chat"),
+    };
 
-    const composer = document.getElementById("composer");
-    const msgInput = document.getElementById("msgInput");
-    const btnSend = document.getElementById("btnSend");
-    const btnBack = document.getElementById("btnBack");
-    const bubbleList = document.getElementById("bubbleList");
-    const chatWithName = document.getElementById("chatWithName");
-    const chatWithSub = document.getElementById("chatWithSub");
+    function setHeader(title, sub){
+      headerTitle.textContent = title;
+      headerSub.textContent = sub || "";
+    }
 
-    const meName = document.getElementById("meName");
-    const meStatus = document.getElementById("meStatus");
+    function showView(name){
+      Object.values(views).forEach(v=>v.classList.remove("active"));
+      views[name].classList.add("active");
 
-    // Modal
-    const modalWrap = document.getElementById("modalWrap");
-    const modalTitle = document.getElementById("modalTitle");
-    const modalLabel = document.getElementById("modalLabel");
-    const modalInput = document.getElementById("modalInput");
-    const modalHint  = document.getElementById("modalHint");
-    const modalCancel = document.getElementById("modalCancel");
-    const modalOk = document.getElementById("modalOk");
+      // Header behavior
+      if(name === "messages"){ setHeader("Mesajlar","Basit mesajlaşma"); $("#newBtn").style.display="flex"; }
+      if(name === "status"){ setHeader("Durum","Basit mesajlaşma"); $("#newBtn").style.display="none"; }
+      if(name === "calls"){ setHeader("Aramalar","Basit mesajlaşma"); $("#newBtn").style.display="none"; }
+      if(name === "profile"){ setHeader("Profil","Basit mesajlaşma"); $("#newBtn").style.display="none"; }
+      if(name === "chat"){ $("#newBtn").style.display="none"; }
+    }
 
-    // Buttons
-    document.getElementById("btnAddCall").addEventListener("click", () => openModal({
-      title:"Yeni Arama",
-      label:"Kişi adı",
-      placeholder:"Örn: Hasan",
-      hint:"Demo: Arama listesine ekler.",
-      onOk:(val)=>{
-        if(!val.trim()) return;
-        state.calls.unshift({ id: cryptoId(), name: val.trim(), when:"Şimdi", type:"Giden" });
-        save(); renderCalls();
-      }
-    }));
+    function setNavActive(name){
+      $$("#bottomNav button").forEach(b=>b.classList.remove("active"));
+      const btn = $(`#bottomNav button[data-go="${name}"]`);
+      if(btn) btn.classList.add("active");
+    }
 
-    document.getElementById("btnAddStatus").addEventListener("click", () => openModal({
-      title:"Durum Ekle",
-      label:"Durum",
-      placeholder:"Ne yapıyorsun?",
-      hint:"Demo: Kendi durumunu günceller.",
-      onOk:(val)=>{
-        if(!val.trim()) return;
-        // mine status is first item
-        const mine = state.statuses.find(s => s.mine);
-        mine.text = val.trim();
-        save(); renderStatus();
-      }
-    }));
+    // --------- Render Chat List ----------
+    function renderList(){
+      const list = $("#chatList");
+      list.innerHTML = "";
+      state.chats.forEach(c=>{
+        const first = (c.name || "?").trim().charAt(0).toUpperCase() || "?";
+        const row = document.createElement("div");
+        row.className = "row";
+        row.innerHTML = `
+          <div class="avatar">${first}</div>
+          <div class="meta">
+            <div class="name">${escapeHtml(c.name)}</div>
+            <div class="sub">${escapeHtml(c.last || "")}</div>
+          </div>
+          <div class="time">${escapeHtml(c.time || "")}</div>
+        `;
+        row.addEventListener("click", ()=>openChat(c.id));
+        list.appendChild(row);
+      });
+      saveState(state);
+    }
 
-    document.getElementById("btnReset").addEventListener("click", () => {
-      localStorage.removeItem(KEY);
-      location.reload();
+    function escapeHtml(s){
+      return String(s)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    // --------- Chat Screen ----------
+    function openChat(id){
+      currentChatId = id;
+      const chat = state.chats.find(x=>x.id===id);
+      if(!chat) return;
+
+      $("#chatTitle").textContent = chat.name;
+      $("#chatSubtitle").textContent = "mesajlaşma";
+
+      renderBubbles();
+      showView("chat");
+      // nav highlight stays on messages
+      setNavActive("messages");
+      // scroll to bottom
+      setTimeout(()=> {
+        views.chat.scrollTop = views.chat.scrollHeight;
+        $("#msgInput").focus();
+      }, 50);
+    }
+
+    function renderBubbles(){
+      const wrap = $("#bubbleWrap");
+      wrap.innerHTML = "";
+      const chat = state.chats.find(x=>x.id===currentChatId);
+      if(!chat) return;
+
+      chat.messages.forEach(m=>{
+        const b = document.createElement("div");
+        b.className = "b" + (m.me ? " me" : "");
+        b.innerHTML = `<div class="t">${escapeHtml(m.text)}</div><div class="s">${escapeHtml(m.time || "")}</div>`;
+        wrap.appendChild(b);
+      });
+
+      // keep last text
+      chat.last = chat.messages.at(-1)?.text || chat.last || "";
+      saveState(state);
+    }
+
+    function sendMessage(){
+      const input = $("#msgInput");
+      const text = (input.value || "").trim();
+      if(!text) return;
+
+      const chat = state.chats.find(x=>x.id===currentChatId);
+      if(!chat) return;
+
+      chat.messages.push({me:true, text, time: nowTime()});
+      chat.last = text;
+      input.value = "";
+      renderBubbles();
+
+      // scroll down
+      setTimeout(()=> {
+        views.chat.scrollTop = views.chat.scrollHeight;
+      }, 50);
+    }
+
+    // --------- Modal New Chat ----------
+    const modalBg = $("#modalBg");
+    function openModal(){
+      $("#newName").value = "";
+      modalBg.classList.add("show");
+      setTimeout(()=>$("#newName").focus(), 50);
+    }
+    function closeModal(){ modalBg.classList.remove("show"); }
+
+    function createChat(){
+      const name = ($("#newName").value || "").trim();
+      if(!name) return;
+
+      const id = "c_" + Math.random().toString(16).slice(2);
+      state.chats.unshift({
+        id, name,
+        last:"Sohbet başlatıldı.",
+        time: nowTime(),
+        messages:[
+          {me:false, text:"Sohbet başlatıldı.", time: nowTime()}
+        ]
+      });
+      saveState(state);
+      renderList();
+      closeModal();
+      openChat(id);
+    }
+
+    // --------- Events ----------
+    // Bottom nav clicks
+    $$("#bottomNav button").forEach(btn=>{
+      btn.addEventListener("click", (e)=>{
+        const go = btn.getAttribute("data-go");
+        if(!go) return;
+        setNavActive(go);
+        showView(go);
+      }, {passive:true});
     });
 
-    document.getElementById("meCard").addEventListener("click", () => openModal({
-      title:"Profil",
-      label:"Adın",
-      placeholder:"Adını yaz",
-      initial: state.me.name,
-      hint:"Demo: Başlığı ve profilini günceller.",
-      onOk:(val)=>{
-        if(!val.trim()) return;
-        state.me.name = val.trim();
-        save(); renderProfile();
-      }
-    }));
+    // Header new chat button
+    $("#newBtn").addEventListener("click", openModal);
 
-    document.getElementById("settingsCard").addEventListener("click", () => {
-      alert("Ayarlar (demo) — İstersen sonraki adımda gerçek ayar ekranı ekleriz.");
+    // Modal actions
+    $("#cancelModal").addEventListener("click", closeModal);
+    modalBg.addEventListener("click", (e)=>{
+      if(e.target === modalBg) closeModal();
+    });
+    $("#createChat").addEventListener("click", createChat);
+    $("#newName").addEventListener("keydown", (e)=>{
+      if(e.key === "Enter") createChat();
     });
 
-    // Header action changes per tab
-    headerAction.addEventListener("click", () => {
-      const t = state.ui.activeTab;
-      if(t === "chats"){
-        openModal({
-          title:"Yeni Sohbet",
-          label:"Kişi adı",
-          placeholder:"Örn: Ece",
-          hint:"Demo: Sohbet listesine yeni kişi ekler.",
-          onOk:(val)=>{
-            if(!val.trim()) return;
-            const name = val.trim();
-            const id = name.toLowerCase().replace(/\s+/g,"-") + "-" + cryptoId().slice(0,4);
-            state.chats.unshift({ id, name, last:"", online:true, messages:[] });
-            save(); renderChats();
-          }
-        });
-      } else if(t === "status"){
-        document.getElementById("btnAddStatus").click();
-      } else if(t === "calls"){
-        doc
+    // Back
+    $("#backToList").addEventListener("click", ()=>{
+      showView("messages");
+      setNavActive("messages");
+    });
+
+    // Send
+    $("#sendBtn").addEventListener("click", sendMessage);
+    $("#msgInput").addEventListener("keydown", (e)=>{
+      if(e.key === "Enter") sendMessage();
+    });
+
+    // Demo clicks
+    $("#addStatus").addEventListener("click", ()=>alert("Durum ekleme: demo."));
+    $("#openSettings").addEventListener("click", ()=>alert("Ayarlar: demo."));
+
+    // Init
+    renderList();
+    showView("messages");
+    setNavActive("messages");
+  </script>
+</body>
+</html>
