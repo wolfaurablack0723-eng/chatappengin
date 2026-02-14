@@ -7,21 +7,10 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { 
-  getAuth,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  onAuthStateChanged,
-  signOut
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-
-import {
-  getDatabase,
-  ref,
-  set,
-  push,
-  onValue
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut }
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getDatabase, ref, push, onValue, set }
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyA3--Xy1WrM6WlxurXXr4i5qwMZiafXN4k",
@@ -38,129 +27,150 @@ const auth = getAuth(app);
 const db = getDatabase(app);
 
 window.register = async () => {
-  const email = document.getElementById("email").value;
-  const pass = document.getElementById("pass").value;
-  try{
-    await createUserWithEmailAndPassword(auth,email,pass);
-  }catch(e){ alert(e.message); }
+  const email=emailInput.value;
+  const pass=passInput.value;
+  await createUserWithEmailAndPassword(auth,email,pass);
 };
 
 window.login = async () => {
-  const email = document.getElementById("email").value;
-  const pass = document.getElementById("pass").value;
-  try{
-    await signInWithEmailAndPassword(auth,email,pass);
-  }catch(e){ alert(e.message); }
+  const email=emailInput.value;
+  const pass=passInput.value;
+  await signInWithEmailAndPassword(auth,email,pass);
 };
 
 window.logout = () => signOut(auth);
 
 onAuthStateChanged(auth,(user)=>{
   if(user){
-    document.getElementById("authBox").style.display="none";
-    document.getElementById("appBox").style.display="block";
+    authBox.style.display="none";
+    appBox.style.display="block";
+    userEmail.innerText=user.email;
     loadMessages();
+    loadStatus();
   }else{
-    document.getElementById("authBox").style.display="block";
-    document.getElementById("appBox").style.display="none";
+    authBox.style.display="block";
+    appBox.style.display="none";
   }
 });
 
-window.sendMessage = () => {
-  const text = document.getElementById("msg").value;
+window.sendMessage=()=>{
+  const text=msg.value.trim();
   if(!text) return;
   push(ref(db,"messages"),{
     uid:auth.currentUser.uid,
-    email:auth.currentUser.email,
     text:text,
     time:Date.now()
   });
-  document.getElementById("msg").value="";
+  msg.value="";
 };
 
 function loadMessages(){
   onValue(ref(db,"messages"),(snap)=>{
+    chatList.innerHTML="";
     const data=snap.val();
-    const box=document.getElementById("chat");
-    box.innerHTML="";
     if(!data) return;
     Object.values(data).forEach(m=>{
       const div=document.createElement("div");
-      div.className="bubble";
-      if(m.uid===auth.currentUser.uid) div.classList.add("me");
-      div.innerText=m.text;
-      box.appendChild(div);
+      div.className="chatItem";
+      div.innerHTML=`<b>${m.text}</b>`;
+      chatList.appendChild(div);
     });
-    box.scrollTop=box.scrollHeight;
+  });
+}
+
+window.addStatus=()=>{
+  const text=prompt("Durum yaz");
+  if(!text) return;
+  push(ref(db,"status"),{
+    user:auth.currentUser.email,
+    text:text
+  });
+};
+
+function loadStatus(){
+  onValue(ref(db,"status"),(snap)=>{
+    statusList.innerHTML="";
+    const data=snap.val();
+    if(!data) return;
+    Object.values(data).forEach(s=>{
+      statusList.innerHTML+=`
+      <div class="card">
+        <b>${s.user}</b><br>${s.text}
+      </div>`;
+    });
   });
 }
 </script>
 
 <style>
 body{margin:0;font-family:sans-serif;background:#efe7db;}
-.hidden{display:none}
-.header{background:#111;color:#fff;padding:15px;font-weight:bold}
+.header{background:#111;color:#fff;padding:15px;font-size:20px;font-weight:bold;display:flex;justify-content:space-between}
 .view{display:none;padding:15px}
 .view.active{display:block}
-.nav{position:fixed;bottom:0;left:0;right:0;background:#fff;display:flex}
-.nav div{flex:1;padding:12px;text-align:center;cursor:pointer}
-.nav .active{background:#ddd}
-.card{background:#fff;padding:15px;border-radius:15px;margin-bottom:10px}
-.bubble{background:#fff;padding:10px;border-radius:15px;margin-bottom:8px;max-width:70%}
-.me{background:#cfe2ff;margin-left:auto}
+.card{background:#fff;padding:15px;border-radius:18px;margin-bottom:12px}
+.nav{position:fixed;bottom:0;left:0;right:0;background:#fff;padding:10px;display:flex;border-radius:20px 20px 0 0}
+.nav div{flex:1;text-align:center;padding:10px;cursor:pointer}
+.nav .active{background:#dbeafe;border-radius:15px}
+.chatItem{background:#fff;padding:12px;border-radius:16px;margin-bottom:10px}
 </style>
 </head>
 
 <body>
 
 <div id="authBox" style="padding:20px">
-  <h2>Giriş / Kayıt</h2>
-  <input id="email" placeholder="Email"><br><br>
-  <input id="pass" type="password" placeholder="Şifre"><br><br>
-  <button onclick="register()">Kayıt Ol</button>
-  <button onclick="login()">Giriş Yap</button>
+<h2>Giriş / Kayıt</h2>
+<input id="emailInput" placeholder="Email"><br><br>
+<input id="passInput" type="password" placeholder="Şifre"><br><br>
+<button onclick="register()">Kayıt Ol</button>
+<button onclick="login()">Giriş Yap</button>
 </div>
 
-<div id="appBox" class="hidden">
+<div id="appBox" style="display:none">
 
-<div class="header">Vigo Chat ⭐</div>
+<div class="header">
+Vigo Chat ⭐
+</div>
 
 <div id="view-messages" class="view active">
-  <div id="chat" style="height:60vh;overflow:auto"></div>
-  <textarea id="msg" placeholder="Mesaj yaz"></textarea>
-  <button onclick="sendMessage()">Gönder</button>
-</div>
-
-<div id="view-profile" class="view">
-  <div class="card">
-    <b>Email:</b> <span id="userEmail"></span><br><br>
-    <button onclick="logout()">Çıkış</button>
-  </div>
+<div class="card"><b>Mesajlar</b></div>
+<div id="chatList"></div>
+<textarea id="msg" placeholder="Mesaj yaz"></textarea>
+<button onclick="sendMessage()">Gönder</button>
 </div>
 
 <div id="view-status" class="view">
-  <div class="card">Durum sistemi eklenebilir.</div>
+<div class="card"><b>Durum</b></div>
+<button onclick="addStatus()">Durum Ekle</button>
+<div id="statusList"></div>
 </div>
 
 <div id="view-calls" class="view">
-  <div class="card">Arama sistemi eklenebilir.</div>
+<div class="card">Aramalar (demo)</div>
+</div>
+
+<div id="view-profile" class="view">
+<div class="card">
+<b>Profil</b><br>
+Email: <span id="userEmail"></span><br><br>
+<button onclick="logout()">Çıkış</button>
+</div>
 </div>
 
 <div class="nav">
-  <div onclick="switchTab('calls')">Aramalar</div>
-  <div onclick="switchTab('status')">Durum</div>
-  <div onclick="switchTab('messages')" class="active">Mesajlar</div>
-  <div onclick="switchTab('profile')">Profil</div>
+<div onclick="switchTab('calls')">Aramalar</div>
+<div onclick="switchTab('status')">Durum</div>
+<div onclick="switchTab('messages')" class="active">Mesajlar</div>
+<div onclick="switchTab('profile')">Profil</div>
 </div>
 
 </div>
 
 <script>
 function switchTab(tab){
-  document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
-  document.getElementById("view-"+tab).classList.add("active");
-  document.querySelectorAll(".nav div").forEach(n=>n.classList.remove("active"));
-  event.target.classList.add("active");
+document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
+document.getElementById("view-"+tab).classList.add("active");
+document.querySelectorAll(".nav div").forEach(n=>n.classList.remove("active"));
+event.target.classList.add("active");
 }
 </script>
 
