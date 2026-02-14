@@ -1,148 +1,125 @@
-<!doctype html>
-<html lang="tr">
+<!DOCTYPE html>
+<html>
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>VigoChatt</title>
 
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
 <style>
-body{
-  margin:0;
-  font-family:system-ui;
-  background:#f2f2f2;
-}
-.wrap{
-  max-width:500px;
-  margin:0 auto;
-  padding:20px;
-}
-.card{
-  background:white;
-  padding:20px;
-  border-radius:12px;
-  box-shadow:0 4px 20px rgba(0,0,0,.08);
-  margin-bottom:20px;
-}
-input{
-  width:100%;
-  padding:10px;
-  margin:8px 0;
-  border:1px solid #ddd;
-  border-radius:8px;
-}
-button{
-  width:100%;
-  padding:10px;
-  margin-top:8px;
-  border:none;
-  border-radius:8px;
-  background:#2b6cff;
-  color:white;
-  font-weight:bold;
-  cursor:pointer;
-}
-.view{ display:none; }
-.view.active{ display:block; }
-#threadList div{
-  padding:10px;
-  border-bottom:1px solid #eee;
-}
+body{font-family:Arial;margin:0;background:#f2f2f2}
+.wrap{max-width:500px;margin:auto;padding:20px}
+.card{background:white;padding:20px;border-radius:10px;margin-bottom:15px}
+input,button{width:100%;padding:10px;margin:5px 0}
+button{background:#2b6cff;color:white;border:none;border-radius:5px}
+.msg{padding:8px;background:#e9e9e9;margin:5px 0;border-radius:5px}
+.me{background:#cfe2ff}
 </style>
-
-<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
-
 </head>
 <body>
 
 <div class="wrap">
 
-<section class="view active" id="view-auth">
 <div class="card">
 <h2>Giriş / Kayıt</h2>
-<input id="email" type="email" placeholder="E-posta">
+<input id="email" placeholder="Email">
 <input id="pass" type="password" placeholder="Şifre">
-<button id="loginBtn">Giriş Yap</button>
-<button id="signupBtn">Kayıt Ol</button>
-<div id="authErr" style="color:red;margin-top:10px;"></div>
+<button onclick="login()">Giriş</button>
+<button onclick="signup()">Kayıt</button>
+<div id="authErr" style="color:red"></div>
 </div>
-</section>
 
-<section class="view" id="view-chats">
 <div class="card">
-<h2>Sohbetler</h2>
-<div id="threadList"></div>
-<button id="logoutBtn">Çıkış</button>
+<h2>Sohbet</h2>
+<div id="messages"></div>
+<input id="msgInput" placeholder="Mesaj yaz">
+<button onclick="sendMsg()">Gönder</button>
+<button onclick="logout()">Çıkış</button>
 </div>
-</section>
+
 </div>
 
 <script>
 
-firebase.initializeApp({
-  apiKey: "AIzaSyA3--Xy1WrM6WlxurXXr4i5qwMZiafXN4k",
-  authDomain: "vigochat-58144.firebaseapp.com",
-  projectId: "vigochat-58144"
-});
+const firebaseConfig = {
+  apiKey: "AZASYBLiQkV4BNrAFILe-VkURhx31AsnxLQ8",
+  authDomain: "vigochatt.firebaseapp.com",
+  projectId: "vigochatt",
+  storageBucket: "vigochatt.firebasestorage.app",
+  messagingSenderId: "12259504636",
+  appId: "1:12259504636:web:d6ee79daceac8834d70279"
+};
+
+firebase.initializeApp(firebaseConfig);
 
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-function show(id){
-  document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
-  document.getElementById("view-"+id).classList.add("active");
-}
+let currentUser = null;
 
 auth.onAuthStateChanged(user=>{
-  if(user){
-    show("chats");
-    loadThreads(user.uid);
-  }else{
-    show("auth");
-  }
+    if(user){
+        currentUser = user;
+        loadMessages();
+    }else{
+        currentUser = null;
+        document.getElementById("messages").innerHTML="";
+    }
 });
 
-document.getElementById("loginBtn").onclick = async ()=>{
-  try{
-    await auth.signInWithEmailAndPassword(
-      email.value.trim(),
-      pass.value.trim()
-    );
-  }catch(e){
-    authErr.textContent = e.message;
-  }
-};
+function login(){
+    const email = document.getElementById("email").value;
+    const pass = document.getElementById("pass").value;
+    auth.signInWithEmailAndPassword(email,pass)
+    .catch(e=>document.getElementById("authErr").innerText=e.message);
+}
 
-document.getElementById("signupBtn").onclick = async ()=>{
-  try{
-    await auth.createUserWithEmailAndPassword(
-      email.value.trim(),
-      pass.value.trim()
-    );
-  }catch(e){
-    authErr.textContent = e.message;
-  }
-};
+function signup(){
+    const email = document.getElementById("email").value;
+    const pass = document.getElementById("pass").value;
+    auth.createUserWithEmailAndPassword(email,pass)
+    .catch(e=>document.getElementById("authErr").innerText=e.message);
+}
 
-document.getElementById("logoutBtn").onclick = ()=>{
-  auth.signOut();
-};
+function logout(){
+    auth.signOut();
+}
 
-function loadThreads(uid){
-  db.collection("threads")
-    .where("participants","array-contains",uid)
-    .onSnapshot(snap=>{
-      threadList.innerHTML="";
-      snap.forEach(doc=>{
-        const div=document.createElement("div");
-        div.innerText="Sohbet: "+doc.id;
-        threadList.appendChild(div);
-      });
+function sendMsg(){
+    if(!currentUser) return alert("Önce giriş yap");
+    const text = document.getElementById("msgInput").value;
+    if(!text) return;
+
+    db.collection("messages").add({
+        uid: currentUser.uid,
+        email: currentUser.email,
+        text: text,
+        created: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    document.getElementById("msgInput").value="";
+}
+
+function loadMessages(){
+    db.collection("messages")
+    .orderBy("created")
+    .onSnapshot(snapshot=>{
+        const container=document.getElementById("messages");
+        container.innerHTML="";
+        snapshot.forEach(doc=>{
+            const m=doc.data();
+            const div=document.createElement("div");
+            div.className="msg";
+            if(m.uid===currentUser.uid) div.classList.add("me");
+            div.innerText=m.email+": "+m.text;
+            container.appendChild(div);
+        });
     });
 }
 
 </script>
-
 </body>
 </html>
