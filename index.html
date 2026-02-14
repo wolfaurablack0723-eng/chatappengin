@@ -10,9 +10,8 @@
 --bg:#0f172a;
 --card:#1e293b;
 --text:#f1f5f9;
---muted:#94a3b8;
 --accent:#3b82f6;
---radius:18px;
+--radius:16px;
 }
 
 body{
@@ -23,8 +22,8 @@ color:var(--text);
 }
 
 .header{
-padding:20px;
-font-size:22px;
+padding:18px;
+font-size:20px;
 font-weight:700;
 display:flex;
 justify-content:space-between;
@@ -61,21 +60,20 @@ cursor:pointer;
 }
 
 .message{
-background:#334155;
 padding:10px;
 border-radius:12px;
-margin-bottom:10px;
+margin-bottom:8px;
+background:#334155;
 }
 
 .me{
 background:var(--accent);
 }
 
-.themeLight{
+.light{
 --bg:#f1f5f9;
 --card:#ffffff;
---text:#0f172a;
---muted:#64748b;
+--text:#111;
 }
 
 </style>
@@ -90,21 +88,20 @@ VigoChatt
 
 <div class="container">
 
-<div id="auth">
+<div id="authSection">
 <div class="card">
-<h3>Giriş / Kayıt</h3>
-<input id="email" placeholder="Email">
-<input id="pass" type="password" placeholder="Şifre">
-<button onclick="login()">Giriş</button>
-<button onclick="register()">Kayıt</button>
-<div id="authErr"></div>
+<input id="emailInput" placeholder="Email">
+<input id="passInput" type="password" placeholder="Şifre">
+<button onclick="registerUser()">Kayıt Ol</button>
+<button onclick="loginUser()">Giriş Yap</button>
+<div id="authError"></div>
 </div>
 </div>
 
-<div id="chat" style="display:none">
+<div id="chatSection" style="display:none">
 
 <div class="card">
-<input id="msgInput" placeholder="Mesaj yaz...">
+<input id="messageInput" placeholder="Mesaj yaz">
 <button onclick="sendMessage()">Gönder</button>
 </div>
 
@@ -118,12 +115,11 @@ VigoChatt
 <div id="statusList"></div>
 
 <div class="card">
-<h3>Profil</h3>
-<input id="displayName" placeholder="İsim">
-<button onclick="saveProfile()">Kaydet</button>
+<input id="nameInput" placeholder="Profil İsmi">
+<button onclick="saveProfile()">Profili Kaydet</button>
 </div>
 
-<button onclick="logout()">Çıkış</button>
+<button onclick="logoutUser()">Çıkış</button>
 
 </div>
 
@@ -153,82 +149,95 @@ getDoc
 const firebaseConfig = {
 apiKey: "AIzaSyA3--Xy1WrM6WlxurXXr4i5qwMZiafXN4k",
 authDomain: "vigochat-58144.firebaseapp.com",
-projectId: "vigochat-58144",
+projectId: "vigochat-58144"
 };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-window.register = async ()=>{
-const email = email.value;
-const pass = pass.value;
+const authSection = document.getElementById("authSection");
+const chatSection = document.getElementById("chatSection");
+const authError = document.getElementById("authError");
+
+window.registerUser = async ()=>{
 try{
-await createUserWithEmailAndPassword(auth,email,pass);
-}catch(e){ authErr.innerText = e.message }
+await createUserWithEmailAndPassword(
+auth,
+document.getElementById("emailInput").value,
+document.getElementById("passInput").value
+);
+}catch(e){ authError.innerText=e.message; }
 };
 
-window.login = async ()=>{
-const email = email.value;
-const pass = pass.value;
+window.loginUser = async ()=>{
 try{
-await signInWithEmailAndPassword(auth,email,pass);
-}catch(e){ authErr.innerText = e.message }
+await signInWithEmailAndPassword(
+auth,
+document.getElementById("emailInput").value,
+document.getElementById("passInput").value
+);
+}catch(e){ authError.innerText=e.message; }
 };
 
-window.logout = ()=> signOut(auth);
+window.logoutUser = ()=> signOut(auth);
 
 onAuthStateChanged(auth, async user=>{
 if(user){
-auth.style.display="none";
-chat.style.display="block";
+authSection.style.display="none";
+chatSection.style.display="block";
 loadMessages();
 loadStatus();
 loadProfile();
 }else{
-auth.style.display="block";
-chat.style.display="none";
+authSection.style.display="block";
+chatSection.style.display="none";
 }
 });
 
-async function loadMessages(){
-const col = collection(db,"messages");
-onSnapshot(col,snap=>{
-messages.innerHTML="";
+function loadMessages(){
+onSnapshot(collection(db,"messages"),snap=>{
+const box=document.getElementById("messages");
+box.innerHTML="";
 snap.forEach(d=>{
-const div = document.createElement("div");
+const m=d.data();
+const div=document.createElement("div");
 div.className="message";
-div.innerText=d.data().text;
-messages.appendChild(div);
+div.innerText=m.text;
+box.appendChild(div);
 });
 });
 }
 
 window.sendMessage = async ()=>{
-if(!auth.currentUser) return;
+const text=document.getElementById("messageInput").value;
+if(!text) return;
 await addDoc(collection(db,"messages"),{
-text:msgInput.value,
+text:text,
 uid:auth.currentUser.uid
 });
-msgInput.value="";
+document.getElementById("messageInput").value="";
 };
 
 window.addStatus = async ()=>{
+const text=document.getElementById("statusInput").value;
+if(!text) return;
 await addDoc(collection(db,"status"),{
-text:statusInput.value,
+text:text,
 time:Date.now()
 });
-statusInput.value="";
+document.getElementById("statusInput").value="";
 };
 
 function loadStatus(){
 onSnapshot(collection(db,"status"),snap=>{
-statusList.innerHTML="";
+const box=document.getElementById("statusList");
+box.innerHTML="";
 snap.forEach(d=>{
 const div=document.createElement("div");
 div.className="card";
 div.innerText=d.data().text;
-statusList.appendChild(div);
+box.appendChild(div);
 });
 });
 }
@@ -236,7 +245,7 @@ statusList.appendChild(div);
 window.saveProfile = async ()=>{
 const user=auth.currentUser;
 await setDoc(doc(db,"users",user.uid),{
-name:displayName.value
+name:document.getElementById("nameInput").value
 });
 };
 
@@ -244,12 +253,12 @@ async function loadProfile(){
 const user=auth.currentUser;
 const snap=await getDoc(doc(db,"users",user.uid));
 if(snap.exists()){
-displayName.value=snap.data().name;
+document.getElementById("nameInput").value=snap.data().name;
 }
 }
 
 window.toggleTheme = ()=>{
-document.body.classList.toggle("themeLight");
+document.body.classList.toggle("light");
 };
 
 </script>
