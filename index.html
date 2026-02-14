@@ -3,183 +3,88 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Vigo Chat</title>
+<title>VigoChatt</title>
 
 <style>
 :root{
---bg:#efe7db;
---card:#f5f1ea;
---border:#d8d2c7;
---text:#1b1b1b;
---muted:#6b6b6b;
---accent:#3b82f6;
+  --bg:#0f172a;
+  --card:#1e293b;
+  --accent:#3b82f6;
+  --text:#f1f5f9;
+  --muted:#94a3b8;
+  --radius:16px;
 }
 
-*{box-sizing:border-box;margin:0;padding:0}
 body{
-font-family:system-ui;
-background:var(--bg);
-color:var(--text);
+  margin:0;
+  font-family:system-ui;
+  background:var(--bg);
+  color:var(--text);
 }
 
 header{
-background:#000;
-color:#fff;
-padding:16px;
-display:flex;
-justify-content:space-between;
-align-items:center;
-font-weight:700;
-font-size:18px;
+  padding:18px;
+  font-weight:700;
+  font-size:20px;
+  background:var(--card);
+  display:flex;
+  justify-content:space-between;
 }
 
-.star{
-color:#4ade80;
-font-size:22px;
-cursor:pointer;
-}
-
-.container{
-padding:16px;
-padding-bottom:120px;
-}
-
-.section{display:none}
-.section.active{display:block}
+.section{display:none;padding:20px;}
+.section.active{display:block;}
 
 .card{
-background:var(--card);
-border:1px solid var(--border);
-border-radius:18px;
-padding:16px;
-margin-bottom:14px;
+  background:var(--card);
+  padding:16px;
+  border-radius:var(--radius);
+  margin-bottom:16px;
 }
 
-.list-item{
-background:var(--card);
-border:1px solid var(--border);
-border-radius:18px;
-padding:14px;
-display:flex;
-align-items:center;
-gap:12px;
-margin-bottom:10px;
-cursor:pointer;
+input,textarea{
+  width:100%;
+  padding:12px;
+  margin-bottom:10px;
+  border-radius:10px;
+  border:none;
 }
 
-.avatar{
-width:44px;
-height:44px;
-border-radius:14px;
-background:#dbeafe;
-display:flex;
-align-items:center;
-justify-content:center;
-font-weight:700;
-color:#2563eb;
-}
-
-.meta b{display:block}
-.meta span{font-size:13px;color:var(--muted)}
-
-.bottom{
-position:fixed;
-bottom:0;
-left:0;
-right:0;
-display:flex;
-justify-content:center;
-padding:12px;
-background:transparent;
+button{
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:10px;
+  background:var(--accent);
+  color:white;
+  font-weight:600;
+  cursor:pointer;
 }
 
 .nav{
-background:var(--card);
-border:1px solid var(--border);
-border-radius:24px;
-display:flex;
-width:95%;
-max-width:520px;
-padding:8px;
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  display:flex;
+  justify-content:space-around;
+  background:var(--card);
+  padding:10px 0;
 }
 
-.tab{
-flex:1;
-text-align:center;
-padding:10px;
-border-radius:16px;
-font-weight:600;
-color:var(--muted);
-cursor:pointer;
-}
-
-.tab.active{
-background:#dbeafe;
-color:#000;
-}
-
-.chat-box{
-position:fixed;
-bottom:90px;
-left:0;
-right:0;
-display:none;
-flex-direction:column;
-height:60%;
-background:var(--card);
-border-top-left-radius:24px;
-border-top-right-radius:24px;
-border:1px solid var(--border);
-}
-
-.chat-header{
-padding:14px;
-font-weight:700;
-border-bottom:1px solid var(--border);
-display:flex;
-justify-content:space-between;
-}
-
-.chat-messages{
-flex:1;
-overflow:auto;
-padding:12px;
+.nav div{
+  cursor:pointer;
+  font-size:13px;
 }
 
 .message{
-background:#fff;
-padding:10px 14px;
-border-radius:14px;
-margin-bottom:8px;
-max-width:75%;
+  padding:10px;
+  margin:6px 0;
+  border-radius:10px;
+  background:#334155;
 }
-
-.message.me{
-background:#dbeafe;
-margin-left:auto;
-}
-
-.chat-input{
-display:flex;
-gap:8px;
-padding:12px;
-border-top:1px solid var(--border);
-}
-
-.chat-input input{
-flex:1;
-padding:10px;
-border-radius:14px;
-border:1px solid var(--border);
-}
-
-.chat-input button{
-padding:10px 16px;
-border:none;
-background:var(--accent);
-color:#fff;
-border-radius:14px;
-cursor:pointer;
+.me{
+  background:var(--accent);
+  text-align:right;
 }
 </style>
 </head>
@@ -187,159 +92,198 @@ cursor:pointer;
 <body>
 
 <header>
-<div>Vigo Chat ⭐</div>
-<div class="star">★</div>
+  VigoChatt
+  <div onclick="logout()" style="cursor:pointer;">Çıkış</div>
 </header>
 
-<div class="container">
-
-<!-- ARAMALAR -->
-<div class="section active" id="calls">
-<div class="card">
-<b>Aramalar</b>
-<p style="color:var(--muted);font-size:13px;margin-top:6px;">
-Son aramalar burada görünecek.
-</p>
-</div>
-</div>
-
-<!-- DURUM -->
-<div class="section" id="status">
-<div class="card">
-<b>Durum</b>
-<p style="color:var(--muted);font-size:13px;margin-top:6px;">
-Durum ekleme sistemi.
-</p>
-</div>
+<!-- AUTH -->
+<div id="authSection" class="section active">
+  <div class="card">
+    <h3>Giriş / Kayıt</h3>
+    <input id="email" placeholder="Email">
+    <input id="password" type="password" placeholder="Şifre">
+    <button onclick="register()">Kayıt Ol</button>
+    <button onclick="login()">Giriş Yap</button>
+    <div id="authError" style="color:red;"></div>
+  </div>
 </div>
 
-<!-- MESAJLAR -->
-<div class="section" id="messages">
-<div class="card">
-<b>Mesajlar</b>
-<p style="color:var(--muted);font-size:13px;margin-top:6px;">
-Bir sohbet seç.
-</p>
+<!-- CHAT -->
+<div id="chatSection" class="section">
+  <div id="messages"></div>
+  <input id="messageInput" placeholder="Mesaj yaz">
+  <button onclick="sendMessage()">Gönder</button>
 </div>
 
-<div id="chatList"></div>
+<!-- STATUS -->
+<div id="statusSection" class="section">
+  <input id="statusInput" placeholder="Durum yaz">
+  <button onclick="addStatus()">Paylaş</button>
+  <div id="statusList"></div>
 </div>
 
-<!-- PROFİL -->
-<div class="section" id="profile">
-<div class="card">
-<b>Profil</b>
-<p style="color:var(--muted);font-size:13px;margin-top:6px;">
-Profil ayarları
-</p>
+<!-- PROFILE -->
+<div id="profileSection" class="section">
+  <div class="card">
+    <input id="nameInput" placeholder="İsim">
+    <input id="birthdayInput" type="date">
+    <textarea id="bioInput" placeholder="Hakkında"></textarea>
+    <button onclick="saveProfile()">Kaydet</button>
+  </div>
 </div>
 
-<div class="list-item">
-<div class="avatar">🙂</div>
-<div class="meta">
-<b id="username">Engin</b>
-<span id="statusText">Durum: çevrimiçi</span>
-</div>
-</div>
-
-<div class="list-item" onclick="editProfile()">
-<div class="avatar">⚙️</div>
-<div class="meta">
-<b>Ayarlar</b>
-<span>Profil düzenle</span>
-</div>
-</div>
-</div>
-
-</div>
-
-<!-- CHAT BOX -->
-<div class="chat-box" id="chatBox">
-<div class="chat-header">
-<span id="chatTitle">Sohbet</span>
-<span onclick="closeChat()" style="cursor:pointer;">✖</span>
-</div>
-<div class="chat-messages" id="chatMessages"></div>
-<div class="chat-input">
-<input type="text" id="msgInput" placeholder="Mesaj yaz">
-<button onclick="sendMessage()">Gönder</button>
-</div>
-</div>
-
-<!-- NAV -->
-<div class="bottom">
 <div class="nav">
-<div class="tab active" onclick="switchTab('calls',this)">Aramalar</div>
-<div class="tab" onclick="switchTab('status',this)">Durum</div>
-<div class="tab" onclick="switchTab('messages',this)">Mesajlar</div>
-<div class="tab" onclick="switchTab('profile',this)">Profil</div>
-</div>
+  <div onclick="switchTab('chatSection')">Sohbet</div>
+  <div onclick="switchTab('statusSection')">Durum</div>
+  <div onclick="switchTab('profileSection')">Profil</div>
 </div>
 
-<script>
+<script type="module">
 
-const chats=[
-{name:"Ahmet"},
-{name:"Zeynep"},
-{name:"Mert"}
-];
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-const chatList=document.getElementById("chatList");
+import {
+  getDatabase,
+  ref,
+  push,
+  set,
+  onValue,
+  get
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-function renderChats(){
-chatList.innerHTML="";
-chats.forEach((c,i)=>{
-chatList.innerHTML+=`
-<div class="list-item" onclick="openChat('${c.name}')">
-<div class="avatar">${c.name[0]}</div>
-<div class="meta">
-<b>${c.name}</b>
-<span>Sohbet başlat</span>
-</div>
-</div>
-`;
+const firebaseConfig = {
+  apiKey: "AIzaSyA3--Xy1WrM6WlxurXXr4i5qwMZiafXN4k",
+  authDomain: "vigochat-58144.firebaseapp.com",
+  databaseURL: "https://vigochat-58144-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "vigochat-58144",
+  storageBucket: "vigochat-58144.appspot.com",
+  messagingSenderId: "384136632816",
+  appId: "1:384136632816:web:2bb6d6942680a2e2e6e535"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
+
+let currentUser=null;
+
+onAuthStateChanged(auth, user=>{
+  if(user){
+    currentUser=user;
+    document.getElementById("authSection").classList.remove("active");
+    switchTab("chatSection");
+    loadMessages();
+    loadStatuses();
+    loadProfile();
+  }else{
+    document.getElementById("authSection").classList.add("active");
+  }
 });
+
+window.register = async function(){
+  try{
+    await createUserWithEmailAndPassword(auth,email.value,password.value);
+  }catch(e){
+    authError.innerText=e.message;
+  }
 }
 
-function switchTab(id,el){
-document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
-document.getElementById(id).classList.add("active");
-
-document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
-el.classList.add("active");
+window.login = async function(){
+  try{
+    await signInWithEmailAndPassword(auth,email.value,password.value);
+  }catch(e){
+    authError.innerText=e.message;
+  }
 }
 
-function openChat(name){
-document.getElementById("chatTitle").innerText=name;
-document.getElementById("chatBox").style.display="flex";
+window.logout = function(){
+  signOut(auth);
 }
 
-function closeChat(){
-document.getElementById("chatBox").style.display="none";
+window.switchTab = function(id){
+  document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
 }
 
-function sendMessage(){
-const input=document.getElementById("msgInput");
-if(!input.value.trim()) return;
-
-const div=document.createElement("div");
-div.className="message me";
-div.innerText=input.value;
-
-document.getElementById("chatMessages").appendChild(div);
-input.value="";
+function loadMessages(){
+  const msgRef = ref(db,"messages");
+  onValue(msgRef,snapshot=>{
+    const data=snapshot.val();
+    messages.innerHTML="";
+    if(!data)return;
+    Object.values(data).forEach(msg=>{
+      const div=document.createElement("div");
+      div.className="message";
+      if(msg.uid===currentUser.uid) div.classList.add("me");
+      div.innerText=msg.text;
+      messages.appendChild(div);
+    });
+  });
 }
 
-function editProfile(){
-const newName=prompt("Yeni isim:");
-if(newName){
-document.getElementById("username").innerText=newName;
-}
+window.sendMessage=function(){
+  const text=messageInput.value;
+  if(!text)return;
+  push(ref(db,"messages"),{
+    text:text,
+    uid:currentUser.uid,
+    time:Date.now()
+  });
+  messageInput.value="";
 }
 
-renderChats();
+window.addStatus=function(){
+  const text=statusInput.value;
+  if(!text)return;
+  push(ref(db,"statuses/"+currentUser.uid),{
+    text:text,
+    time:Date.now()
+  });
+  statusInput.value="";
+}
+
+function loadStatuses(){
+  onValue(ref(db,"statuses"),snapshot=>{
+    const data=snapshot.val();
+    statusList.innerHTML="";
+    if(!data)return;
+    for(let uid in data){
+      Object.values(data[uid]).forEach(st=>{
+        const div=document.createElement("div");
+        div.className="card";
+        div.innerText=st.text;
+        statusList.appendChild(div);
+      });
+    }
+  });
+}
+
+window.saveProfile=async function(){
+  await set(ref(db,"users/"+currentUser.uid),{
+    name:nameInput.value,
+    birthday:birthdayInput.value,
+    bio:bioInput.value,
+    email:currentUser.email
+  });
+}
+
+function loadProfile(){
+  get(ref(db,"users/"+currentUser.uid)).then(snapshot=>{
+    const d=snapshot.val();
+    if(!d)return;
+    nameInput.value=d.name||"";
+    birthdayInput.value=d.birthday||"";
+    bioInput.value=d.bio||"";
+  });
+}
 
 </script>
-
 </body>
 </html>
