@@ -3,285 +3,180 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VigoChatt Pro</title>
+<title>VigoChat Pro</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 
 <style>
+
 :root{
---bg:#0f172a;
---card:#1e293b;
---accent:#3b82f6;
---text:#f1f5f9;
---muted:#94a3b8;
---radius:18px;
+    --bg-dark:#0f172a;
+    --card-dark:#1e293b;
+    --accent:#3b82f6;
+    --text-light:#f1f5f9;
+    --text-muted:#94a3b8;
+    --radius:16px;
+    --transition:0.3s ease;
 }
 
 body{
-margin:0;
-font-family:system-ui;
-background:var(--bg);
-color:var(--text);
-display:flex;
-flex-direction:column;
-height:100vh;
+    margin:0;
+    font-family:'Poppins',sans-serif;
+    background:var(--bg-dark);
+    color:var(--text-light);
+    display:flex;
+    flex-direction:column;
+    min-height:100vh;
+}
+
+.hidden{
+    display:none !important;
 }
 
 header{
-padding:18px;
-font-size:20px;
-font-weight:700;
-display:flex;
-justify-content:space-between;
-align-items:center;
-background:#111827;
+    padding:20px;
+    font-size:22px;
+    font-weight:700;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    background:linear-gradient(135deg,#1e293b,#0f172a);
+    box-shadow:0 5px 20px rgba(0,0,0,0.4);
 }
 
-button{
-background:var(--accent);
-border:none;
-color:white;
-padding:12px;
-border-radius:12px;
-font-weight:600;
-cursor:pointer;
+.container{
+    flex:1;
+    padding:20px;
+    overflow-y:auto;
+}
+
+.card{
+    background:var(--card-dark);
+    padding:20px;
+    border-radius:var(--radius);
+    margin-bottom:20px;
+    box-shadow:0 8px 25px rgba(0,0,0,0.4);
+    transition:var(--transition);
+}
+
+.card:hover{
+    transform:translateY(-3px);
 }
 
 input{
-padding:12px;
-border-radius:12px;
-border:none;
-background:#334155;
-color:white;
-width:100%;
-margin-bottom:10px;
+    width:100%;
+    padding:14px;
+    border-radius:12px;
+    border:none;
+    margin-bottom:15px;
+    font-size:14px;
+    outline:none;
 }
 
-.view{
-flex:1;
-display:none;
-padding:16px;
-overflow-y:auto;
+button{
+    width:100%;
+    padding:14px;
+    border-radius:12px;
+    border:none;
+    font-weight:600;
+    font-size:14px;
+    cursor:pointer;
+    transition:var(--transition);
 }
 
-.view.active{display:block;}
+.btn-primary{
+    background:var(--accent);
+    color:white;
+}
 
-.card{
-background:var(--card);
-padding:16px;
-border-radius:var(--radius);
-margin-bottom:12px;
+.btn-primary:hover{
+    opacity:0.8;
+}
+
+.navbar{
+    position:fixed;
+    bottom:0;
+    left:0;
+    right:0;
+    background:var(--card-dark);
+    display:flex;
+    justify-content:space-around;
+    padding:12px 0;
+    box-shadow:0 -5px 20px rgba(0,0,0,0.5);
+}
+
+.nav-item{
+    text-align:center;
+    font-size:12px;
+    cursor:pointer;
+    transition:var(--transition);
+}
+
+.nav-item.active{
+    color:var(--accent);
 }
 
 .message{
-padding:10px 14px;
-border-radius:16px;
-margin:6px 0;
-max-width:70%;
+    padding:10px;
+    margin-bottom:10px;
+    border-radius:12px;
+    background:#334155;
 }
 
-.me{
-background:#2563eb;
-align-self:flex-end;
+.theme-light{
+    --bg-dark:#f1f5f9;
+    --card-dark:#ffffff;
+    --text-light:#0f172a;
+    --text-muted:#64748b;
 }
 
-.other{
-background:#334155;
-align-self:flex-start;
+.fade-in{
+    animation:fade 0.4s ease;
 }
 
-.messages{
-display:flex;
-flex-direction:column;
+@keyframes fade{
+    from{opacity:0; transform:translateY(10px);}
+    to{opacity:1; transform:translateY(0);}
 }
 
-.nav{
-display:flex;
-background:#111827;
-padding:10px;
-justify-content:space-around;
-}
-
-.nav button{
-flex:1;
-margin:0 4px;
-}
-
-.hidden{display:none;}
 </style>
 </head>
+
 <body>
 
 <header>
-<span>VigoChatt</span>
-<button onclick="toggleTheme()">Tema</button>
+    <div>VigoChat Pro</div>
+    <div>
+        <button onclick="toggleTheme()" style="background:none;border:none;color:var(--text-light);font-size:18px;">🌙</button>
+    </div>
 </header>
 
-<div id="authView" class="view active">
-<div class="card">
-<h3>Giriş / Kayıt</h3>
-<input id="email" placeholder="Email">
-<input id="pass" type="password" placeholder="Şifre">
-<button onclick="login()">Giriş</button>
-<button onclick="register()">Kayıt</button>
-<p id="authError"></p>
-</div>
-</div>
+<div class="container">
 
-<div id="chatView" class="view">
-<div class="card">
-<h3>Sohbet</h3>
-<div id="messages" class="messages"></div>
-<input id="msgInput" placeholder="Mesaj yaz">
-<button onclick="sendMessage()">Gönder</button>
-<button onclick="logout()">Çıkış</button>
-</div>
-</div>
+    <div id="authSection" class="card">
+        <h3>Giriş / Kayıt</h3>
+        <input type="email" id="email" placeholder="Email">
+        <input type="password" id="password" placeholder="Şifre">
+        <button class="btn-primary" onclick="register()">Kayıt Ol</button>
+        <button class="btn-primary" onclick="login()">Giriş Yap</button>
+        <div id="authError" style="color:red;margin-top:10px;"></div>
+    </div>
 
-<div id="usersView" class="view">
-<div class="card">
-<h3>Kişiler</h3>
-<div id="userList"></div>
-</div>
+    <div id="chatSection" class="hidden">
+
+        <div class="card">
+            <input type="text" id="messageInput" placeholder="Mesaj yaz...">
+            <button class="btn-primary" onclick="sendMessage()">Gönder</button>
+        </div>
+
+        <div id="messages"></div>
+
+    </div>
+
 </div>
 
-<div id="statusView" class="view">
-<div class="card">
-<h3>Durum</h3>
-<input id="statusInput" placeholder="Durum yaz">
-<button onclick="setStatus()">Paylaş</button>
-<div id="statusList"></div>
+<div class="navbar">
+    <div class="nav-item active" onclick="switchTab('chat')">Sohbet</div>
+    <div class="nav-item" onclick="switchTab('profile')">Profil</div>
+    <div class="nav-item" onclick="logout()">Çıkış</div>
 </div>
-</div>
-
-<div class="nav hidden" id="bottomNav">
-<button onclick="openView('chatView')">Sohbet</button>
-<button onclick="openView('usersView')">Kişiler</button>
-<button onclick="openView('statusView')">Durum</button>
-</div>
-
-<script type="module">
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, setDoc, doc, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-const firebaseConfig = {
-apiKey: "AIzaSyA3--Xy1WrM6WlxurXXr4i5qwMZiafXN4k",
-authDomain: "vigochat-58144.firebaseapp.com",
-projectId: "vigochat-58144"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-
-let currentUser=null;
-
-window.login=async()=>{
-try{
-await signInWithEmailAndPassword(auth,email.value,pass.value);
-}catch(e){
-authError.innerText=e.message;
-}
-}
-
-window.register=async()=>{
-try{
-await createUserWithEmailAndPassword(auth,email.value,pass.value);
-await setDoc(doc(db,"users",auth.currentUser.uid),{
-email:email.value,
-status:"çevrimiçi"
-});
-}catch(e){
-authError.innerText=e.message;
-}
-}
-
-window.logout=()=>signOut(auth);
-
-onAuthStateChanged(auth,user=>{
-if(user){
-currentUser=user;
-authView.classList.remove("active");
-chatView.classList.add("active");
-bottomNav.classList.remove("hidden");
-loadMessages();
-loadUsers();
-loadStatuses();
-}else{
-authView.classList.add("active");
-chatView.classList.remove("active");
-bottomNav.classList.add("hidden");
-}
-});
-
-function loadMessages(){
-const q=query(collection(db,"messages"),orderBy("time"));
-onSnapshot(q,snap=>{
-messages.innerHTML="";
-snap.forEach(docu=>{
-const data=docu.data();
-const div=document.createElement("div");
-div.className="message "+(data.uid===currentUser.uid?"me":"other");
-div.innerText=data.text;
-messages.appendChild(div);
-});
-messages.scrollTop=messages.scrollHeight;
-});
-}
-
-window.sendMessage=async()=>{
-if(!msgInput.value) return;
-await addDoc(collection(db,"messages"),{
-text:msgInput.value,
-uid:currentUser.uid,
-time:Date.now()
-});
-msgInput.value="";
-}
-
-async function loadUsers(){
-const snap=await getDocs(collection(db,"users"));
-userList.innerHTML="";
-snap.forEach(d=>{
-const data=d.data();
-const div=document.createElement("div");
-div.className="card";
-div.innerText=data.email+" - "+data.status;
-userList.appendChild(div);
-});
-}
-
-window.setStatus=async()=>{
-await setDoc(doc(db,"users",currentUser.uid),{
-email:currentUser.email,
-status:statusInput.value
-});
-statusInput.value="";
-}
-
-async function loadStatuses(){
-const snap=await getDocs(collection(db,"users"));
-statusList.innerHTML="";
-snap.forEach(d=>{
-const data=d.data();
-const div=document.createElement("div");
-div.className="card";
-div.innerText=data.email+" : "+data.status;
-statusList.appendChild(div);
-});
-}
-
-window.openView=(id)=>{
-document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
-document.getElementById(id).classList.add("active");
-}
-
-window.toggleTheme=()=>{
-document.body.style.background =
-document.body.style.background=="white" ? "#0f172a" : "white";
-}
-
-</script>
-
-</body>
-</html>
