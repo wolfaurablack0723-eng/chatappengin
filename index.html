@@ -180,3 +180,224 @@ button{
     <div class="nav-item" onclick="switchTab('profile')">Profil</div>
     <div class="nav-item" onclick="logout()">Çıkış</div>
 </div>
+<script type="module">
+
+// Firebase Import
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { 
+    getAuth, 
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    signOut,
+    onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+import { 
+    getDatabase, 
+    ref, 
+    push, 
+    onValue 
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+// SENİN FIREBASE CONFIG
+const firebaseConfig = {
+  apiKey: "AIzaSyA3--Xy1WrM6WlxurXXr4i5qwMZiafXN4k",
+  authDomain: "vigochat-58144.firebaseapp.com",
+  databaseURL: "https://vigochat-58144-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "vigo
+      <script type="module">
+
+import { 
+    ref, 
+    set, 
+    get, 
+    update,
+    child,
+    onDisconnect
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+const dbRoot = ref(db);
+
+// ONLINE STATUS
+onAuthStateChanged(auth, (user)=>{
+    if(user){
+        const userStatusRef = ref(db, "users/" + user.uid);
+        set(userStatusRef, {
+            email: user.email,
+            online: true,
+            lastSeen: Date.now()
+        });
+
+        onDisconnect(userStatusRef).update({
+            online: false,
+            lastSeen: Date.now()
+        });
+
+        loadUsers();
+        loadStatuses();
+    }
+});
+
+// LOAD USERS
+function loadUsers(){
+    const usersRef = ref(db, "users");
+
+    onValue(usersRef, (snapshot)=>{
+        const data = snapshot.val();
+        const container = document.getElementById("peopleList");
+        if(!container) return;
+
+        container.innerHTML = "";
+
+        for(let uid in data){
+            if(uid === auth.currentUser.uid) continue;
+
+            const user = data[uid];
+
+            const div = document.createElement("div");
+            div.className = "card";
+            div.innerHTML = `
+                <strong>${user.email}</strong><br>
+                ${user.online ? "🟢 Online" : "⚫ Son Görülme: " + new Date(user.lastSeen).toLocaleTimeString()}
+                <br><button onclick="openPrivateChat('${uid}')">Mesaj</button>
+            `;
+            container.appendChild(div);
+        }
+    });
+}
+
+// PRIVATE CHAT
+let currentChatUser = null;
+
+window.openPrivateChat = function(uid){
+    currentChatUser = uid;
+    document.getElementById("chatTitle").innerText = "Sohbet";
+    loadPrivateMessages(uid);
+    switchTabReal("messages");
+}
+
+function loadPrivateMessages(uid){
+
+    const chatId = getChatId(auth.currentUser.uid, uid);
+    const messagesRef = ref(db, "privateMessages/" + chatId);
+
+    onValue(messagesRef, (snapshot)=>{
+        const data = snapshot.val();
+        const container = document.getElementById("messages");
+        container.innerHTML = "";
+
+        if(!data) return;
+
+        Object.values(data).forEach(msg=>{
+            const div = document.createElement("div");
+            div.className = "message";
+
+            const isMe = msg.uid === auth.currentUser.uid;
+
+            div.style.textAlign = isMe ? "right" : "left";
+
+            div.innerHTML = `
+                <div style="
+                    display:inline-block;
+                    padding:10px;
+                    border-radius:10px;
+                    background:${isMe ? '#4c8bf5' : '#2a2a2a'};
+                ">
+                    ${msg.text}
+                    <div style="font-size:10px;opacity:.6">
+                        ${new Date(msg.time).toLocaleTimeString()}
+                    </div>
+                </div>
+            `;
+
+            container.appendChild(div);
+        });
+
+        container.scrollTop = container.scrollHeight;
+    });
+}
+
+// SEND PRIVATE MESSAGE
+window.sendMessage = function(){
+
+    const input = document.getElementById("messageInput");
+    const text = input.value;
+
+    if(text.trim() === "" || !currentChatUser) return;
+
+    const chatId = getChatId(auth.currentUser.uid, currentChatUser);
+    const messagesRef = ref(db, "privateMessages/" + chatId);
+
+    push(messagesRef, {
+        text: text,
+        uid: auth.currentUser.uid,
+        time: Date.now()
+    });
+
+    input.value = "";
+}
+
+// CHAT ID GENERATOR
+function getChatId(uid1, uid2){
+    return uid1 < uid2 ? uid1 + "_" + uid2 : uid2 + "_" + uid1;
+}
+
+// STATUS (DURUM)
+window.addStatus = function(){
+
+    const text = prompt("Durum yaz");
+    if(!text) return;
+
+    const statusRef = ref(db, "statuses/" + auth.currentUser.uid);
+
+    push(statusRef, {
+        text: text,
+        time: Date.now()
+    });
+}
+
+function loadStatuses(){
+    const statusRef = ref(db, "statuses");
+
+    onValue(statusRef, (snapshot)=>{
+        const data = snapshot.val();
+        const container = document.getElementById("statusList");
+        if(!container) return;
+
+        container.innerHTML = "";
+
+        for(let uid in data){
+            const userStatuses = data[uid];
+
+            Object.values(userStatuses).forEach(status=>{
+                const div = document.createElement("div");
+                div.className = "card";
+                div.innerHTML = `
+                    <strong>${uid}</strong><br>
+                    ${status.text}
+                    <div style="font-size:10px">
+                        ${new Date(status.time).toLocaleTimeString()}
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+    });
+}
+
+// ARAMALAR DEMO
+window.addCall = function(){
+    alert("Arama sistemi BLOK 4'te WebRTC ile eklenecek.");
+}
+
+// GERÇEK SEKME GEÇİŞ
+window.switchTabReal = function(tab){
+
+    document.querySelectorAll(".section").forEach(s=>{
+        s.style.display = "none";
+    });
+
+    document.getElementById(tab + "Section").style.display = "block";
+}
+
+</script>
