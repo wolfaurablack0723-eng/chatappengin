@@ -380,7 +380,9 @@
       <button class="tabBtn" type="button" data-tab="settings"><div class="ico">⚙️</div><div class="lbl">Ayarlar</div></button>
     </nav>
   </div>
-
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
   <script>
     // ---- helpers
     const $ = (s, el=document)=> el.querySelector(s);
@@ -702,6 +704,7 @@ setView("auth");
 renderMustLoginHints();
 initFirebaseWhenReady();
 </script>
+  
 </body>
 </html>
   
