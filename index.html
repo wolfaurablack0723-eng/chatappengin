@@ -3,34 +3,37 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
-  <title>Basit Mesajlaşma</title>
+  <title>VigoChatt</title>
   <style>
     :root{
       --bg:#efe7db;
-      --card:rgba(0,0,0,.06);
+      --card:rgba(255,255,255,.58);
       --text:#1b1b1b;
       --muted:rgba(0,0,0,.55);
       --border:rgba(0,0,0,.10);
       --accent:#2b6cff;
+      --accent2:rgba(43,108,255,.12);
       --safe-bottom: env(safe-area-inset-bottom, 0px);
       --safe-top: env(safe-area-inset-top, 0px);
       --radius:18px;
+      --shadow: 0 12px 28px rgba(0,0,0,.08);
     }
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
       margin:0;
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
-      background: radial-gradient(900px 600px at 60% 10%, rgba(255,255,255,.75), transparent 60%),
-                  radial-gradient(900px 600px at 10% 90%, rgba(255,255,255,.60), transparent 60%),
-                  var(--bg);
+      background:
+        radial-gradient(900px 600px at 60% 10%, rgba(255,255,255,.75), transparent 60%),
+        radial-gradient(900px 600px at 10% 90%, rgba(255,255,255,.60), transparent 60%),
+        var(--bg);
       color:var(--text);
     }
 
     .app{
       max-width:520px;
       margin:0 auto;
-      height:100dvh;
+      min-height:100dvh;
       display:flex;
       flex-direction:column;
       padding-top: var(--safe-top);
@@ -45,21 +48,18 @@
       justify-content:space-between;
       gap:10px;
     }
-    .header h1{
-      margin:0;
-      font-size:18px;
-      letter-spacing:.2px;
-    }
+    .header h1{margin:0;font-size:18px;letter-spacing:.2px}
     .header small{color:var(--muted)}
     .pill{
       border:1px solid var(--border);
-      background: rgba(255,255,255,.55);
+      background: var(--card);
       padding:10px 12px;
       border-radius:999px;
       cursor:pointer;
       user-select:none;
-      appearance:none; -webkit-appearance:none;
-      font:inherit; color:inherit;
+      appearance:none;-webkit-appearance:none;
+      font:inherit;color:inherit;
+      box-shadow: 0 8px 18px rgba(0,0,0,.06);
     }
     .pill:active{transform:scale(.98)}
 
@@ -74,25 +74,28 @@
 
     .card{
       border:1px solid var(--border);
-      background: rgba(255,255,255,.55);
+      background: var(--card);
       border-radius: var(--radius);
       padding: 14px;
       margin-bottom: 12px;
+      box-shadow: var(--shadow);
     }
+
     .list{display:flex; flex-direction:column; gap:10px}
     .item{
       display:flex; align-items:center; gap:12px;
       border:1px solid var(--border);
-      background: rgba(255,255,255,.55);
+      background: var(--card);
       border-radius: 16px;
       padding: 12px;
       cursor:pointer;
       user-select:none;
+      box-shadow: 0 10px 24px rgba(0,0,0,.06);
     }
     .item:active{transform:scale(.99)}
     .avatar{
       width:44px;height:44px;border-radius:16px;
-      background: rgba(43,108,255,.12);
+      background: var(--accent2);
       border:1px solid rgba(43,108,255,.18);
       display:grid; place-items:center;
       font-weight:900;
@@ -102,6 +105,33 @@
     .meta{min-width:0; flex:1}
     .meta b{display:block; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
     .meta span{display:block; font-size:13px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:3px}
+
+    /* Forms */
+    .field{display:flex; flex-direction:column; gap:8px; margin-top:10px}
+    .label{font-size:12px; color:var(--muted); font-weight:800; letter-spacing:.2px}
+    .input, .textarea{
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.72);
+      border-radius: 16px;
+      padding: 12px;
+      outline:none;
+      font-size:14px;
+      width:100%;
+    }
+    .textarea{min-height:90px; resize:none}
+
+    .btnPrimary{
+      border:1px solid rgba(43,108,255,.25);
+      background: var(--accent2);
+      color: var(--accent);
+      font-weight:900;
+      border-radius: 16px;
+      padding: 12px 14px;
+      cursor:pointer;
+      appearance:none;-webkit-appearance:none;
+      font:inherit;
+    }
+    .btnPrimary:active{transform:scale(.99)}
 
     /* Chat overlay */
     .overlay{
@@ -122,29 +152,30 @@
       height:100%;
       display:flex;
       flex-direction:column;
-      background: rgba(255,255,255,.50);
+      background: rgba(255,255,255,.54);
     }
     .chatTop{
       padding: 12px 14px;
       display:flex; align-items:center; gap:10px;
       border-bottom:1px solid var(--border);
-      background: rgba(255,255,255,.55);
+      background: var(--card);
+      box-shadow: 0 10px 24px rgba(0,0,0,.06);
     }
     .btn{
       width:44px; height:44px;
       border-radius: 14px;
       border:1px solid var(--border);
-      background: rgba(255,255,255,.65);
+      background: rgba(255,255,255,.72);
       cursor:pointer;
       display:grid; place-items:center;
       user-select:none;
-      appearance:none; -webkit-appearance:none;
-      font:inherit; color:inherit;
+      appearance:none;-webkit-appearance:none;
+      font:inherit;color:inherit;
     }
     .btn:active{transform:scale(.98)}
     .chatTitle{min-width:0; flex:1}
     .chatTitle b{display:block; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-    .chatTitle span{display:block; font-size:12px; color:var(--muted)}
+    .chatTitle span{display:block; font-size:12px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
 
     .chatBody{
       flex:1;
@@ -153,30 +184,42 @@
       display:flex;
       flex-direction:column;
       gap:10px;
+      scroll-behavior:smooth;
     }
     .bubble{
-      max-width:78%;
+      max-width:80%;
       padding:10px 12px;
       border-radius: 16px;
       border:1px solid var(--border);
-      background: rgba(255,255,255,.75);
+      background: rgba(255,255,255,.80);
       font-size:14px;
       line-height:1.35;
       white-space:pre-wrap;
       word-break:break-word;
+      box-shadow: 0 10px 24px rgba(0,0,0,.06);
     }
     .bubble.me{
       margin-left:auto;
-      background: rgba(43,108,255,.12);
+      background: var(--accent2);
       border-color: rgba(43,108,255,.20);
     }
+    .bubbleMeta{
+      margin-top:6px;
+      font-size:11px;
+      color:var(--muted);
+    }
+
+    /* IMPORTANT: composer artık fixed değil, chat içinde sticky */
     .composer{
+      position: sticky;
+      bottom: 0;
       padding: 10px 14px calc(10px + var(--safe-bottom));
       border-top:1px solid var(--border);
-      background: rgba(255,255,255,.55);
+      background: var(--card);
       display:flex;
       gap:10px;
       align-items:flex-end;
+      box-shadow: 0 -10px 24px rgba(0,0,0,.06);
     }
     .composer textarea{
       flex:1;
@@ -184,7 +227,7 @@
       max-height:140px;
       resize:none;
       border:1px solid var(--border);
-      background: rgba(255,255,255,.75);
+      background: rgba(255,255,255,.80);
       border-radius: 16px;
       padding: 12px;
       outline:none;
@@ -194,13 +237,13 @@
       width:52px;height:52px;
       border-radius:16px;
       border:1px solid rgba(43,108,255,.25);
-      background: rgba(43,108,255,.12);
+      background: var(--accent2);
       color: var(--accent);
       font-weight:900;
       cursor:pointer;
       display:grid; place-items:center;
       user-select:none;
-      appearance:none; -webkit-appearance:none;
+      appearance:none;-webkit-appearance:none;
       font:inherit;
     }
     .send:active{transform:scale(.98)}
@@ -217,11 +260,12 @@
     .nav{
       width:min(520px, calc(100% - 24px));
       border:1px solid var(--border);
-      background: rgba(255,255,255,.55);
+      background: var(--card);
       border-radius: 22px;
       padding: 10px;
       display:flex;
       gap:8px;
+      box-shadow: var(--shadow);
     }
     .tab{
       flex:1;
@@ -238,11 +282,11 @@
     }
     .tab.active{
       color: var(--text);
-      background: rgba(43,108,255,.10);
+      background: var(--accent2);
       border-color: rgba(43,108,255,.18);
     }
     .tab .ico{font-size:20px; line-height:1}
-    .tab .lbl{font-size:12px; font-weight:800}
+    .tab .lbl{font-size:12px; font-weight:900}
   </style>
 </head>
 
@@ -253,7 +297,7 @@
         <h1 id="title">Mesajlar</h1>
         <small id="sub">Bağlanıyor…</small>
       </div>
-      <button class="pill" id="addBtn" type="button">＋</button>
+      <button class="pill" id="addBtn" type="button">Ayarlar</button>
     </div>
 
     <!-- Aramalar -->
@@ -275,13 +319,18 @@
       <div class="card">
         <b>Durum</b>
         <div style="margin-top:6px; color:var(--muted); font-size:13px">
-          Buraya hikaye/durum mantığı eklenir (demo).
+          Durum paylaş — herkes görsün.
+        </div>
+
+        <div class="field">
+          <div class="label">Yeni durum</div>
+          <textarea class="textarea" id="statusText" placeholder="Bir şey yaz… (örn: Dışarıdayım)"></textarea>
+          <button class="btnPrimary" id="statusSend" type="button">Durum Paylaş</button>
+          <div style="margin-top:4px; font-size:12px; color:var(--muted)" id="statusHint"></div>
         </div>
       </div>
-      <div class="list">
-        <div class="item"><div class="avatar">✨</div><div class="meta"><b>Senin durumun</b><span>Durum ekle</span></div></div>
-        <div class="item"><div class="avatar">📌</div><div class="meta"><b>Ahmet</b><span>“Dışarıdayım”</span></div></div>
-      </div>
+
+      <div class="list" id="statusList"></div>
     </section>
 
     <!-- Mesajlar -->
@@ -289,30 +338,51 @@
       <div class="card">
         <b>Mesajlar</b>
         <div style="margin-top:6px; color:var(--muted); font-size:13px">
-          Bir sohbet seç — mesaj yazıp gönderebilirsin.
+          Bir sohbet seç — gerçek zamanlı mesajlaş.
+        </div>
+        <div style="margin-top:8px; font-size:12px; color:var(--muted)">
+          <b id="meNickLabel"></b> • <span id="meAboutLabel"></span>
         </div>
       </div>
       <div class="list" id="chatList"></div>
     </section>
 
-    <!-- Profil -->
+    <!-- Profil / Ayarlar -->
     <section class="view" id="view-profile">
       <div class="card">
-        <b>Profil</b>
+        <b>Ayarlar</b>
         <div style="margin-top:6px; color:var(--muted); font-size:13px">
-          Basit profil ekranı (demo).
+          Takma ad ve durum mesajını kaydet.
+        </div>
+
+        <div class="field">
+          <div class="label">Takma ad</div>
+          <input class="input" id="nickInput" placeholder="örn: Engin"/>
+        </div>
+
+        <div class="field">
+          <div class="label">Durum mesajı</div>
+          <input class="input" id="aboutInput" placeholder="örn: çevrimiçi"/>
+        </div>
+
+        <div class="field">
+          <button class="btnPrimary" id="saveSettings" type="button">Kaydet</button>
+          <div style="margin-top:6px; font-size:12px; color:var(--muted)" id="saveHint"></div>
         </div>
       </div>
-      <div class="list">
-        <div class="item" style="cursor:default"><div class="avatar">🙂</div><div class="meta"><b id="meName">Engin</b><span id="meStatus">Durum: çevrimiçi</span></div></div>
-        <div class="item" style="cursor:default"><div class="avatar">⚙️</div><div class="meta"><b>Ayarlar</b><span>Bildirim / Gizlilik (demo)</span></div></div>
+
+      <div class="card">
+        <b>Bilgi</b>
+        <div style="margin-top:6px; color:var(--muted); font-size:13px">
+          Mesajlar Firebase ile gerçek zamanlıdır.
+        </div>
       </div>
     </section>
   </div>
 
   <!-- Chat overlay -->
   <div class="overlay" id="overlay">
-    <div class="chat">
+    <div class="chat" id="chatRoot">
       <div class="chatTop">
         <button class="btn" id="back" type="button">←</button>
         <div class="chatTitle">
@@ -321,9 +391,11 @@
         </div>
         <button class="btn" id="more" type="button">⋯</button>
       </div>
+
       <div class="chatBody" id="chatBody"></div>
+
       <div class="composer">
-        <textarea id="msg" rows="1" placeholder="Mesaj yaz..."></textarea>
+        <textarea id="msg" rows="1" placeholder="Mesaj yaz…"></textarea>
         <button class="send" id="send" type="button">➤</button>
       </div>
     </div>
@@ -332,24 +404,21 @@
   <!-- Bottom nav -->
   <div class="bottom">
     <nav class="nav">
-      <div class="tab" data-tab="calls"><div class="ico">👥</div><div class="lbl">Aramalar</div></div>
-      <div class="tab" data-tab="status"><div class="ico">❗</div><div class="lbl">Durum</div></div>
-      <div class="tab active" data-tab="messages"><div class="ico">📶</div><div class="lbl">Mesajlar</div></div>
-      <div class="tab" data-tab="profile"><div class="ico">🤔</div><div class="lbl">Profil</div></div>
+      <div class="tab" data-tab="calls"><div class="ico">📞</div><div class="lbl">Aramalar</div></div>
+      <div class="tab" data-tab="status"><div class="ico">✨</div><div class="lbl">Durum</div></div>
+      <div class="tab active" data-tab="messages"><div class="ico">💬</div><div class="lbl">Mesajlar</div></div>
+      <div class="tab" data-tab="profile"><div class="ico">⚙️</div><div class="lbl">Ayarlar</div></div>
     </nav>
   </div>
 
-  <!-- Firebase + Uygulama -->
   <script type="module">
     const $ = (s, el=document)=> el.querySelector(s);
     const $$ = (s, el=document)=> Array.from(el.querySelectorAll(s));
 
-    // ✅ Firebase SDK
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
     import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
     import { getFirestore, collection, addDoc, serverTimestamp, query, orderBy, limit, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-    // 🔥 SENİN FIREBASE CONFIG (DEĞİŞTİRME)
     const firebaseConfig = {
       apiKey: "AIzaSyB1qovN4BNfaFlvE-KvURhX31AshxLuc0",
       authDomain: "vigochatt.firebaseapp.com",
@@ -363,49 +432,57 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // --- yardımcılar
-    function escapeHtml(s){
+    function esc(s){
       return String(s).replace(/[&<>"']/g, c => ({
         "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
       }[c]));
     }
 
-    function ensureNick(){
-      let nick = localStorage.getItem("vigo_nick") || "";
-      nick = nick.trim();
-      if(!nick){
-        nick = prompt("Takma adın ne olsun? (örn: Engin)") || "Anon";
-        nick = nick.trim() || "Anon";
-        localStorage.setItem("vigo_nick", nick);
-      }
-      $("#meName").textContent = nick;
-      return nick;
+    // ---- Settings (local)
+    const state = {
+      uid: null,
+      nick: (localStorage.getItem("vigo_nick") || "Engin").trim() || "Engin",
+      about: (localStorage.getItem("vigo_about") || "çevrimiçi").trim() || "çevrimiçi",
+    };
+
+    function applySettingsToUI(){
+      $("#meNickLabel").textContent = state.nick;
+      $("#meAboutLabel").textContent = state.about;
+      $("#nickInput").value = state.nick;
+      $("#aboutInput").value = state.about;
     }
 
-    let uid = null;
-    let nick = ensureNick();
+    function saveSettings(){
+      state.nick = ($("#nickInput").value || "Engin").trim().slice(0,24) || "Engin";
+      state.about = ($("#aboutInput").value || "çevrimiçi").trim().slice(0,48) || "çevrimiçi";
+      localStorage.setItem("vigo_nick", state.nick);
+      localStorage.setItem("vigo_about", state.about);
+      applySettingsToUI();
+      $("#saveHint").textContent = "Kaydedildi ✅";
+      setTimeout(()=> $("#saveHint").textContent="", 1500);
+    }
 
-    // --- Demo sohbet listesi (UI aynı kalsın)
+    // ---- Chats UI list (room ids)
     const chats = [
-      {id:"c1", name:"Ahmet", last:"", msgs:[]},
-      {id:"c2", name:"Zeynep", last:"", msgs:[]},
-      {id:"c3", name:"Mert", last:"", msgs:[]}
+      {id:"c1", name:"Ahmet", last:""},
+      {id:"c2", name:"Zeynep", last:""},
+      {id:"c3", name:"Mert", last:""}
     ];
 
     function renderChats(){
       const el = $("#chatList");
       el.innerHTML = chats.map(c=>`
         <div class="item" data-chat="${c.id}">
-          <div class="avatar">${escapeHtml((c.name[0]||"•"))}</div>
+          <div class="avatar">${esc((c.name[0]||"•"))}</div>
           <div class="meta">
-            <b>${escapeHtml(c.name)}</b>
-            <span>${escapeHtml(c.last || "Sohbete gir…")}</span>
+            <b>${esc(c.name)}</b>
+            <span>${esc(c.last || "Sohbete gir…")}</span>
           </div>
         </div>
       `).join("");
     }
 
-    // --- Tab geçiş (aynı)
+    // ---- Tabs
     function setTab(tab){
       $$(".tab").forEach(t=> t.classList.toggle("active", t.dataset.tab === tab));
       ["calls","status","messages","profile"].forEach(v=>{
@@ -413,72 +490,59 @@
         if(view) view.classList.toggle("active", v === tab);
       });
 
-      const titles = {calls:"Aramalar", status:"Durum", messages:"Mesajlar", profile:"Profil"};
+      const titles = {calls:"Aramalar", status:"Durum", messages:"Mesajlar", profile:"Ayarlar"};
       $("#title").textContent = titles[tab] || "Mesajlar";
       closeChat();
     }
 
-    // --- Firebase login
+    // ---- Auth connect
     $("#sub").textContent = "Bağlanıyor…";
     signInAnonymously(auth).catch(()=>{});
     onAuthStateChanged(auth, (user)=>{
       if(user){
-        uid = user.uid;
-        $("#sub").textContent = "Bağlandı ✅";
-        $("#meStatus").textContent = "Durum: çevrimiçi";
+        state.uid = user.uid;
+        $("#sub").textContent = "Online ✅";
       }else{
-        uid = null;
-        $("#sub").textContent = "Bağlantı yok…";
-        $("#meStatus").textContent = "Durum: çevrimdışı";
+        state.uid = null;
+        $("#sub").textContent = "Offline";
       }
     });
 
-    // --- Chat realtime
-    let current = null;
+    // ---- Chat realtime
+    let currentChat = null;
     let unsubMessages = null;
 
-    function renderChatFromFirestore(list){
+    function renderChatMessages(arr){
       const box = $("#chatBody");
-      box.innerHTML = list.map(m =>
-        `<div class="bubble ${m.uid === uid ? "me":""}">${escapeHtml(m.text)}</div>`
-      ).join("");
+      box.innerHTML = arr.map(m=>{
+        const me = (m.uid === state.uid);
+        const meta = !me ? `<div class="bubbleMeta">${esc(m.nick || "Anon")}</div>` : "";
+        return `<div class="bubble ${me ? "me":""}">${esc(m.text || "")}${meta}</div>`;
+      }).join("");
       box.scrollTop = box.scrollHeight;
     }
 
-    function openChat(id){
-      current = chats.find(c=>c.id===id) || null;
-      if(!current) return;
+    function openChat(chatId){
+      currentChat = chats.find(c=>c.id===chatId) || null;
+      if(!currentChat) return;
 
-      $("#chatName").textContent = current.name;
-      $("#chatSub").textContent = "çevrimiçi";
+      $("#chatName").textContent = currentChat.name;
+      $("#chatSub").textContent = state.about;
 
-      // önceki dinlemeyi kapat
-      if(unsubMessages) { unsubMessages(); unsubMessages = null; }
+      if(unsubMessages){ try{unsubMessages();}catch{} unsubMessages=null; }
 
-      // Firestore path: rooms/{chatId}/messages
-      const msgsRef = collection(db, "rooms", id, "messages");
+      const msgsRef = collection(db, "rooms", chatId, "messages");
       const q = query(msgsRef, orderBy("createdAt","asc"), limit(250));
 
       unsubMessages = onSnapshot(q, (snap)=>{
         const arr = [];
-        snap.forEach(d=>{
-          const m = d.data();
-          arr.push({
-            uid: m.uid || "",
-            nick: m.nick || "Anon",
-            text: m.text || ""
-          });
-        });
-
-        // son mesajı listede göster
-        const last = arr.length ? arr[arr.length-1].text : "";
-        current.last = last;
+        snap.forEach(d=> arr.push(d.data()));
+        currentChat.last = arr.length ? (arr[arr.length-1].text || "") : "";
         renderChats();
-
-        renderChatFromFirestore(arr);
+        renderChatMessages(arr);
       }, (err)=>{
-        $("#chatSub").textContent = "Hata";
         console.log(err);
+        $("#chatSub").textContent = "Hata";
       });
 
       $("#overlay").classList.add("show");
@@ -488,75 +552,94 @@
     function closeChat(){
       $("#overlay").classList.remove("show");
       $("#msg").value = "";
-      current = null;
-      if(unsubMessages) { unsubMessages(); unsubMessages = null; }
+      currentChat = null;
+      if(unsubMessages){ try{unsubMessages();}catch{} unsubMessages=null; }
     }
 
     async function sendMsg(){
-      if(!current || !uid) return;
-
+      if(!currentChat) return;
+      if(!state.uid) return alert("Bağlantı yok. Firebase Auth kontrol et.");
       const t = $("#msg").value.trim();
       if(!t) return;
-
       $("#msg").value = "";
 
       try{
-        await addDoc(collection(db, "rooms", current.id, "messages"), {
-          uid,
-          nick,
-          text: t.slice(0, 1000),
+        await addDoc(collection(db, "rooms", currentChat.id, "messages"), {
+          uid: state.uid,
+          nick: state.nick,
+          text: t.slice(0, 1200),
           createdAt: serverTimestamp()
         });
       }catch(e){
-        alert("Mesaj gönderilemedi. Firestore/Rules kontrol et.");
         console.log(e);
+        alert("Mesaj gönderilemedi. Firestore Rules/Auth kontrol et.");
       }
     }
 
-    // --- click + touch garanti
+    // ---- Durum (global)
+    let unsubStatus = null;
+
+    function startStatusFeed(){
+      if(unsubStatus){ try{unsubStatus();}catch{} unsubStatus=null; }
+      const ref = collection(db, "statusPosts");
+      const q = query(ref, orderBy("createdAt","desc"), limit(30));
+      unsubStatus = onSnapshot(q, (snap)=>{
+        const list = [];
+        snap.forEach(d=> list.push(d.data()));
+        const el = $("#statusList");
+        el.innerHTML = list.map(s=>`
+          <div class="item" style="cursor:default">
+            <div class="avatar">✨</div>
+            <div class="meta">
+              <b>${esc(s.nick || "Anon")}</b>
+              <span>${esc(s.text || "")}</span>
+            </div>
+          </div>
+        `).join("");
+      });
+    }
+
+    async function sendStatus(){
+      if(!state.uid) return alert("Bağlantı yok. Firebase Auth kontrol et.");
+      const t = ($("#statusText").value || "").trim();
+      if(!t) return;
+      $("#statusText").value = "";
+      $("#statusHint").textContent = "Paylaşılıyor…";
+
+      try{
+        await addDoc(collection(db, "statusPosts"),{
+          uid: state.uid,
+          nick: state.nick,
+          text: t.slice(0, 500),
+          createdAt: serverTimestamp()
+        });
+        $("#statusHint").textContent = "Paylaşıldı ✅";
+        setTimeout(()=> $("#statusHint").textContent="", 1200);
+      }catch(e){
+        console.log(e);
+        $("#statusHint").textContent = "Hata";
+      }
+    }
+
+    // ---- WebView touch garanti
     function bindMulti(el, fn){
       ["click","touchend","pointerup"].forEach(ev=>{
         el.addEventListener(ev, (e)=>{
-          e.preventDefault();
-          e.stopPropagation();
+          e.preventDefault(); e.stopPropagation();
           fn();
         }, {passive:false});
       });
     }
 
-    // --- olaylar
-    document.addEventListener("click", (e)=>{
-      const tab = e.target.closest(".tab");
-      if(tab) setTab(tab.dataset.tab);
+    // ---- Klavye/textarea taşma düzeltme (visualViewport)
+    function setupKeyboardFix(){
+      const vv = window.visualViewport;
+      const chatRoot = $("#chatRoot");
+      if(!vv || !chatRoot) return;
 
-      const chatItem = e.target.closest("#chatList .item");
-      if(chatItem) openChat(chatItem.dataset.chat);
-    });
-
-    bindMulti($("#back"), closeChat);
-    bindMulti($("#send"), sendMsg);
-
-    $("#msg").addEventListener("keydown", (e)=>{
-      if((e.key === "Enter" || e.key === "NumpadEnter") && !e.shiftKey){
-        e.preventDefault();
-        sendMsg();
-      }
-    });
-
-    $("#addBtn").addEventListener("click", ()=>{
-      const n = prompt("Takma ad değiştir (isteğe bağlı):", nick || "");
-      if(n !== null){
-        nick = (n.trim() || "Anon");
-        localStorage.setItem("vigo_nick", nick);
-        $("#meName").textContent = nick;
-      }
-    });
-
-    $("#more").addEventListener("click", ()=> alert("Demo"));
-
-    // init
-    renderChats();
-    setTab("messages");
-  </script>
-</body>
-</html>
+      const apply = ()=>{
+        // klavye açılınca viewport küçülür, chat container height ayarla
+        const h = Math.max(200, Math.floor(vv.height));
+        chatRoot.style.height = h + "px";
+      };
+      vv.addEventListener("resize", apply)
