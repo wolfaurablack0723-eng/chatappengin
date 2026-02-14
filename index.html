@@ -2,124 +2,93 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>VigoChat</title>
-
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 <style>
-body{font-family:Arial;margin:0;background:#f2f2f2}
-.container{padding:20px}
-input,button{width:100%;padding:12px;margin:6px 0;border-radius:8px;border:1px solid #ccc}
+body{font-family:Arial;padding:20px}
+input,button{padding:10px;margin:5px;width:100%}
 button{background:#2b6cff;color:white;border:none}
-#chat{display:none}
-#messages{height:300px;overflow:auto;background:white;padding:10px;border-radius:8px}
-.msg{margin:5px 0}
-.top{display:flex;justify-content:space-between;align-items:center}
+#chat{display:none;margin-top:20px}
 </style>
 </head>
-
 <body>
 
-<div class="container" id="auth">
 <h2>Giriş / Kayıt</h2>
-<input id="email" placeholder="Email">
-<input id="password" type="password" placeholder="Şifre">
-<button onclick="register()">Kayıt Ol</button>
-<button onclick="login()">Giriş Yap</button>
+
+<input type="email" id="email" placeholder="Email">
+<input type="password" id="pass" placeholder="Şifre">
+<button onclick="login()">Giriş</button>
+<button onclick="signup()">Kayıt</button>
+
 <p id="error" style="color:red;"></p>
-</div>
 
-<div class="container" id="chat">
-<div class="top">
-<h3>VigoChat</h3>
+<div id="chat">
+<h2>Sohbet</h2>
+<input id="msg" placeholder="Mesaj yaz">
+<button onclick="send()">Gönder</button>
 <button onclick="logout()">Çıkış</button>
-</div>
-
-<input id="roomInput" placeholder="Oda adı (örn: genel)">
-<button onclick="joinRoom()">Odaya Gir</button>
-
 <div id="messages"></div>
-
-<input id="messageInput" placeholder="Mesaj yaz...">
-<button onclick="sendMessage()">Gönder</button>
 </div>
 
-<script type="module">
+<script>
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } 
-from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-import { getDatabase, ref, push, onValue } 
-from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
-
-
-// 🔥 BURAYI KENDİ FIREBASE CONFIGİNLE DEĞİŞTİR
-const firebaseConfig = {
-  apiKey: "BURAYA_APIKEY",
-  authDomain: "BURAYA_AUTHDOMAIN",
-  databaseURL: "BURAYA_DATABASEURL",
-  projectId: "BURAYA_PROJECTID",
-  storageBucket: "BURAYA_STORAGE",
-  messagingSenderId: "BURAYA_SENDERID",
-  appId: "BURAYA_APPID"
+var firebaseConfig = {
+  apiKey: "AIzaSyA3--Xy1WrM6WlxurXXr4i5qwMZiafXN4k",
+  authDomain: "vigochat-58144.firebaseapp.com",
+  databaseURL: "https://vigochat-58144-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "vigochat-58144",
+  storageBucket: "vigochat-58144.appspot.com",
+  messagingSenderId: "384136632816",
+  appId: "1:384136632816:web:2bb6d6942680a2e2e6e535"
 };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getDatabase(app);
+firebase.initializeApp(firebaseConfig);
 
-let currentRoom = null;
+var auth = firebase.auth();
+var db = firebase.database();
 
-window.register = function(){
-const email = emailInput.value;
-const pass = password.value;
-createUserWithEmailAndPassword(auth,email,pass)
-.catch(e=> error.innerText=e.message);
+function signup(){
+  auth.createUserWithEmailAndPassword(
+    email.value, pass.value
+  ).catch(e=> error.innerText = e.message);
 }
 
-window.login = function(){
-const email = emailInput.value;
-const pass = password.value;
-signInWithEmailAndPassword(auth,email,pass)
-.catch(e=> error.innerText=e.message);
+function login(){
+  auth.signInWithEmailAndPassword(
+    email.value, pass.value
+  ).catch(e=> error.innerText = e.message);
 }
 
-window.logout = function(){
-signOut(auth);
+function logout(){
+  auth.signOut();
 }
 
-onAuthStateChanged(auth,user=>{
-if(user){
-auth.style.display="none";
-chat.style.display="block";
-}else{
-auth.style.display="block";
-chat.style.display="none";
+function send(){
+  if(!msg.value) return;
+  db.ref("messages").push({
+    user: auth.currentUser.email,
+    text: msg.value
+  });
+  msg.value="";
 }
+
+auth.onAuthStateChanged(user=>{
+  if(user){
+    document.getElementById("chat").style.display="block";
+    db.ref("messages").on("value",snap=>{
+      messages.innerHTML="";
+      snap.forEach(child=>{
+        messages.innerHTML += "<p><b>"+child.val().user+"</b>: "+child.val().text+"</p>";
+      });
+    });
+  }else{
+    document.getElementById("chat").style.display="none";
+  }
 });
-
-window.joinRoom = function(){
-currentRoom = roomInput.value;
-messages.innerHTML="";
-const messagesRef = ref(db,"rooms/"+currentRoom);
-onValue(messagesRef,(snapshot)=>{
-messages.innerHTML="";
-snapshot.forEach(child=>{
-const msg = child.val();
-messages.innerHTML += "<div class='msg'><b>"+msg.user+":</b> "+msg.text+"</div>";
-});
-});
-}
-
-window.sendMessage = function(){
-if(!currentRoom) return;
-const msgRef = ref(db,"rooms/"+currentRoom);
-push(msgRef,{
-user:auth.currentUser.email,
-text:messageInput.value
-});
-messageInput.value="";
-}
 
 </script>
+
 </body>
 </html>
