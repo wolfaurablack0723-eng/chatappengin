@@ -1,100 +1,3 @@
-<!doctype html>
-<html lang="tr">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>VigoChatt</title>
-
-<style>
-:root{
-  --bg:#efe7db;
-  --card:rgba(0,0,0,.06);
-  --text:#1b1b1b;
-  --muted:rgba(0,0,0,.55);
-  --border:rgba(0,0,0,.10);
-  --accent:#2b6cff;
-  --radius:18px;
-}
-body{
-  margin:0;
-  font-family:system-ui;
-  background:var(--bg);
-  color:var(--text);
-}
-.app{max-width:520px;margin:auto;height:100vh;display:flex;flex-direction:column}
-.header{padding:16px;font-weight:bold;font-size:18px}
-.view{flex:1;overflow:auto;padding:12px}
-.card{
-  background:#fff;
-  border-radius:var(--radius);
-  padding:12px;
-  margin-bottom:12px;
-  border:1px solid var(--border)
-}
-input,textarea{
-  width:100%;
-  padding:10px;
-  border-radius:12px;
-  border:1px solid var(--border);
-  margin-bottom:10px
-}
-button{
-  padding:10px 16px;
-  border:none;
-  border-radius:12px;
-  background:var(--accent);
-  color:#fff;
-  cursor:pointer
-}
-.message{
-  padding:8px 12px;
-  border-radius:12px;
-  margin-bottom:6px;
-  background:#fff;
-  border:1px solid var(--border)
-}
-.me{
-  background:rgba(43,108,255,.15);
-  margin-left:auto;
-  max-width:70%
-}
-</style>
-</head>
-<body>
-
-<div class="app">
-  <div class="header">VigoChatt</div>
-
-  <!-- AUTH -->
-  <div class="view" id="authView">
-    <div class="card">
-      <input id="email" type="email" placeholder="Email">
-      <input id="pass" type="password" placeholder="Şifre">
-      <button onclick="register()">Kayıt Ol</button>
-      <button onclick="login()">Giriş Yap</button>
-      <div id="authErr"></div>
-    </div>
-  </div>
-
-  <!-- CHAT -->
-  <div class="view" id="chatView" style="display:none">
-    <div class="card">
-      <input id="targetEmail" placeholder="Mesaj atılacak email">
-      <button onclick="openChat()">Sohbet Aç</button>
-    </div>
-
-    <div id="messages"></div>
-
-    <div class="card">
-      <textarea id="msg" placeholder="Mesaj yaz"></textarea>
-      <button onclick="sendMessage()">Gönder</button>
-    </div>
-
-    <button onclick="logout()">Çıkış</button>
-  </div>
-</div>
-
-<!-- FIREBASE -->
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -108,9 +11,6 @@ import {
 
 import {
   getFirestore,
-  doc,
-  setDoc,
-  getDoc,
   collection,
   addDoc,
   query,
@@ -129,68 +29,122 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 let currentUser = null;
+let currentChatEmail = null;
 let currentChatId = null;
 
-window.register = async function(){
+/* ---------------- AUTH EKRANI EKLE ---------------- */
+
+const authCard = document.createElement("div");
+authCard.className="card";
+authCard.innerHTML = `
+  <h3>Giriş / Kayıt</h3>
+  <input id="emailInput" placeholder="Email">
+  <input id="passInput" type="password" placeholder="Şifre">
+  <button id="registerBtn">Kayıt Ol</button>
+  <button id="loginBtn">Giriş Yap</button>
+  <div id="authError" style="color:red"></div>
+`;
+document.getElementById("view-profile").prepend(authCard);
+
+document.getElementById("registerBtn").onclick = async ()=>{
   try{
     await createUserWithEmailAndPassword(auth,
-      email.value, pass.value);
-  }catch(e){ authErr.innerText=e.message }
-}
+      emailInput.value, passInput.value);
+  }catch(e){
+    authError.innerText=e.message;
+  }
+};
 
-window.login = async function(){
+document.getElementById("loginBtn").onclick = async ()=>{
   try{
     await signInWithEmailAndPassword(auth,
-      email.value, pass.value);
-  }catch(e){ authErr.innerText=e.message }
-}
+      emailInput.value, passInput.value);
+  }catch(e){
+    authError.innerText=e.message;
+  }
+};
 
-window.logout = async function(){
-  await signOut(auth);
-}
-
-onAuthStateChanged(auth, user=>{
+onAuthStateChanged(auth,user=>{
   if(user){
-    currentUser = user;
-    authView.style.display="none";
-    chatView.style.display="block";
+    currentUser=user;
+    authCard.style.display="none";
+    loadUsers();
   }else{
-    authView.style.display="block";
-    chatView.style.display="none";
+    authCard.style.display="block";
   }
 });
 
-window.openChat = async function(){
-  const target = targetEmail.value.trim().toLowerCase();
-  if(!target) return;
+/* ---------------- KULLANICILARI YÜKLE ---------------- */
 
-  currentChatId = [currentUser.email,target].sort().join("_");
+function loadUsers(){
+  const usersRef = collection(db,"users");
+
+  onSnapshot(usersRef,snap=>{
+    const list = document.getElementById("chatList");
+    list.innerHTML="";
+
+    snap.forEach(doc=>{
+      const data=doc.data();
+      if(data.email===currentUser.email) return;
+
+      const div=document.createElement("div");
+      div.className="item";
+      div.innerHTML=`
+        <div class="avatar">${data.email[0].toUpperCase()}</div>
+        <div class="meta">
+          <b>${data.email}</b>
+          <span>Sohbet aç</span>
+        </div>
+      `;
+      div.onclick=()=>openChat(data.email);
+      list.appendChild(div);
+    });
+  });
+
+  // kullanıcıyı kaydet
+  addDoc(usersRef,{
+    email:currentUser.email
+  });
+}
+
+/* ---------------- CHAT ---------------- */
+
+function openChat(targetEmail){
+  currentChatEmail=targetEmail;
+  currentChatId=[currentUser.email,targetEmail].sort().join("_");
+
+  document.getElementById("overlay").classList.add("show");
+  document.getElementById("chatName").innerText=targetEmail;
 
   listenMessages();
 }
 
 function listenMessages(){
-  const q = query(
+  const q=query(
     collection(db,"chats",currentChatId,"messages"),
     orderBy("time")
   );
 
   onSnapshot(q,snap=>{
-    messages.innerHTML="";
+    const box=document.getElementById("chatBody");
+    box.innerHTML="";
+
     snap.forEach(doc=>{
-      const data = doc.data();
+      const data=doc.data();
       const div=document.createElement("div");
-      div.className="message";
+      div.className="bubble";
       if(data.uid===currentUser.uid) div.classList.add("me");
       div.innerText=data.text;
-      messages.appendChild(div);
+      box.appendChild(div);
     });
+
+    box.scrollTop=box.scrollHeight;
   });
 }
 
-window.sendMessage = async function(){
+document.getElementById("send").onclick=async ()=>{
   if(!currentChatId) return;
-  const text=msg.value.trim();
+  const text=document.getElementById("msg").value.trim();
   if(!text) return;
 
   await addDoc(
@@ -201,9 +155,8 @@ window.sendMessage = async function(){
       time:Date.now()
     }
   );
-  msg.value="";
-}
+
+  document.getElementById("msg").value="";
+};
 
 </script>
-</body>
-</html>
