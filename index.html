@@ -1,11 +1,7 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { 
-  getAuth, 
-  signInAnonymously, 
-  onAuthStateChanged 
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
+import { getAuth, signInAnonymously, onAuthStateChanged }
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
   getFirestore,
   collection,
@@ -13,7 +9,10 @@ import {
   query,
   orderBy,
   onSnapshot,
-  serverTimestamp
+  serverTimestamp,
+  doc,
+  setDoc,
+  getDocs
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -30,23 +29,55 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 let userId = null;
+let currentRoom = null;
 
 signInAnonymously(auth);
 
 onAuthStateChanged(auth, (user)=>{
   if(user){
     userId = user.uid;
-    loadMessages();
+    loadRooms();
   }
 });
 
+const chatList = document.getElementById("chatList");
 const chatBody = document.getElementById("chatBody");
 const msgInput = document.getElementById("msg");
 const sendBtn = document.getElementById("send");
+const overlay = document.getElementById("overlay");
+const backBtn = document.getElementById("back");
 
-function loadMessages(){
+async function loadRooms(){
+  chatList.innerHTML = "";
+
+  const snapshot = await getDocs(collection(db,"rooms"));
+
+  snapshot.forEach(docSnap=>{
+    const data = docSnap.data();
+    const div = document.createElement("div");
+    div.className = "item";
+    div.innerHTML = `
+      <div class="avatar">${data.name[0]}</div>
+      <div class="meta">
+        <b>${data.name}</b>
+        <span>Sohbete gir</span>
+      </div>
+    `;
+    div.onclick = ()=> openChat(docSnap.id, data.name);
+    chatList.appendChild(div);
+  });
+}
+
+function openChat(roomId, name){
+  currentRoom = roomId;
+  document.getElementById("chatName").textContent = name;
+  overlay.classList.add("show");
+  loadMessages(roomId);
+}
+
+function loadMessages(roomId){
   const q = query(
-    collection(db, "messages"),
+    collection(db,"rooms",roomId,"messages"),
     orderBy("createdAt")
   );
 
@@ -63,16 +94,24 @@ function loadMessages(){
   });
 }
 
-sendBtn.addEventListener("click", async ()=>{
+sendBtn.onclick = async ()=>{
   const text = msgInput.value.trim();
-  if(!text) return;
+  if(!text || !currentRoom) return;
 
-  await addDoc(collection(db,"messages"),{
-    text: text,
-    uid: userId,
-    createdAt: serverTimestamp()
-  });
+  await addDoc(
+    collection(db,"rooms",currentRoom,"messages"),
+    {
+      text: text,
+      uid: userId,
+      createdAt: serverTimestamp()
+    }
+  );
 
   msgInput.value = "";
-});
+};
+
+backBtn.onclick = ()=>{
+  overlay.classList.remove("show");
+  currentRoom = null;
+};
 </script>
