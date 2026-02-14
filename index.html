@@ -3,221 +3,227 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VigoChat</title>
+<title>Vigo Chat</title>
 
 <style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Segoe UI, sans-serif;}
+
 body{
-margin:0;
-font-family:Arial, sans-serif;
-background:#0f172a;
-color:white;
+background:linear-gradient(180deg,#0f172a,#0b1220);
+color:#e2e8f0;
 }
 
+/* HEADER */
 header{
-background:#1e293b;
-padding:15px;
-text-align:center;
-font-weight:bold;
-}
-
-nav{
-position:fixed;
-bottom:0;
-width:100%;
-background:#1e293b;
+background:#111827;
+padding:18px;
 display:flex;
-justify-content:space-around;
-padding:10px 0;
+justify-content:space-between;
+align-items:center;
+font-size:20px;
+font-weight:600;
+box-shadow:0 3px 10px rgba(0,0,0,0.4);
 }
 
-nav button{
-background:none;
-border:none;
-color:white;
-font-size:14px;
-}
-
+/* SECTIONS */
 .section{
 display:none;
-padding:15px;
-padding-bottom:80px;
+padding:20px;
+padding-bottom:100px;
 }
 
 .active{
 display:block;
 }
 
-input,textarea{
-width:100%;
-padding:10px;
-margin:5px 0;
-background:#334155;
-border:none;
-color:white;
+h2{
+margin-bottom:15px;
 }
 
-button{
-padding:10px;
-background:#2563eb;
-border:none;
-color:white;
-margin-top:5px;
-}
-
+/* CARD */
 .card{
 background:#1e293b;
-padding:10px;
-margin:5px 0;
+padding:15px;
+border-radius:14px;
+margin-bottom:12px;
+box-shadow:0 4px 15px rgba(0,0,0,0.3);
 }
+
+.user{
+display:flex;
+align-items:center;
+gap:15px;
+}
+
+.avatar{
+width:45px;
+height:45px;
+border-radius:50%;
+background:#3b82f6;
+display:flex;
+align-items:center;
+justify-content:center;
+font-weight:bold;
+color:white;
+}
+
+/* BUTTON */
+button{
+width:100%;
+padding:14px;
+background:linear-gradient(90deg,#3b82f6,#2563eb);
+border:none;
+border-radius:12px;
+color:white;
+font-weight:600;
+margin-top:10px;
+}
+
+/* NAV */
+nav{
+position:fixed;
+bottom:0;
+width:100%;
+background:#111827;
+display:flex;
+justify-content:space-around;
+padding:14px 0;
+box-shadow:0 -2px 10px rgba(0,0,0,0.4);
+}
+
+nav button{
+background:none;
+border:none;
+color:#94a3b8;
+font-weight:500;
+}
+
+nav button.activeTab{
+color:#3b82f6;
+font-weight:700;
+}
+
+/* INPUT */
+input{
+width:100%;
+padding:12px;
+margin-top:8px;
+background:#0f172a;
+border:1px solid #334155;
+border-radius:10px;
+color:white;
+}
+
 </style>
 </head>
 <body>
 
-<header>VigoChat</header>
+<header>
+<span>Vigo Chat</span>
+<span>⭐</span>
+</header>
 
-<div id="login" class="section active">
-<h3>Giriş / Kayıt</h3>
-<input id="email" placeholder="Email">
-<input id="password" type="password" placeholder="Şifre">
-<button onclick="register()">Kayıt Ol</button>
-<button onclick="login()">Giriş Yap</button>
+<!-- ARAMALAR -->
+<div id="arama" class="section active">
+<h2>Aramalar</h2>
+
+<div class="card user">
+<div class="avatar">A</div>
+<div>
+<div>Ahmet</div>
+<div style="color:#94a3b8;font-size:13px;">Bugün 12:05 • Gelen</div>
+</div>
 </div>
 
-<div id="chat" class="section">
-<h3>Genel Sohbet</h3>
-<div id="messages"></div>
-<input id="msgInput" placeholder="Mesaj yaz">
-<button onclick="sendMessage()">Gönder</button>
+<div class="card user">
+<div class="avatar">Z</div>
+<div>
+<div>Zeynep</div>
+<div style="color:#94a3b8;font-size:13px;">Dün 21:18 • Giden</div>
+</div>
 </div>
 
-<div id="status" class="section">
-<h3>Durum Ekle</h3>
-<input id="statusInput" placeholder="Durum yaz">
-<button onclick="addStatus()">Paylaş</button>
-<div id="statusList"></div>
 </div>
 
-<div id="profile" class="section">
-<h3>Profil</h3>
-<input id="nameInput" placeholder="Ad Soyad">
-<input id="birthdayInput" type="date">
-<textarea id="bioInput" placeholder="Hakkında"></textarea>
-<button onclick="saveProfile()">Kaydet</button>
-<div id="profileInfo"></div>
+<!-- DURUM -->
+<div id="durum" class="section">
+<h2>Durum</h2>
+
+<div class="card user">
+<div class="avatar">✨</div>
+<div>
+<div>Senin durumun</div>
+<div style="color:#94a3b8;font-size:13px;">Durum ekle</div>
+</div>
 </div>
 
+<div class="card user">
+<div class="avatar">A</div>
+<div>
+<div>Ahmet</div>
+<div style="color:#94a3b8;font-size:13px;">“Dışarıdayım”</div>
+</div>
+</div>
+
+</div>
+
+<!-- MESAJLAR -->
+<div id="mesaj" class="section">
+<h2>Mesajlar</h2>
+
+<div class="card user">
+<div class="avatar">A</div>
+<div>
+<div>Ahmet</div>
+<div style="color:#94a3b8;font-size:13px;">Nasılsın?</div>
+</div>
+</div>
+
+<div class="card user">
+<div class="avatar">Z</div>
+<div>
+<div>Zeynep</div>
+<div style="color:#94a3b8;font-size:13px;">Yarın görüşürüz.</div>
+</div>
+</div>
+
+</div>
+
+<!-- PROFİL -->
+<div id="profil" class="section">
+<h2>Profil</h2>
+
+<div class="card user">
+<div class="avatar">E</div>
+<div>
+<div>Engin</div>
+<div style="color:#94a3b8;font-size:13px;">Durum: çevrimiçi</div>
+</div>
+</div>
+
+<div class="card">
+<h3>Ayarlar</h3>
+<input placeholder="Adını değiştir">
+<button>Kaydet</button>
+</div>
+
+</div>
+
+<!-- ALT MENÜ -->
 <nav>
-<button onclick="show('chat')">Sohbet</button>
-<button onclick="show('status')">Durum</button>
-<button onclick="show('profile')">Profil</button>
+<button onclick="goster('arama',this)" class="activeTab">Aramalar</button>
+<button onclick="goster('durum',this)">Durum</button>
+<button onclick="goster('mesaj',this)">Mesajlar</button>
+<button onclick="goster('profil',this)">Profil</button>
 </nav>
 
-<script type="module">
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getDatabase, ref, push, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyA3--Xy1WrM6WlxurXXr4i5qwMZiafXN4k",
-  authDomain: "vigochat-58144.firebaseapp.com",
-  databaseURL: "https://vigochat-58144-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "vigochat-58144",
-  storageBucket: "vigochat-58144.firebasestorage.app",
-  messagingSenderId: "384136632816",
-  appId: "1:384136632816:web:2bb6d6942680a2e2e6e535",
-  measurementId: "G-62VZ3906GS"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth();
-const db = getDatabase();
-
-window.register = function(){
-createUserWithEmailAndPassword(auth,email.value,password.value)
-.then(()=>alert("Kayıt başarılı"))
-.catch(e=>alert(e.message));
-}
-
-window.login = function(){
-signInWithEmailAndPassword(auth,email.value,password.value)
-.catch(e=>alert(e.message));
-}
-
-onAuthStateChanged(auth,user=>{
-if(user){
-show('chat');
-loadMessages();
-loadStatus();
-loadProfile();
-}
-});
-
-window.sendMessage = function(){
-const user = auth.currentUser;
-push(ref(db,'messages'),{
-text:msgInput.value,
-uid:user.uid
-});
-msgInput.value="";
-}
-
-function loadMessages(){
-onValue(ref(db,'messages'),snap=>{
-messages.innerHTML="";
-snap.forEach(child=>{
-let data=child.val();
-messages.innerHTML+=`<div class="card">${data.text}</div>`;
-});
-});
-}
-
-window.addStatus = function(){
-const user = auth.currentUser;
-set(ref(db,'status/'+user.uid),{
-text:statusInput.value
-});
-statusInput.value="";
-}
-
-function loadStatus(){
-onValue(ref(db,'status'),snap=>{
-statusList.innerHTML="";
-snap.forEach(child=>{
-let data=child.val();
-statusList.innerHTML+=`<div class="card">${data.text}</div>`;
-});
-});
-}
-
-window.saveProfile = function(){
-const user = auth.currentUser;
-set(ref(db,'users/'+user.uid),{
-name:nameInput.value,
-birthday:birthdayInput.value,
-bio:bioInput.value
-});
-alert("Profil kaydedildi");
-}
-
-function loadProfile(){
-const user = auth.currentUser;
-onValue(ref(db,'users/'+user.uid),snap=>{
-if(snap.exists()){
-let data=snap.val();
-profileInfo.innerHTML=
-`<div class="card">
-İsim: ${data.name}<br>
-Doğum: ${data.birthday}<br>
-Bio: ${data.bio}
-</div>`;
-}
-});
-}
-
-window.show=function(id){
+<script>
+function goster(id,btn){
 document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
 document.getElementById(id).classList.add('active');
+
+document.querySelectorAll('nav button').forEach(b=>b.classList.remove('activeTab'));
+btn.classList.add('activeTab');
 }
 </script>
 
