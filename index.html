@@ -552,39 +552,7 @@ let auth = null;   //
     }
 
 
-        auth.onAuthStateChanged(async (user)=>{
-          if(!user){
-            state.uid = null;
-            state.email = "";
-            $("#sub").textContent = "Giriş gerekli";
-            renderMustLoginHints();
-            return;
-          }
-          state.uid = user.uid;
-          state.email = user.email || "";
-          $("#sub").textContent = "Online ✅";
-          renderMustLoginHints();
-          await ensureUserDoc();
-          // giriş olunca otomatik sohbetlere geç
-          setView("chats");
-        });
-
-        // buttons
-        $("#loginBtn").addEventListener("click", login);
-        $("#signupBtn").addEventListener("click", signup);
-        $("#logoutBtn").addEventListener("click", ()=> auth.signOut());
-
-        $("#saveProfile").addEventListener("click", saveProfile);
-        $("#saveAbout").addEventListener("click", saveAbout);
-        $("#startBtn").addEventListener("click", startChat);
-
-        $("#msg").addEventListener("input", (e)=> autoGrow(e.target));
-        $("#send").addEventListener("click", sendMsg);
-        $("#msg").addEventListener("keydown", (e)=>{
-          if(e.key==="Enter" && !e.shiftKey){ e.preventDefault(); sendMsg(); }
-        });
-
-        $("#back").addEventListener("click", closeChat);
+        
 
       }catch(e){
         console.log(e);
