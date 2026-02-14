@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="tr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,112 +7,140 @@
 
 <style>
 :root{
---bg:#f2f2f2;
---card:#ffffff;
---text:#111;
---accent:#2b6cff;
+  --bg:#0f172a;
+  --card:#1e293b;
+  --accent:#3b82f6;
+  --text:#ffffff;
+  --muted:#94a3b8;
 }
-body.dark{
---bg:#111;
---card:#1e1e1e;
---text:#eee;
+
+.light{
+  --bg:#f1f5f9;
+  --card:#ffffff;
+  --accent:#2563eb;
+  --text:#0f172a;
+  --muted:#64748b;
 }
+
 body{
-margin:0;
-font-family:Arial;
-background:var(--bg);
-color:var(--text);
+  margin:0;
+  font-family:system-ui;
+  background:var(--bg);
+  color:var(--text);
 }
-.container{padding:20px;max-width:500px;margin:auto}
-input,button{
-width:100%;
-padding:12px;
-margin:6px 0;
-border-radius:8px;
-border:1px solid #ccc;
+
+.container{
+  max-width:500px;
+  margin:auto;
+  padding:20px;
 }
-button{
-background:var(--accent);
-color:white;
-border:none;
-}
+
 .card{
-background:var(--card);
-padding:15px;
-border-radius:12px;
-margin-top:15px;
+  background:var(--card);
+  padding:20px;
+  border-radius:16px;
+  margin-bottom:20px;
 }
-#chatPage{display:none}
-#messages{
-height:300px;
-overflow:auto;
-background:var(--card);
-padding:10px;
-border-radius:10px;
+
+input,textarea{
+  width:100%;
+  padding:12px;
+  margin-bottom:10px;
+  border-radius:10px;
+  border:none;
+  outline:none;
+  font-size:14px;
 }
-.msg{margin:5px 0}
-.top{display:flex;justify-content:space-between;align-items:center}
-.smallBtn{
-width:auto;
-padding:6px 10px;
-margin-left:5px;
+
+button{
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:10px;
+  background:var(--accent);
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
+  margin-bottom:8px;
+}
+
+button.secondary{
+  background:#334155;
+}
+
+#chatBox{
+  max-height:350px;
+  overflow-y:auto;
+  margin-bottom:10px;
+}
+
+.msg{
+  padding:10px;
+  margin-bottom:6px;
+  border-radius:12px;
+  background:#334155;
+}
+
+.me{
+  background:var(--accent);
+}
+
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:10px;
+}
+
+.small{
+  font-size:12px;
+  color:var(--muted);
 }
 </style>
 </head>
-
 <body>
 
-<div class="container" id="authPage">
+<div class="container">
+
+<!-- AUTH -->
+<div class="card" id="authCard">
 <h2>Giriş / Kayıt</h2>
 <input id="email" placeholder="Email">
 <input id="password" type="password" placeholder="Şifre">
-<button id="signupBtn">Kayıt Ol</button>
-<button id="loginBtn">Giriş Yap</button>
-<p id="error" style="color:red;"></p>
+<button onclick="register()">Kayıt Ol</button>
+<button onclick="login()">Giriş Yap</button>
+<div id="authError" class="small"></div>
 </div>
 
-<div class="container" id="chatPage">
-
-<div class="top">
-<h3>VigoChatt</h3>
-<div>
-<button class="smallBtn" id="themeBtn">Tema</button>
-<button class="smallBtn" id="logoutBtn">Çıkış</button>
-</div>
-</div>
-
-<div class="card">
-<input id="roomInput" placeholder="Oda adı (örn: genel)">
-<button id="joinBtn">Odaya Gir</button>
+<!-- CHAT -->
+<div class="card" id="chatCard" style="display:none">
+<div class="topbar">
+  <b>VigoChatt</b>
+  <div>
+    <button class="secondary" onclick="toggleTheme()">Tema</button>
+    <button class="secondary" onclick="logout()">Çıkış</button>
+  </div>
 </div>
 
-<div id="messages"></div>
-
-<input id="messageInput" placeholder="Mesaj yaz...">
-<button id="sendBtn">Gönder</button>
-
-<div class="card">
-<h4>Profil</h4>
-<input id="displayName" placeholder="Görünen ad">
-<button id="saveNameBtn">Kaydet</button>
+<div id="chatBox"></div>
+<textarea id="message" placeholder="Mesaj yaz..."></textarea>
+<button onclick="sendMessage()">Gönder</button>
 </div>
 
 </div>
 
+<!-- FIREBASE -->
 <script type="module">
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } 
-from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-import { getDatabase, ref, push, onValue } 
-from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyA3--Xy1WrM6WlxurXXr4i5qwMZiafXN4k",
   authDomain: "vigochat-58144.firebaseapp.com",
   databaseURL: "https://vigochat-58144-default-rtdb.europe-west1.firebasedatabase.app",
   projectId: "vigochat-58144",
-  storageBucket: "vigochat-58144.firebasestorage.app",
+  storageBucket: "vigochat-58144.appspot.com",
   messagingSenderId: "384136632816",
   appId: "1:384136632816:web:2bb6d6942680a2e2e6e535"
 };
@@ -121,68 +149,76 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
 
-let currentRoom = null;
+const authCard = document.getElementById("authCard");
+const chatCard = document.getElementById("chatCard");
+const chatBox = document.getElementById("chatBox");
 
-signupBtn.onclick = () =>{
-createUserWithEmailAndPassword(auth,email.value,password.value)
-.catch(e=>error.innerText=e.message);
-};
+window.register = async function(){
+  const email = emailInput();
+  const pass = passInput();
+  try{
+    await createUserWithEmailAndPassword(auth,email,pass);
+  }catch(e){
+    showError(e.message);
+  }
+}
 
-loginBtn.onclick = () =>{
-signInWithEmailAndPassword(auth,email.value,password.value)
-.catch(e=>error.innerText=e.message);
-};
+window.login = async function(){
+  const email = emailInput();
+  const pass = passInput();
+  try{
+    await signInWithEmailAndPassword(auth,email,pass);
+  }catch(e){
+    showError("Email veya şifre hatalı");
+  }
+}
 
-logoutBtn.onclick = ()=> signOut(auth);
+window.logout = function(){
+  signOut(auth);
+}
+
+window.sendMessage = function(){
+  const text = document.getElementById("message").value.trim();
+  if(!text) return;
+  push(ref(db,"messages"),{
+    uid:auth.currentUser.uid,
+    text:text
+  });
+  document.getElementById("message").value="";
+}
+
+function emailInput(){ return document.getElementById("email").value.trim(); }
+function passInput(){ return document.getElementById("password").value.trim(); }
+function showError(msg){ document.getElementById("authError").innerText=msg; }
 
 onAuthStateChanged(auth,user=>{
-if(user){
-authPage.style.display="none";
-chatPage.style.display="block";
-}else{
-authPage.style.display="block";
-chatPage.style.display="none";
-}
+  if(user){
+    authCard.style.display="none";
+    chatCard.style.display="block";
+    loadMessages();
+  }else{
+    authCard.style.display="block";
+    chatCard.style.display="none";
+  }
 });
 
-joinBtn.onclick = ()=>{
-currentRoom = roomInput.value;
-messages.innerHTML="";
-const roomRef = ref(db,"rooms/"+currentRoom);
-onValue(roomRef,(snapshot)=>{
-messages.innerHTML="";
-snapshot.forEach(child=>{
-const msg = child.val();
-messages.innerHTML += "<div class='msg'><b>"+msg.name+":</b> "+msg.text+"</div>";
-});
-messages.scrollTop = messages.scrollHeight;
-});
-};
-
-sendBtn.onclick = ()=>{
-if(!currentRoom) return;
-if(!messageInput.value) return;
-
-push(ref(db,"rooms/"+currentRoom),{
-name: displayName.value || auth.currentUser.email,
-text: messageInput.value
-});
-messageInput.value="";
-};
-
-themeBtn.onclick = ()=>{
-document.body.classList.toggle("dark");
-localStorage.setItem("theme",document.body.classList.contains("dark"));
-};
-
-if(localStorage.getItem("theme")==="true"){
-document.body.classList.add("dark");
+function loadMessages(){
+  chatBox.innerHTML="";
+  onChildAdded(ref(db,"messages"),snap=>{
+    const data = snap.val();
+    const div = document.createElement("div");
+    div.className="msg";
+    if(data.uid===auth.currentUser.uid) div.classList.add("me");
+    div.innerText=data.text;
+    chatBox.appendChild(div);
+    chatBox.scrollTop=chatBox.scrollHeight;
+  });
 }
 
-saveNameBtn.onclick = ()=>{
-alert("İsim kaydedildi.");
-};
-
+window.toggleTheme = function(){
+  document.body.classList.toggle("light");
+}
 </script>
+
 </body>
 </html>
