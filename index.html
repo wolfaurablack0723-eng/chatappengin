@@ -7,7 +7,7 @@
   <style>
     :root{
       --bg:#efe7db;
-      --card:rgba(255,255,255,.60);
+      --card:rgba(255,255,255,.62);
       --text:#171717;
       --muted:rgba(0,0,0,.55);
       --border:rgba(0,0,0,.10);
@@ -28,14 +28,19 @@
         radial-gradient(900px 600px at 10% 90%, rgba(255,255,255,.62), transparent 60%),
         var(--bg);
       color:var(--text);
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
     }
+
+    /* input yazma/focus fix */
+    input, textarea { -webkit-user-select:text; user-select:text; }
 
     .wrap{
       max-width:520px;
       margin:0 auto;
       min-height:100dvh;
       padding-top: var(--safe-top);
-      padding-bottom: calc(86px + var(--safe-bottom));
+      padding-bottom: calc(92px + var(--safe-bottom));
       display:flex;
       flex-direction:column;
     }
@@ -49,6 +54,7 @@
     }
     .top h1{margin:0;font-size:18px;letter-spacing:.2px}
     .top small{color:var(--muted)}
+
     .pill{
       border:1px solid var(--border);
       background: var(--card);
@@ -78,7 +84,7 @@
     input, textarea{
       width:100%;
       border:1px solid var(--border);
-      background: rgba(255,255,255,.78);
+      background: rgba(255,255,255,.82);
       border-radius: 16px;
       padding:12px;
       outline:none;
@@ -120,7 +126,6 @@
       background: var(--accent2);
       border:1px solid rgba(43,108,255,.18);
       display:grid; place-items:center;
-      overflow:hidden;
       flex:0 0 auto;
       font-weight:900;
       color:var(--accent);
@@ -160,7 +165,7 @@
     .iconBtn{
       width:44px;height:44px;border-radius:14px;
       border:1px solid var(--border);
-      background: rgba(255,255,255,.78);
+      background: rgba(255,255,255,.82);
       cursor:pointer;
       display:grid; place-items:center;
       appearance:none;-webkit-appearance:none;
@@ -185,7 +190,7 @@
       padding:10px 12px;
       border-radius: 16px;
       border:1px solid var(--border);
-      background: rgba(255,255,255,.82);
+      background: rgba(255,255,255,.86);
       font-size:14px;
       line-height:1.35;
       white-space:pre-wrap;
@@ -223,7 +228,7 @@
       padding:0;
     }
 
-    /* Bottom nav */
+    /* Bottom nav (BUTTON) */
     .bottom{
       position:fixed; left:0; right:0; bottom:0;
       z-index:9999;
@@ -240,7 +245,7 @@
       gap:8px;
       box-shadow: var(--shadow);
     }
-    .tab{
+    .tabBtn{
       flex:1;
       border-radius: 16px;
       padding: 10px 6px;
@@ -252,14 +257,17 @@
       user-select:none;
       color:var(--muted);
       border:1px solid transparent;
+      background: transparent;
+      appearance:none;-webkit-appearance:none;
+      font:inherit;
     }
-    .tab.active{
+    .tabBtn.active{
       color: var(--text);
       background: var(--accent2);
       border-color: rgba(43,108,255,.18);
     }
-    .tab .ico{font-size:20px; line-height:1}
-    .tab .lbl{font-size:12px; font-weight:900}
+    .tabBtn .ico{font-size:20px; line-height:1}
+    .tabBtn .lbl{font-size:12px; font-weight:900}
   </style>
 </head>
 
@@ -268,28 +276,22 @@
     <div class="top">
       <div>
         <h1 id="title">VigoChatt</h1>
-        <small id="sub">Sekmeler çalışmalı ✅</small>
+        <small id="sub">Açılıyor…</small>
       </div>
-      <button class="pill" id="logoutBtn" type="button">Çıkış</button>
+      <button class="pill" id="logoutBtn" type="button" style="display:none">Çıkış</button>
     </div>
 
     <!-- AUTH -->
     <section class="view active" id="view-auth">
       <div class="card">
         <b>Giriş / Kayıt</b>
-        <div class="hint">
-          Firebase: <span id="fbState">yükleniyor…</span>
-        </div>
-
-        <div style="margin-top:12px" class="hint">
-          Email/Şifre ile giriş çalışır. (Telefon için sonra native APK gerekir.)
-        </div>
+        <div class="hint">Firebase: <span id="fbState">yükleniyor…</span></div>
 
         <div style="margin-top:12px">
           <div class="label">E-posta</div>
-          <input id="email" inputmode="email" placeholder="ornek@mail.com">
+          <input id="email" inputmode="email" autocomplete="email" placeholder="ornek@mail.com">
           <div class="label" style="margin-top:10px">Şifre</div>
-          <input id="pass" type="password" placeholder="••••••••">
+          <input id="pass" type="password" autocomplete="current-password" placeholder="••••••••">
 
           <div style="display:flex; gap:10px; margin-top:12px">
             <button class="btn" id="loginBtn" type="button" style="flex:1">Giriş</button>
@@ -305,12 +307,12 @@
     <section class="view" id="view-chats">
       <div class="card">
         <b>Sohbetler</b>
-        <div class="hint">Gerçek kullanıcı listesi (kayıtlı kişiler).</div>
+        <div class="hint">Karşı tarafın email’i ile sohbet başlat.</div>
 
         <div style="margin-top:12px">
-          <div class="label">Kime yazacaksın? (email)</div>
+          <div class="label">Email</div>
           <div style="display:flex; gap:10px; margin-top:8px">
-            <input id="startEmail" inputmode="email" placeholder="arkadas@mail.com" style="flex:1">
+            <input id="startEmail" inputmode="email" autocomplete="off" placeholder="arkadas@mail.com" style="flex:1">
             <button class="btn" id="startBtn" type="button">Başlat</button>
           </div>
           <div class="hint danger" id="startErr"></div>
@@ -324,10 +326,10 @@
     <section class="view" id="view-status">
       <div class="card">
         <b>Durum</b>
-        <div class="hint">Şimdilik “durum metni” kaydediyoruz.</div>
+        <div class="hint">Durum metnini kaydet.</div>
 
         <div style="margin-top:12px">
-          <div class="label">Durumun</div>
+          <div class="label">Durum</div>
           <input id="about" placeholder="çevrimiçi">
           <button class="btn" id="saveAbout" type="button" style="margin-top:10px">Kaydet</button>
           <div class="hint" id="aboutHint"></div>
@@ -339,13 +341,11 @@
     <section class="view" id="view-settings">
       <div class="card">
         <b>Ayarlar</b>
-        <div class="hint">İsim + Profil foto.</div>
+        <div class="hint">İsim + foto (foto kısmını sonra %100 ekleyeceğiz, önce temel sistemi oturtalım).</div>
 
         <div style="margin-top:12px">
           <div class="label">Ad Soyad</div>
           <input id="name" placeholder="Engin">
-          <div class="label" style="margin-top:10px">Profil foto</div>
-          <input id="photo" type="file" accept="image/*">
           <button class="btn" id="saveProfile" type="button" style="margin-top:10px">Kaydet</button>
           <div class="hint" id="saveHint"></div>
         </div>
@@ -377,9 +377,9 @@
   <!-- NAV -->
   <div class="bottom">
     <nav class="nav">
-      <div class="tab active" data-tab="chats"><div class="ico">💬</div><div class="lbl">Sohbet</div></div>
-      <div class="tab" data-tab="status"><div class="ico">✨</div><div class="lbl">Durum</div></div>
-      <div class="tab" data-tab="settings"><div class="ico">⚙️</div><div class="lbl">Ayarlar</div></div>
+      <button class="tabBtn active" id="tabChats" type="button" data-tab="chats"><div class="ico">💬</div><div class="lbl">Sohbet</div></button>
+      <button class="tabBtn" id="tabStatus" type="button" data-tab="status"><div class="ico">✨</div><div class="lbl">Durum</div></button>
+      <button class="tabBtn" id="tabSettings" type="button" data-tab="settings"><div class="ico">⚙️</div><div class="lbl">Ayarlar</div></button>
     </nav>
   </div>
 
@@ -387,22 +387,14 @@
     const $ = (s, el=document)=> el.querySelector(s);
     const $$ = (s, el=document)=> Array.from(el.querySelectorAll(s));
 
-    // ✅ Sekmeler HER ŞARTTA çalışsın (Firebase bozulsa da)
     function setView(id){
       ["auth","chats","status","settings"].forEach(v=>{
         $("#view-"+v).classList.toggle("active", v===id);
       });
-      $$(".tab").forEach(t=> t.classList.toggle("active", t.dataset.tab===id));
+      $$(".tabBtn").forEach(t=> t.classList.toggle("active", t.dataset.tab===id));
       const titles = {auth:"VigoChatt", chats:"Sohbetler", status:"Durum", settings:"Ayarlar"};
       $("#title").textContent = titles[id] || "VigoChatt";
     }
-    $$(".tab").forEach(t=>{
-      t.addEventListener("click", ()=>{
-        // giriş yoksa auth’a at
-        if(!state.meUid) { setView("auth"); return; }
-        setView(t.dataset.tab);
-      });
-    });
 
     function bindMulti(el, fn){
       ["click","touchend","pointerup"].forEach(ev=>{
@@ -412,6 +404,7 @@
         }, {passive:false});
       });
     }
+
     function autoGrow(ta){
       ta.style.height = "auto";
       ta.style.height = Math.min(140, ta.scrollHeight) + "px";
@@ -420,21 +413,32 @@
     const state = {
       meUid: null,
       meEmail: "",
-      meName: "",
-      fb: null, auth: null, db: null, storage: null,
-      currentThread: null,
+      meName: "Kullanıcı",
+      fb: null, auth: null, db: null,
       unsubThreads: null,
-      unsubMsgs: null
+      unsubMsgs: null,
+      currentThread: null
     };
 
-    // ✅ Firebase’i DİNAMİK yükle: yüklenemezse sayfa yine çalışır
+    const esc = (s)=> String(s ?? "").replace(/[&<>"']/g, c => ({
+      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+    }[c]));
+
+    // TABLAR: giriş yoksa auth'a döndür
+    $$(".tabBtn").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        if(!state.meUid){ setView("auth"); return; }
+        setView(btn.dataset.tab);
+      });
+    });
+
+    // Firebase dinamik yükle (yüklenmezse bile sekmeler/ekranlar bozulmaz)
     async function loadFirebase(){
       try{
-        const [{ initializeApp }, authMod, fsMod, stMod] = await Promise.all([
+        const [{ initializeApp }, authMod, fsMod] = await Promise.all([
           import("https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js"),
           import("https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js"),
           import("https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js"),
-          import("https://www.gstatic.com/firebasejs/10.12.5/firebase-storage.js")
         ]);
 
         const firebaseConfig = {
@@ -447,27 +451,26 @@
         };
 
         const app = initializeApp(firebaseConfig);
-        state.fb = { app, authMod, fsMod, stMod };
+        state.fb = { authMod, fsMod };
         state.auth = authMod.getAuth(app);
         state.db = fsMod.getFirestore(app);
-        state.storage = stMod.getStorage(app);
 
         $("#fbState").textContent = "OK ✅";
         $("#fbState").className = "ok";
+        $("#sub").textContent = "Giriş yapabilirsin";
 
-        // Auth listener
         authMod.onAuthStateChanged(state.auth, async (user)=>{
           if(!user){
             state.meUid = null;
-            $("#sub").textContent = "Giriş gerekli";
             $("#logoutBtn").style.display = "none";
+            $("#sub").textContent = "Giriş gerekli";
             setView("auth");
             return;
           }
           state.meUid = user.uid;
           state.meEmail = user.email || "";
-          $("#sub").textContent = "Online ✅";
           $("#logoutBtn").style.display = "inline-block";
+          $("#sub").textContent = "Online ✅";
 
           await ensureUserDoc();
           subscribeThreads();
@@ -476,15 +479,12 @@
 
       }catch(err){
         console.log(err);
-        $("#fbState").textContent = "HATA ❌ (Firebase yüklenmedi)";
+        $("#fbState").textContent = "HATA ❌";
         $("#fbState").className = "danger";
-        $("#authErr").textContent = "Firebase yüklenmediği için giriş/mesaj çalışmaz. GitHub Pages linkini HTTPS açtığından emin ol.";
+        $("#sub").textContent = "Firebase yüklenmedi";
+        $("#authErr").textContent = "Firebase yüklenmediği için giriş/mesaj çalışmaz. Linki HTTPS aç.";
       }
     }
-
-    const esc = (s)=> String(s ?? "").replace(/[&<>"']/g, c => ({
-      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
-    }[c]));
 
     async function ensureUserDoc(){
       const { fsMod } = state.fb;
@@ -495,7 +495,6 @@
           email: state.meEmail,
           name: "Kullanıcı",
           about: "çevrimiçi",
-          photoURL: "",
           createdAt: fsMod.serverTimestamp()
         });
       }
@@ -508,14 +507,42 @@
 
     function threadIdFor(a,b){ return (a<b) ? (a+"_"+b) : (b+"_"+a); }
 
+    async function login(){
+      $("#authErr").textContent = "";
+      const email = ($("#email").value||"").trim();
+      const pass = ($("#pass").value||"").trim();
+      try{
+        await state.fb.authMod.signInWithEmailAndPassword(state.auth, email, pass);
+      }catch(e){
+        $("#authErr").textContent = e?.message || "Giriş hatası";
+      }
+    }
+
+    async function signup(){
+      $("#authErr").textContent = "";
+      const email = ($("#email").value||"").trim();
+      const pass = ($("#pass").value||"").trim();
+      try{
+        await state.fb.authMod.createUserWithEmailAndPassword(state.auth, email, pass);
+      }catch(e){
+        $("#authErr").textContent = e?.message || "Kayıt hatası";
+      }
+    }
+
+    async function logout(){
+      try{ await state.fb.authMod.signOut(state.auth); }catch{}
+    }
+
     async function startChat(){
       $("#startErr").textContent = "";
       const email = ($("#startEmail").value||"").trim().toLowerCase();
       if(!email) return;
+
       if(email === (state.meEmail||"").toLowerCase()){
         $("#startErr").textContent = "Kendi email’inle sohbet açamazsın.";
         return;
       }
+
       const { fsMod } = state.fb;
 
       const qU = fsMod.query(fsMod.collection(state.db,"users"), fsMod.where("email","==", email));
@@ -524,6 +551,7 @@
         $("#startErr").textContent = "Bu email ile kayıtlı kullanıcı yok.";
         return;
       }
+
       const otherDoc = snap.docs[0];
       const otherUid = otherDoc.id;
       const other = otherDoc.data() || {};
@@ -531,15 +559,17 @@
       const tid = threadIdFor(state.meUid, otherUid);
       const tRef = fsMod.doc(state.db, "threads", tid);
       const tSnap = await fsMod.getDoc(tRef);
+
       if(!tSnap.exists()){
         await fsMod.setDoc(tRef, {
           participants: [state.meUid, otherUid],
           updatedAt: fsMod.serverTimestamp(),
           lastText: "",
-          a: { uid: state.meUid, name: state.meName, photoURL:"" },
-          b: { uid: otherUid, name: other.name || "Kullanıcı", photoURL: other.photoURL || "" }
+          a: { uid: state.meUid, name: state.meName },
+          b: { uid: otherUid, name: other.name || "Kullanıcı" }
         });
       }
+
       $("#startEmail").value = "";
       openThread(tid);
     }
@@ -595,36 +625,8 @@
 
       const mRef = fsMod.collection(state.db, "threads", tid, "messages");
       const qM = fsMod.query(mRef, fsMod.orderBy("createdAt","asc"), fsMod.limit(300));
-
       state.unsubMsgs = fsMod.onSnapshot(qM, (snap)=>{
         const arr = [];
         snap.forEach(d=> arr.push(d.data()));
         renderMsgs(arr);
-      });
-    }
-
-    function closeChat(){
-      $("#overlay").classList.remove("show");
-      $("#msg").value = "";
-      if(state.unsubMsgs){ state.unsubMsgs(); state.unsubMsgs=null; }
-      state.currentThread = null;
-    }
-
-    function renderMsgs(arr){
-      const box = $("#chatBody");
-      box.innerHTML = arr.map(m=>{
-        const mine = (m.uid === state.meUid);
-        return `<div class="bubble ${mine ? "me":""}">${esc(m.text || "")}</div>`;
-      }).join("");
-      box.scrollTop = box.scrollHeight;
-    }
-
-    async function sendMsg(){
-      if(!state.currentThread) return;
-      const text = ($("#msg").value||"").trim();
-      if(!text) return;
-      $("#msg").value = "";
-      autoGrow($("#msg"));
-
-      const { fsMod } = state.fb;
-      await fsMod.addDoc(fsMod.collection(state.db, "threads
+     
