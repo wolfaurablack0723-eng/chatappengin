@@ -1,4 +1,4 @@
-<!-- Firebase Compat -->
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
@@ -19,7 +19,8 @@ var db = firebase.database();
 let currentUser = null;
 let currentChat = null;
 
-function login(){
+/* Giriş */
+function loginUser(){
   let phone = prompt("Numara gir");
   if(!phone) return;
   currentUser = phone;
@@ -32,15 +33,18 @@ function login(){
   loadUsers();
 }
 
+/* Kullanıcıları yükle */
 function loadUsers(){
   db.ref("users").on("value", snap=>{
     const data = snap.val() || {};
     const el = document.getElementById("chatList");
     el.innerHTML="";
+
     Object.keys(data).forEach(uid=>{
       if(uid===currentUser) return;
-      el.innerHTML+=`
-        <div class="item" onclick="openChat('${uid}')">
+
+      el.innerHTML += `
+        <div class="item" onclick="openFirebaseChat('${uid}')">
           <div class="avatar">${uid[0]}</div>
           <div class="meta">
             <b>${uid}</b>
@@ -52,48 +56,69 @@ function loadUsers(){
   });
 }
 
+/* Chat ID */
 function chatId(a,b){
   return a<b ? a+"_"+b : b+"_"+a;
 }
 
-function openChat(uid){
+/* Sohbet Aç */
+function openFirebaseChat(uid){
+  if(!currentUser){
+    alert("Önce giriş yap");
+    return;
+  }
+
   currentChat = uid;
   document.getElementById("chatName").innerText = uid;
   document.getElementById("overlay").classList.add("show");
+
   loadMessages();
 }
 
+/* Mesajları Yükle */
 function loadMessages(){
   let id = chatId(currentUser,currentChat);
+
   db.ref("messages/"+id).on("value", snap=>{
     const data = snap.val() || {};
     const box = document.getElementById("chatBody");
     box.innerHTML="";
+
     Object.values(data).forEach(m=>{
-      box.innerHTML+=`
+      box.innerHTML += `
         <div class="bubble ${m.from===currentUser?'me':''}">
           ${m.text}
         </div>
       `;
     });
+
     box.scrollTop = box.scrollHeight;
   });
 }
 
-function sendMsg(){
-  let text = document.getElementById("msg").value.trim();
+/* Mesaj Gönder */
+function sendFirebaseMsg(){
+  if(!currentUser || !currentChat) return;
+
+  let input = document.getElementById("msg");
+  let text = input.value.trim();
   if(!text) return;
+
   let id = chatId(currentUser,currentChat);
+
   db.ref("messages/"+id).push({
     from: currentUser,
     text: text,
     time: Date.now()
   });
-  document.getElementById("msg").value="";
+
+  input.value="";
 }
 
-function closeChat(){
-  document.getElementById("overlay").classList.remove("show");
-}
+/* Mevcut butona bağla */
+document.getElementById("send").addEventListener("click", sendFirebaseMsg);
+
+/* İlk açılışta giriş iste */
+setTimeout(loginUser, 500);
 
 </script>
