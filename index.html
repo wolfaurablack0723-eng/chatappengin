@@ -6,19 +6,21 @@
   <title>Vigo Chat</title>
   <style>
     :root{
-      --bg1:#fbf3e6;
-      --bg2:#f6ead8;
+      --bg1:#fff7ee;
+      --bg2:#f7efe6;
       --card: rgba(255,255,255,.78);
-      --stroke: rgba(0,0,0,.07);
-      --text: #1f1f1f;
+      --stroke: rgba(0,0,0,.08);
+      --text:#151515;
       --muted: rgba(0,0,0,.55);
       --accent:#2a7cff;
       --accent2:#ffb347;
       --shadow: 0 10px 30px rgba(0,0,0,.07);
-      --radius:18px;
-      --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --radius: 18px;
+
       --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
     }
+
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
@@ -26,616 +28,643 @@
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
       color:var(--text);
       background:
-        radial-gradient(900px 600px at 60% 10%, rgba(255,255,255,.85), transparent 60%),
-        radial-gradient(900px 600px at 10% 90%, rgba(255,255,255,.55), transparent 60%),
+        radial-gradient(900px 600px at 60% 10%, rgba(255,255,255,.9), transparent 60%),
+        radial-gradient(900px 600px at 10% 90%, rgba(255,255,255,.7), transparent 60%),
         linear-gradient(180deg, var(--bg1), var(--bg2));
+      overflow:hidden;
     }
+
     .app{
+      height:100%;
       max-width:520px;
       margin:0 auto;
-      height:100dvh;
       display:flex;
       flex-direction:column;
       padding-top: calc(10px + var(--safe-top));
-      padding-bottom: calc(84px + var(--safe-bottom));
+      padding-bottom: calc(86px + var(--safe-bottom));
     }
+
+    /* Header */
     header{
-      padding: 14px 16px 10px;
+      padding: 10px 14px 8px;
       display:flex;
       align-items:center;
       justify-content:space-between;
       gap:10px;
     }
-    header .title{
+    .title{
       display:flex;
       flex-direction:column;
       gap:2px;
       min-width:0;
     }
-    header h1{
+    .title h1{
       margin:0;
       font-size:20px;
       letter-spacing:.2px;
+      line-height:1.1;
     }
-    header small{color:var(--muted)}
+    .title small{
+      color:var(--muted);
+      font-size:12px;
+    }
     .pill{
       border:1px solid var(--stroke);
       background: rgba(255,255,255,.55);
-      padding:9px 12px;
-      border-radius:999px;
-      cursor:pointer;
-      user-select:none;
-      box-shadow: 0 6px 18px rgba(0,0,0,.05);
+      padding: 9px 12px;
+      border-radius: 999px;
       display:flex;
       align-items:center;
       gap:8px;
+      cursor:pointer;
+      user-select:none;
+      box-shadow: 0 6px 18px rgba(0,0,0,.05);
       font-weight:600;
     }
     .pill:active{transform:scale(.98)}
-    .views{flex:1; overflow:hidden; padding: 0 12px;}
-    .view{display:none; height:100%; overflow:auto; padding: 6px 4px 10px;}
-    .view.active{display:block}
-    .card{
-      background: var(--card);
-      border:1px solid var(--stroke);
-      border-radius: var(--radius);
-      padding:14px;
-      box-shadow: var(--shadow);
+    .pill .dot{
+      width:10px;height:10px;border-radius:50%;
+      background: #31c46f;
+      box-shadow: 0 0 0 3px rgba(49,196,111,.15);
     }
-    .card + .card{margin-top:12px}
-    .row{display:flex; align-items:center; justify-content:space-between; gap:12px}
+
+    /* Views */
+    .view{
+      flex:1;
+      overflow:auto;
+      padding: 6px 14px 14px;
+      display:none;
+      -webkit-overflow-scrolling: touch;
+    }
+    .view.active{display:block}
+
+    .card{
+      border:1px solid var(--stroke);
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+    .row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
     .muted{color:var(--muted)}
-    .list{margin-top:10px; display:flex; flex-direction:column; gap:10px}
+    .btn{
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,.75);
+      border-radius: 14px;
+      padding: 10px 12px;
+      font-weight:700;
+      cursor:pointer;
+      user-select:none;
+      box-shadow: 0 6px 18px rgba(0,0,0,.05);
+    }
+    .btn:active{transform:scale(.98)}
+    .btn.primary{
+      border-color: rgba(42,124,255,.25);
+      background: linear-gradient(180deg, rgba(42,124,255,.16), rgba(255,255,255,.82));
+    }
+    .btn.orange{
+      border-color: rgba(255,179,71,.35);
+      background: linear-gradient(180deg, rgba(255,179,71,.20), rgba(255,255,255,.82));
+    }
+
+    .list{display:flex; flex-direction:column; gap:10px}
     .item{
-      background: rgba(255,255,255,.70);
-      border: 1px solid var(--stroke);
-      border-radius: 16px;
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,.62);
+      border-radius: 18px;
       padding: 12px;
       display:flex;
-      gap:12px;
       align-items:center;
+      gap:12px;
       cursor:pointer;
-      box-shadow: 0 8px 22px rgba(0,0,0,.05);
+      user-select:none;
     }
     .item:active{transform:scale(.99)}
     .avatar{
-      width:46px; height:46px;
-      border-radius:14px;
-      background: rgba(42,124,255,.12);
-      border:1px solid rgba(42,124,255,.20);
+      width:42px;height:42px;border-radius: 14px;
       display:grid; place-items:center;
-      font-weight:800;
-      color: var(--accent);
+      font-weight:900;
+      color: #1f4aa3;
+      background: rgba(42,124,255,.12);
+      border:1px solid rgba(42,124,255,.18);
       flex:0 0 auto;
     }
-    .item .meta{min-width:0; flex:1}
-    .item .name{font-weight:800; margin:0 0 2px}
-    .item .last{
-      margin:0;
-      color: var(--muted);
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      max-width:100%;
+    .item .meta{
+      min-width:0; flex:1;
+      display:flex; flex-direction:column; gap:4px;
+    }
+    .item .meta .name{font-weight:900}
+    .item .meta .preview{
+      font-size:13px;
+      color:var(--muted);
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
     }
     .badge{
       font-size:12px;
       padding:6px 10px;
       border-radius:999px;
       border:1px solid var(--stroke);
-      background: rgba(255,255,255,.6);
+      background: rgba(255,255,255,.7);
       color: var(--muted);
-      font-weight:700;
       flex:0 0 auto;
     }
 
-    /* bottom nav */
+    /* Bottom nav */
     .nav{
-      position:fixed;
+      position: fixed;
       left:50%;
-      transform:translateX(-50%);
+      transform: translateX(-50%);
+      bottom: 10px;
       bottom: calc(10px + var(--safe-bottom));
-      width:min(520px, calc(100% - 20px));
-      background: rgba(255,255,255,.70);
+      width: min(520px, calc(100% - 24px));
       border:1px solid var(--stroke);
-      border-radius: 20px;
-      box-shadow: 0 18px 45px rgba(0,0,0,.10);
+      background: rgba(255,255,255,.78);
+      backdrop-filter: blur(10px);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
       display:flex;
-      padding:8px;
-      gap:8px;
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
+      padding: 8px;
+      gap: 6px;
+      z-index: 50;
     }
     .tab{
       flex:1;
-      border-radius:16px;
-      padding:10px 8px;
+      border-radius: 18px;
+      padding: 10px 8px;
       display:flex;
       flex-direction:column;
       align-items:center;
       gap:4px;
       cursor:pointer;
       user-select:none;
-      color: rgba(0,0,0,.55);
-      font-weight:700;
+      color: var(--muted);
+      font-weight:800;
       font-size:12px;
-      border:1px solid transparent;
     }
-    .tab .ico{font-size:18px; line-height:1}
     .tab.active{
-      color: var(--accent);
-      background: rgba(42,124,255,.10);
-      border-color: rgba(42,124,255,.18);
+      color: var(--text);
+      background: linear-gradient(180deg, rgba(42,124,255,.10), rgba(255,255,255,.65));
+      border: 1px solid rgba(42,124,255,.18);
     }
+    .ico{font-size:18px; line-height:1}
 
-    /* floating add button */
-    .fab{
-      position:fixed;
-      right: calc(12px + max(0px, env(safe-area-inset-right, 0px)));
-      top: calc(20px + var(--safe-top));
-      width:46px; height:46px;
-      border-radius: 18px;
-      background: rgba(255,255,255,.80);
+    /* Chat screen */
+    .chatHeader{
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      padding: 10px 12px;
+      margin: 0 0 10px;
       border:1px solid var(--stroke);
-      box-shadow: 0 12px 30px rgba(0,0,0,.10);
-      display:grid; place-items:center;
-      cursor:pointer;
-      user-select:none;
-      font-size:22px;
-      font-weight:900;
-    }
-    .fab:active{transform:scale(.98)}
-
-    /* chat screen */
-    .chatTop{
+      background: rgba(255,255,255,.84);
+      backdrop-filter: blur(8px);
+      border-radius: 18px;
       display:flex;
       align-items:center;
+      justify-content:space-between;
       gap:10px;
-      padding: 2px 2px 10px;
-      position:sticky;
-      top:0;
-      background: linear-gradient(180deg, rgba(251,243,230,.95), rgba(251,243,230,.0));
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
-      z-index:2;
+    }
+    .chatHeader .left{
+      display:flex; align-items:center; gap:10px; min-width:0;
     }
     .backBtn{
-      width:42px;height:42px;
-      border-radius:16px;
+      width:40px;height:40px;
+      border-radius: 14px;
       border:1px solid var(--stroke);
-      background: rgba(255,255,255,.65);
+      background: rgba(255,255,255,.75);
       display:grid; place-items:center;
       cursor:pointer;
-      box-shadow: 0 10px 24px rgba(0,0,0,.06);
       user-select:none;
-      font-weight:900;
     }
+    .backBtn:active{transform:scale(.98)}
     .chatTitle{min-width:0}
-    .chatTitle .nm{margin:0;font-weight:900}
-    .chatTitle .st{margin:0;color:var(--muted);font-size:12px}
-    .bubbleWrap{display:flex; flex-direction:column; gap:8px; padding: 6px 4px 90px;}
-    .brow{display:flex}
-    .b{
+    .chatTitle .n{font-weight:900}
+    .chatTitle .s{font-size:12px;color:var(--muted)}
+
+    .bubbles{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      padding-bottom: 84px; /* input bar space */
+    }
+    .bubble{
       max-width: 78%;
       padding: 10px 12px;
-      border-radius: 16px;
+      border-radius: 18px;
       border:1px solid var(--stroke);
-      box-shadow: 0 8px 22px rgba(0,0,0,.05);
-      background: rgba(255,255,255,.78);
-      line-height:1.25;
-      word-break:break-word;
-      position:relative;
+      box-shadow: 0 6px 18px rgba(0,0,0,.05);
+      font-size: 14px;
+      line-height: 1.35;
+      background: rgba(255,255,255,.75);
+      word-wrap: break-word;
     }
-    .b.me{
+    .bubble.me{
       margin-left:auto;
-      background: rgba(42,124,255,.13);
       border-color: rgba(42,124,255,.18);
+      background: linear-gradient(180deg, rgba(42,124,255,.14), rgba(255,255,255,.78));
     }
-    .time{
-      display:block;
+    .bubble .time{
       margin-top:6px;
       font-size:11px;
-      color: rgba(0,0,0,.45);
+      color: var(--muted);
       text-align:right;
     }
+
     .composer{
-      position:fixed;
+      position: fixed;
       left:50%;
-      transform:translateX(-50%);
-      bottom: calc(84px + var(--safe-bottom));
-      width:min(520px, calc(100% - 20px));
-      padding: 10px;
-      background: rgba(255,255,255,.78);
+      transform: translateX(-50%);
+      bottom: calc(92px + var(--safe-bottom));
+      width: min(520px, calc(100% - 24px));
       border:1px solid var(--stroke);
-      border-radius: 18px;
-      box-shadow: 0 18px 45px rgba(0,0,0,.10);
+      background: rgba(255,255,255,.84);
+      backdrop-filter: blur(10px);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      padding: 8px;
       display:none;
-      gap:10px;
-      align-items:center;
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
+      gap:8px;
+      z-index: 60;
     }
-    .composer.show{display:flex}
+    .composer.active{display:flex}
     .composer input{
       flex:1;
-      border-radius: 14px;
-      border:1px solid var(--stroke);
-      padding: 12px 12px;
+      border:none;
       outline:none;
       font-size:15px;
-      background: rgba(255,255,255,.85);
+      padding: 10px 12px;
+      border-radius: 16px;
+      background: rgba(255,255,255,.65);
+      border:1px solid rgba(0,0,0,.06);
     }
     .sendBtn{
-      border:none;
-      border-radius: 14px;
-      padding: 12px 14px;
-      font-weight:900;
+      width:48px;height:48px;
+      border-radius: 16px;
+      border:1px solid rgba(42,124,255,.22);
+      background: linear-gradient(180deg, rgba(42,124,255,.22), rgba(255,255,255,.85));
       cursor:pointer;
-      background: var(--accent);
-      color:white;
-      box-shadow: 0 12px 26px rgba(42,124,255,.22);
+      user-select:none;
+      font-weight:900;
+      display:grid;
+      place-items:center;
     }
     .sendBtn:active{transform:scale(.98)}
 
-    /* modal */
-    .overlay{
-      position:fixed; inset:0;
+    /* Modal */
+    .modalWrap{
+      position: fixed;
+      inset:0;
       background: rgba(0,0,0,.25);
       display:none;
-      padding: 18px;
-      z-index:10;
+      align-items:flex-end;
+      justify-content:center;
+      padding: 14px;
+      z-index: 999;
     }
-    .overlay.show{display:flex; align-items:center; justify-content:center}
-    .modal{
+    .modalWrap.show{display:flex}
+    .sheet{
       width:min(520px, 100%);
-      background: rgba(255,255,255,.92);
       border:1px solid var(--stroke);
+      background: rgba(255,255,255,.92);
+      backdrop-filter: blur(10px);
       border-radius: 22px;
-      box-shadow: 0 30px 80px rgba(0,0,0,.20);
-      padding: 16px;
+      box-shadow: 0 18px 50px rgba(0,0,0,.18);
+      padding: 12px;
     }
-    .modal h3{margin:0 0 10px}
-    .modal .grid{display:grid; gap:10px}
-    .modal input, .modal textarea, .modal select{
-      width:100%;
-      border-radius: 14px;
+    .sheet h3{margin:6px 4px 8px; font-size:16px}
+    .sheet .field{
+      display:flex; flex-direction:column; gap:6px;
+      margin: 10px 4px;
+    }
+    .sheet label{font-size:12px;color:var(--muted); font-weight:700}
+    .sheet input{
       border:1px solid var(--stroke);
-      padding: 12px 12px;
-      outline:none;
-      font-size:15px;
-      background: rgba(255,255,255,.92);
+      border-radius: 16px;
+      padding: 12px;
+      font-size: 15px;
+      outline: none;
+      background: rgba(255,255,255,.8);
     }
-    .modal textarea{min-height:90px; resize:none}
-    .modal .actions{display:flex; gap:10px; justify-content:flex-end; margin-top:12px}
-    .btn{
-      border:1px solid var(--stroke);
-      background: rgba(255,255,255,.75);
-      border-radius: 14px;
-      padding: 10px 14px;
-      cursor:pointer;
-      font-weight:900;
+    .sheet .actions{
+      display:flex;
+      gap:10px;
+      margin-top: 10px;
+      padding: 4px;
     }
-    .btn.primary{
-      background: var(--accent);
-      color:#fff;
-      border-color: rgba(42,124,255,.2);
+    .sheet .actions .btn{flex:1}
+    .hint{
+      font-size:12px;color:var(--muted); margin: 8px 6px 0;
     }
-    .btn:active{transform:scale(.98)}
-
-    .smallNote{font-size:12px;color:var(--muted);margin-top:8px}
   </style>
 </head>
+
 <body>
   <div class="app">
     <header>
       <div class="title">
-        <h1 id="hdrTitle">Mesajlar</h1>
-        <small id="hdrSub">Basit mesajlaşma</small>
+        <h1 id="headerTitle">Mesajlar</h1>
+        <small id="headerSub">Basit mesajlaşma</small>
       </div>
-      <div class="pill" id="hdrAction" title="Hızlı işlem">
-        <span id="hdrActionIco">➕</span>
-        <span id="hdrActionTxt">Yeni</span>
+      <div class="pill" id="headerAction">
+        <span class="dot"></span>
+        <span id="headerActionText">Yeni</span>
+        <span style="opacity:.6">＋</span>
       </div>
     </header>
 
-    <div class="views">
-      <!-- CALLS -->
-      <section class="view" id="v_calls">
+    <!-- ARAMALAR -->
+    <section class="view" id="view-calls" aria-label="Aramalar">
+      <div class="card">
+        <div class="row">
+          <div>
+            <div style="font-weight:900">Aramalar</div>
+            <div class="muted" style="font-size:13px">Son aramalar burada görünecek (demo).</div>
+          </div>
+          <button class="btn orange" id="btnAddCall">+ Arama</button>
+        </div>
+      </div>
+      <div class="list" id="callsList"></div>
+    </section>
+
+    <!-- DURUM -->
+    <section class="view" id="view-status" aria-label="Durum">
+      <div class="card">
+        <div class="row">
+          <div>
+            <div style="font-weight:900">Durum</div>
+            <div class="muted" style="font-size:13px">Buraya hikaye/durum mantığı eklenir (demo).</div>
+          </div>
+          <button class="btn orange" id="btnAddStatus">+ Durum</button>
+        </div>
+      </div>
+      <div class="list" id="statusList"></div>
+    </section>
+
+    <!-- MESAJLAR -->
+    <section class="view active" id="view-chats" aria-label="Mesajlar">
+      <div class="card">
+        <div style="font-weight:900">Mesajlar</div>
+        <div class="muted" style="font-size:13px">Bir sohbet seç — mesaj yazıp gönderebilirsin.</div>
+      </div>
+      <div class="list" id="chatList"></div>
+    </section>
+
+    <!-- PROFIL -->
+    <section class="view" id="view-profile" aria-label="Profil">
+      <div class="card">
+        <div style="font-weight:900">Profil</div>
+        <div class="muted" style="font-size:13px">Basit profil ekranı (demo).</div>
+      </div>
+
+      <div class="list">
+        <div class="item" id="meCard">
+          <div class="avatar">🙂</div>
+          <div class="meta">
+            <div class="name" id="meName">Engin</div>
+            <div class="preview" id="meStatus">Durum: çevrimiçi</div>
+          </div>
+          <div class="badge">Ayarla</div>
+        </div>
+
+        <div class="item" id="settingsCard">
+          <div class="avatar">⚙️</div>
+          <div class="meta">
+            <div class="name">Ayarlar</div>
+            <div class="preview">Bildirim / Gizlilik (demo)</div>
+          </div>
+          <div class="badge">→</div>
+        </div>
+
         <div class="card">
           <div class="row">
             <div>
-              <div style="font-weight:900;">Aramalar</div>
-              <div class="muted" style="margin-top:4px;">Son aramalar burada görünecek.</div>
+              <div style="font-weight:900">Veriler</div>
+              <div class="muted" style="font-size:13px">Bu demo cihazda saklanır (localStorage).</div>
             </div>
-            <span class="badge">demo</span>
+            <button class="btn" id="btnReset">Sıfırla</button>
           </div>
+          <div class="hint">Not: Bu sürüm gerçek kullanıcılarla mesajlaşmaz. Sonraki adımda Firebase eklenir.</div>
         </div>
-        <div class="list" id="callsList"></div>
-      </section>
+      </div>
+    </section>
 
-      <!-- STATUS -->
-      <section class="view" id="v_status">
-        <div class="card">
-          <div class="row">
-            <div>
-              <div style="font-weight:900;">Durum</div>
-              <div class="muted" style="margin-top:4px;">Hikaye/durum mantığı (basit).</div>
-            </div>
-            <span class="badge" id="myStatusBadge">—</span>
-          </div>
-        </div>
-        <div class="list" id="statusList"></div>
-      </section>
-
-      <!-- CHATS -->
-      <section class="view" id="v_chats">
-        <div class="card">
-          <div style="font-weight:900;">Mesajlar</div>
-          <div class="muted" style="margin-top:4px;">Bir sohbet seç — mesaj yazıp gönderebilirsin.</div>
-        </div>
-        <div class="list" id="chatList"></div>
-      </section>
-
-      <!-- PROFILE -->
-      <section class="view" id="v_profile">
-        <div class="card">
-          <div class="row">
-            <div style="display:flex;align-items:center;gap:12px;min-width:0;">
-              <div class="avatar" id="meAvatar">🙂</div>
-              <div style="min-width:0;">
-                <div style="font-weight:900;" id="meName">Engin</div>
-                <div class="muted" id="meBio">Durum: çevrimiçi</div>
-              </div>
-            </div>
-            <span class="badge">Profil</span>
-          </div>
-        </div>
-
-        <div class="card">
-          <div style="font-weight:900;margin-bottom:8px;">Ayarlar</div>
-          <div class="muted">Adını/durumunu değiştir, kalıcı kaydedilir.</div>
-          <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
-            <button class="btn" id="btnEditProfile">Profili Düzenle</button>
-            <button class="btn" id="btnReset">Verileri Sıfırla</button>
-          </div>
-          <div class="smallNote">Not: Bu sürüm sunucusuz (offline). Gerçek WhatsApp gibi olması için ileride Firebase ekleriz.</div>
-        </div>
-      </section>
-
-      <!-- CHAT THREAD (inside views for layout) -->
-      <section class="view" id="v_thread">
-        <div class="chatTop">
+    <!-- CHAT (tek sohbet ekranı) -->
+    <section class="view" id="view-chat" aria-label="Sohbet">
+      <div class="chatHeader">
+        <div class="left">
           <div class="backBtn" id="btnBack">←</div>
-          <div class="avatar" id="thAvatar">A</div>
           <div class="chatTitle">
-            <p class="nm" id="thName">Kişi</p>
-            <p class="st" id="thSub">yazıyor…</p>
+            <div class="n" id="chatWithName">Kişi</div>
+            <div class="s" id="chatWithSub">Çevrimiçi</div>
           </div>
         </div>
-        <div class="bubbleWrap" id="threadWrap"></div>
-      </section>
-    </div>
+        <div class="badge" id="chatBadge">Sohbet</div>
+      </div>
+      <div class="bubbles" id="bubbleList"></div>
+    </section>
   </div>
 
-  <div class="nav" id="nav">
-    <div class="tab" data-tab="calls"><div class="ico">👥</div><div>Aramalar</div></div>
-    <div class="tab" data-tab="status"><div class="ico">❗</div><div>Durum</div></div>
-    <div class="tab active" data-tab="chats"><div class="ico">💬</div><div>Mesajlar</div></div>
-    <div class="tab" data-tab="profile"><div class="ico">🤔</div><div>Profil</div></div>
-  </div>
-
-  <div class="fab" id="fab" title="Yeni">+</div>
-
+  <!-- Composer -->
   <div class="composer" id="composer">
-    <input id="msgInput" type="text" placeholder="Mesaj yaz…"/>
-    <button class="sendBtn" id="sendBtn">Gönder</button>
+    <input id="msgInput" type="text" placeholder="Mesaj yaz..." autocomplete="off"/>
+    <div class="sendBtn" id="btnSend">➤</div>
   </div>
 
-  <div class="overlay" id="overlay">
-    <div class="modal" id="modal">
+  <!-- Modal -->
+  <div class="modalWrap" id="modalWrap" role="dialog" aria-modal="true">
+    <div class="sheet">
       <h3 id="modalTitle">Yeni</h3>
-      <div class="grid" id="modalBody"></div>
+      <div class="field">
+        <label id="modalLabel">İsim</label>
+        <input id="modalInput" type="text" placeholder="Yaz..."/>
+      </div>
       <div class="actions">
         <button class="btn" id="modalCancel">Vazgeç</button>
         <button class="btn primary" id="modalOk">Kaydet</button>
       </div>
+      <div class="hint" id="modalHint"></div>
     </div>
   </div>
 
+  <!-- Bottom Nav -->
+  <nav class="nav" aria-label="Alt Menü">
+    <div class="tab" data-tab="calls">
+      <div class="ico">👥</div>
+      <div>Aramalar</div>
+    </div>
+    <div class="tab" data-tab="status">
+      <div class="ico">❗</div>
+      <div>Durum</div>
+    </div>
+    <div class="tab active" data-tab="chats">
+      <div class="ico">💬</div>
+      <div>Mesajlar</div>
+    </div>
+    <div class="tab" data-tab="profile">
+      <div class="ico">🤔</div>
+      <div>Profil</div>
+    </div>
+  </nav>
+
   <script>
-    // ---------- Storage helpers ----------
-    const LS = {
-      get(k, fallback){
-        try{
-          const v = localStorage.getItem(k);
-          return v ? JSON.parse(v) : fallback;
-        }catch(e){ return fallback; }
-      },
-      set(k, v){
-        localStorage.setItem(k, JSON.stringify(v));
-      }
-    };
+    // ========== STATE ==========
+    const KEY = "vigo_chat_demo_v1";
+    const state = load() || seed();
 
-    // ---------- Initial seed ----------
-    const seed = () => {
-      const has = LS.get("vigo_inited", false);
-      if(has) return;
+    function seed(){
+      return {
+        me: { name: "Engin", status: "çevrimiçi" },
+        chats: [
+          { id:"ahmet", name:"Ahmet", last:"Nasılsın?", online:true, messages:[
+            { by:"them", text:"Nasılsın?", ts: Date.now()-1000*60*40 },
+            { by:"me", text:"İyiyim, sen?", ts: Date.now()-1000*60*38 }
+          ]},
+          { id:"zeynep", name:"Zeynep", last:"Yarın görüşürüz.", online:false, messages:[
+            { by:"them", text:"Yarın görüşürüz.", ts: Date.now()-1000*60*60*5 }
+          ]},
+          { id:"mert", name:"Mert", last:"Tamamdır.", online:true, messages:[
+            { by:"them", text:"Tamamdır.", ts: Date.now()-1000*60*10 }
+          ]},
+        ],
+        calls: [
+          { id: cryptoId(), name:"Ahmet", when: "Bugün 12:05", type:"Gelen" },
+          { id: cryptoId(), name:"Zeynep", when: "Dün 21:18", type:"Giden" },
+        ],
+        statuses: [
+          { id: cryptoId(), name:"Senin durumun", text:"Durum ekle", mine:true },
+          { id: cryptoId(), name:"Ahmet", text:"“Dışarıdayım”", mine:false },
+        ],
+        ui: { activeTab:"chats", activeChatId:null }
+      };
+    }
 
-      const now = Date.now();
-      const chats = [
-        {
-          id: "c_ahmet",
-          name: "Ahmet",
-          status: "çevrimiçi",
-          avatar: "A",
-          messages: [
-            { id: "m1", me:false, text:"Nasılsın?", ts: now - 1000*60*60*3 }
-          ]
-        },
-        {
-          id: "c_zeynep",
-          name: "Zeynep",
-          status: "son görülme: dün",
-          avatar: "Z",
-          messages: [
-            { id: "m1", me:false, text:"Yarın görüşürüz.", ts: now - 1000*60*60*10 }
-          ]
-        },
-        {
-          id: "c_mert",
-          name: "Mert",
-          status: "meşgul",
-          avatar: "M",
-          messages: [
-            { id: "m1", me:false, text:"Tamamdır.", ts: now - 1000*60*40 }
-          ]
-        }
-      ];
+    function load(){
+      try{
+        const raw = localStorage.getItem(KEY);
+        if(!raw) return null;
+        return JSON.parse(raw);
+      }catch(e){ return null; }
+    }
+    function save(){
+      localStorage.setItem(KEY, JSON.stringify(state));
+    }
+    function cryptoId(){
+      return Math.random().toString(16).slice(2) + Date.now().toString(16);
+    }
 
-      const statuses = [
-        { id:"s_me", name:"Senin durumun", text:"Durum ekle", ts: now - 1000*60*5, mine:true, pin:true },
-        { id:"s_a", name:"Ahmet", text:"Dışarıdayım", ts: now - 1000*60*30, mine:false },
-      ];
-
-      const calls = [
-        { id:"k1", name:"Ahmet", type:"Gelen", ts: now - 1000*60*60*2 },
-        { id:"k2", name:"Zeynep", type:"Giden", ts: now - 1000*60*60*20 },
-      ];
-
-      const me = { name:"Engin", bio:"çevrimiçi", emoji:"🙂", myStatus:"—" };
-
-      LS.set("vigo_chats", chats);
-      LS.set("vigo_statuses", statuses);
-      LS.set("vigo_calls", calls);
-      LS.set("vigo_me", me);
-      LS.set("vigo_inited", true);
-    };
-
-    seed();
-
-    // ---------- State ----------
-    let currentTab = "chats";
-    let currentChatId = null;
-
-    // ---------- Elements ----------
-    const hdrTitle = document.getElementById("hdrTitle");
-    const hdrSub = document.getElementById("hdrSub");
-    const hdrAction = document.getElementById("hdrAction");
-    const hdrActionIco = document.getElementById("hdrActionIco");
-    const hdrActionTxt = document.getElementById("hdrActionTxt");
-
-    const fab = document.getElementById("fab");
-    const nav = document.getElementById("nav");
+    // ========== DOM ==========
+    const headerTitle = document.getElementById("headerTitle");
+    const headerSub   = document.getElementById("headerSub");
+    const headerAction= document.getElementById("headerAction");
+    const headerActionText = document.getElementById("headerActionText");
 
     const views = {
-      calls: document.getElementById("v_calls"),
-      status: document.getElementById("v_status"),
-      chats: document.getElementById("v_chats"),
-      profile: document.getElementById("v_profile"),
-      thread: document.getElementById("v_thread"),
+      calls: document.getElementById("view-calls"),
+      status: document.getElementById("view-status"),
+      chats: document.getElementById("view-chats"),
+      profile: document.getElementById("view-profile"),
+      chat: document.getElementById("view-chat"),
     };
+
+    const tabs = Array.from(document.querySelectorAll(".tab"));
 
     const chatList = document.getElementById("chatList");
     const callsList = document.getElementById("callsList");
     const statusList = document.getElementById("statusList");
 
-    const meAvatar = document.getElementById("meAvatar");
-    const meName = document.getElementById("meName");
-    const meBio = document.getElementById("meBio");
-    const myStatusBadge = document.getElementById("myStatusBadge");
-
     const composer = document.getElementById("composer");
     const msgInput = document.getElementById("msgInput");
-    const sendBtn = document.getElementById("sendBtn");
-
+    const btnSend = document.getElementById("btnSend");
     const btnBack = document.getElementById("btnBack");
-    const thAvatar = document.getElementById("thAvatar");
-    const thName = document.getElementById("thName");
-    const thSub = document.getElementById("thSub");
-    const threadWrap = document.getElementById("threadWrap");
+    const bubbleList = document.getElementById("bubbleList");
+    const chatWithName = document.getElementById("chatWithName");
+    const chatWithSub = document.getElementById("chatWithSub");
 
-    // modal
-    const overlay = document.getElementById("overlay");
+    const meName = document.getElementById("meName");
+    const meStatus = document.getElementById("meStatus");
+
+    // Modal
+    const modalWrap = document.getElementById("modalWrap");
     const modalTitle = document.getElementById("modalTitle");
-    const modalBody = document.getElementById("modalBody");
+    const modalLabel = document.getElementById("modalLabel");
+    const modalInput = document.getElementById("modalInput");
+    const modalHint  = document.getElementById("modalHint");
     const modalCancel = document.getElementById("modalCancel");
     const modalOk = document.getElementById("modalOk");
 
-    // ---------- Utils ----------
-    const pad2 = (n) => String(n).padStart(2,"0");
-    const fmtTime = (ts) => {
-      const d = new Date(ts);
-      return `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
-    };
-    const fmtWhen = (ts) => {
-      const d = new Date(ts);
-      const now = new Date();
-      const sameDay = d.toDateString() === now.toDateString();
-      if(sameDay) return `Bugün ${fmtTime(ts)}`;
-      const yest = new Date(Date.now() - 86400000);
-      if(d.toDateString() === yest.toDateString()) return `Dün ${fmtTime(ts)}`;
-      return `${pad2(d.getDate())}.${pad2(d.getMonth()+1)}.${d.getFullYear()} ${fmtTime(ts)}`;
-    };
-
-    const getChats = () => LS.get("vigo_chats", []);
-    const setChats = (v) => LS.set("vigo_chats", v);
-
-    const getStatuses = () => LS.get("vigo_statuses", []);
-    const setStatuses = (v) => LS.set("vigo_statuses", v);
-
-    const getCalls = () => LS.get("vigo_calls", []);
-    const setCalls = (v) => LS.set("vigo_calls", v);
-
-    const getMe = () => LS.get("vigo_me", {name:"Engin", bio:"çevrimiçi", emoji:"🙂", myStatus:"—"});
-    const setMe = (v) => LS.set("vigo_me", v);
-
-    const firstLetter = (s) => (s || "?").trim().charAt(0).toUpperCase() || "?";
-
-    // ---------- Render ----------
-    function setHeaderFor(tab){
-      if(tab === "calls"){
-        hdrTitle.textContent = "Aramalar";
-        hdrSub.textContent = "Basit mesajlaşma";
-        hdrActionIco.textContent = "➕";
-        hdrActionTxt.textContent = "Ekle";
-      } else if(tab === "status"){
-        hdrTitle.textContent = "Durum";
-        hdrSub.textContent = "Basit mesajlaşma";
-        hdrActionIco.textContent = "➕";
-        hdrActionTxt.textContent = "Ekle";
-      } else if(tab === "chats"){
-        hdrTitle.textContent = "Mesajlar";
-        hdrSub.textContent = "Basit mesajlaşma";
-        hdrActionIco.textContent = "➕";
-        hdrActionTxt.textContent = "Yeni";
-      } else if(tab === "profile"){
-        hdrTitle.textContent = "Profil";
-        hdrSub.textContent = "Basit mesajlaşma";
-        hdrActionIco.textContent = "⚙️";
-        hdrActionTxt.textContent = "Ayar";
-      } else if(tab === "thread"){
-        hdrTitle.textContent = "Sohbet";
-        hdrSub.textContent = "";
-        hdrActionIco.textContent = "⋯";
-        hdrActionTxt.textContent = "Menü";
+    // Buttons
+    document.getElementById("btnAddCall").addEventListener("click", () => openModal({
+      title:"Yeni Arama",
+      label:"Kişi adı",
+      placeholder:"Örn: Hasan",
+      hint:"Demo: Arama listesine ekler.",
+      onOk:(val)=>{
+        if(!val.trim()) return;
+        state.calls.unshift({ id: cryptoId(), name: val.trim(), when:"Şimdi", type:"Giden" });
+        save(); renderCalls();
       }
-    }
+    }));
 
-    function showView(name){
-      Object.values(views).forEach(v => v.classList.remove("active"));
-      views[name].classList.add("active");
-
-      // composer only in thread
-      if(name === "thread"){
-        composer.classList.add("show");
-        nav.style.display = "none";
-        fab.style.display = "none";
-      }else{
-        composer.classList.remove("show");
-        nav.style.display = "flex";
-        fab.style.display = "grid";
+    document.getElementById("btnAddStatus").addEventListener("click", () => openModal({
+      title:"Durum Ekle",
+      label:"Durum",
+      placeholder:"Ne yapıyorsun?",
+      hint:"Demo: Kendi durumunu günceller.",
+      onOk:(val)=>{
+        if(!val.trim()) return;
+        // mine status is first item
+        const mine = state.statuses.find(s => s.mine);
+        mine.text = val.trim();
+        save(); renderStatus();
       }
-    }
+    }));
 
-    function setActiveTab(tab){
-      currentTab = tab;
+    document.getElementById("btnReset").addEventListener("click", () => {
+      localStorage.removeItem(KEY);
+      location.reload();
+    });
+
+    document.getElementById("meCard").addEventListener("click", () => openModal({
+      title:"Profil",
+      label:"Adın",
+      placeholder:"Adını yaz",
+      initial: state.me.name,
+      hint:"Demo: Başlığı ve profilini günceller.",
+      onOk:(val)=>{
+        if(!val.trim()) return;
+        state.me.name = val.trim();
+        save(); renderProfile();
+      }
+    }));
+
+    document.getElementById("settingsCard").addEventListener("click", () => {
+      alert("Ayarlar (demo) — İstersen sonraki adımda gerçek ayar ekranı ekleriz.");
+    });
+
+    // Header action changes per tab
+    headerAction.addEventListener("click", () => {
+      const t = state.ui.activeTab;
+      if(t === "chats"){
+        openModal({
+          title:"Yeni Sohbet",
+          label:"Kişi adı",
+          placeholder:"Örn: Ece",
+          hint:"Demo: Sohbet listesine yeni kişi ekler.",
+          onOk:(val)=>{
+            if(!val.trim()) return;
+            const name = val.trim();
+            const id = name.toLowerCase().replace(/\s+/g,"-") + "-" + cryptoId().slice(0,4);
+            state.chats.unshift({ id, name, last:"", online:true, messages:[] });
+            save(); renderChats();
+          }
+        });
+      } else if(t === "status"){
+        document.getElementById("btnAddStatus").click();
+      } else if(t === "calls"){
+        doc
