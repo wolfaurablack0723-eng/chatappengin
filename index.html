@@ -1,124 +1,209 @@
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>VigoChatt</title>
 
-<script>
-var firebaseConfig = {
+<style>
+:root{
+  --bg:#efe7db;
+  --card:rgba(0,0,0,.06);
+  --text:#1b1b1b;
+  --muted:rgba(0,0,0,.55);
+  --border:rgba(0,0,0,.10);
+  --accent:#2b6cff;
+  --radius:18px;
+}
+body{
+  margin:0;
+  font-family:system-ui;
+  background:var(--bg);
+  color:var(--text);
+}
+.app{max-width:520px;margin:auto;height:100vh;display:flex;flex-direction:column}
+.header{padding:16px;font-weight:bold;font-size:18px}
+.view{flex:1;overflow:auto;padding:12px}
+.card{
+  background:#fff;
+  border-radius:var(--radius);
+  padding:12px;
+  margin-bottom:12px;
+  border:1px solid var(--border)
+}
+input,textarea{
+  width:100%;
+  padding:10px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  margin-bottom:10px
+}
+button{
+  padding:10px 16px;
+  border:none;
+  border-radius:12px;
+  background:var(--accent);
+  color:#fff;
+  cursor:pointer
+}
+.message{
+  padding:8px 12px;
+  border-radius:12px;
+  margin-bottom:6px;
+  background:#fff;
+  border:1px solid var(--border)
+}
+.me{
+  background:rgba(43,108,255,.15);
+  margin-left:auto;
+  max-width:70%
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="header">VigoChatt</div>
+
+  <!-- AUTH -->
+  <div class="view" id="authView">
+    <div class="card">
+      <input id="email" type="email" placeholder="Email">
+      <input id="pass" type="password" placeholder="Şifre">
+      <button onclick="register()">Kayıt Ol</button>
+      <button onclick="login()">Giriş Yap</button>
+      <div id="authErr"></div>
+    </div>
+  </div>
+
+  <!-- CHAT -->
+  <div class="view" id="chatView" style="display:none">
+    <div class="card">
+      <input id="targetEmail" placeholder="Mesaj atılacak email">
+      <button onclick="openChat()">Sohbet Aç</button>
+    </div>
+
+    <div id="messages"></div>
+
+    <div class="card">
+      <textarea id="msg" placeholder="Mesaj yaz"></textarea>
+      <button onclick="sendMessage()">Gönder</button>
+    </div>
+
+    <button onclick="logout()">Çıkış</button>
+  </div>
+</div>
+
+<!-- FIREBASE -->
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+import {
+  getFirestore,
+  doc,
+  setDoc,
+  getDoc,
+  collection,
+  addDoc,
+  query,
+  orderBy,
+  onSnapshot
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const firebaseConfig = {
   apiKey: "AIzaSyA3--Xy1WrM6WlxurXXr4i5qwMZiafXN4k",
   authDomain: "vigochat-58144.firebaseapp.com",
-  databaseURL: "https://vigochat-58144-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "vigochat-58144",
-  storageBucket: "vigochat-58144.firebasestorage.app",
-  messagingSenderId: "384136632816",
-  appId: "1:384136632816:web:2bb6d6942680a2e2e6e535"
+  projectId: "vigochat-58144"
 };
 
-firebase.initializeApp(firebaseConfig);
-var db = firebase.database();
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
 let currentUser = null;
-let currentChat = null;
+let currentChatId = null;
 
-/* Giriş */
-function loginUser(){
-  let phone = prompt("Numara gir");
-  if(!phone) return;
-  currentUser = phone;
-
-  db.ref("users/"+phone).set({
-    phone: phone,
-    online: true
-  });
-
-  loadUsers();
+window.register = async function(){
+  try{
+    await createUserWithEmailAndPassword(auth,
+      email.value, pass.value);
+  }catch(e){ authErr.innerText=e.message }
 }
 
-/* Kullanıcıları yükle */
-function loadUsers(){
-  db.ref("users").on("value", snap=>{
-    const data = snap.val() || {};
-    const el = document.getElementById("chatList");
-    el.innerHTML="";
-
-    Object.keys(data).forEach(uid=>{
-      if(uid===currentUser) return;
-
-      el.innerHTML += `
-        <div class="item" onclick="openFirebaseChat('${uid}')">
-          <div class="avatar">${uid[0]}</div>
-          <div class="meta">
-            <b>${uid}</b>
-            <span>Mesajlaş</span>
-          </div>
-        </div>
-      `;
-    });
-  });
+window.login = async function(){
+  try{
+    await signInWithEmailAndPassword(auth,
+      email.value, pass.value);
+  }catch(e){ authErr.innerText=e.message }
 }
 
-/* Chat ID */
-function chatId(a,b){
-  return a<b ? a+"_"+b : b+"_"+a;
+window.logout = async function(){
+  await signOut(auth);
 }
 
-/* Sohbet Aç */
-function openFirebaseChat(uid){
-  if(!currentUser){
-    alert("Önce giriş yap");
-    return;
+onAuthStateChanged(auth, user=>{
+  if(user){
+    currentUser = user;
+    authView.style.display="none";
+    chatView.style.display="block";
+  }else{
+    authView.style.display="block";
+    chatView.style.display="none";
   }
+});
 
-  currentChat = uid;
-  document.getElementById("chatName").innerText = uid;
-  document.getElementById("overlay").classList.add("show");
+window.openChat = async function(){
+  const target = targetEmail.value.trim().toLowerCase();
+  if(!target) return;
 
-  loadMessages();
+  currentChatId = [currentUser.email,target].sort().join("_");
+
+  listenMessages();
 }
 
-/* Mesajları Yükle */
-function loadMessages(){
-  let id = chatId(currentUser,currentChat);
+function listenMessages(){
+  const q = query(
+    collection(db,"chats",currentChatId,"messages"),
+    orderBy("time")
+  );
 
-  db.ref("messages/"+id).on("value", snap=>{
-    const data = snap.val() || {};
-    const box = document.getElementById("chatBody");
-    box.innerHTML="";
-
-    Object.values(data).forEach(m=>{
-      box.innerHTML += `
-        <div class="bubble ${m.from===currentUser?'me':''}">
-          ${m.text}
-        </div>
-      `;
+  onSnapshot(q,snap=>{
+    messages.innerHTML="";
+    snap.forEach(doc=>{
+      const data = doc.data();
+      const div=document.createElement("div");
+      div.className="message";
+      if(data.uid===currentUser.uid) div.classList.add("me");
+      div.innerText=data.text;
+      messages.appendChild(div);
     });
-
-    box.scrollTop = box.scrollHeight;
   });
 }
 
-/* Mesaj Gönder */
-function sendFirebaseMsg(){
-  if(!currentUser || !currentChat) return;
-
-  let input = document.getElementById("msg");
-  let text = input.value.trim();
+window.sendMessage = async function(){
+  if(!currentChatId) return;
+  const text=msg.value.trim();
   if(!text) return;
 
-  let id = chatId(currentUser,currentChat);
-
-  db.ref("messages/"+id).push({
-    from: currentUser,
-    text: text,
-    time: Date.now()
-  });
-
-  input.value="";
+  await addDoc(
+    collection(db,"chats",currentChatId,"messages"),
+    {
+      text:text,
+      uid:currentUser.uid,
+      time:Date.now()
+    }
+  );
+  msg.value="";
 }
 
-/* Mevcut butona bağla */
-document.getElementById("send").addEventListener("click", sendFirebaseMsg);
-
-/* İlk açılışta giriş iste */
-setTimeout(loginUser, 500);
-
 </script>
+</body>
+</html>
