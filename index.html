@@ -3,287 +3,223 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VigoChatt</title>
+<title>VigoChat</title>
 
 <style>
-:root{
-  --bg:#0f172a;
-  --card:#1e293b;
-  --accent:#3b82f6;
-  --text:#f1f5f9;
-  --muted:#94a3b8;
-  --radius:16px;
-}
-
 body{
-  margin:0;
-  font-family:system-ui;
-  background:var(--bg);
-  color:var(--text);
+margin:0;
+font-family:Arial, sans-serif;
+background:#0f172a;
+color:white;
 }
 
 header{
-  padding:18px;
-  font-weight:700;
-  font-size:20px;
-  background:var(--card);
-  display:flex;
-  justify-content:space-between;
+background:#1e293b;
+padding:15px;
+text-align:center;
+font-weight:bold;
 }
 
-.section{display:none;padding:20px;}
-.section.active{display:block;}
+nav{
+position:fixed;
+bottom:0;
+width:100%;
+background:#1e293b;
+display:flex;
+justify-content:space-around;
+padding:10px 0;
+}
 
-.card{
-  background:var(--card);
-  padding:16px;
-  border-radius:var(--radius);
-  margin-bottom:16px;
+nav button{
+background:none;
+border:none;
+color:white;
+font-size:14px;
+}
+
+.section{
+display:none;
+padding:15px;
+padding-bottom:80px;
+}
+
+.active{
+display:block;
 }
 
 input,textarea{
-  width:100%;
-  padding:12px;
-  margin-bottom:10px;
-  border-radius:10px;
-  border:none;
+width:100%;
+padding:10px;
+margin:5px 0;
+background:#334155;
+border:none;
+color:white;
 }
 
 button{
-  width:100%;
-  padding:12px;
-  border:none;
-  border-radius:10px;
-  background:var(--accent);
-  color:white;
-  font-weight:600;
-  cursor:pointer;
+padding:10px;
+background:#2563eb;
+border:none;
+color:white;
+margin-top:5px;
 }
 
-.nav{
-  position:fixed;
-  bottom:0;
-  left:0;
-  right:0;
-  display:flex;
-  justify-content:space-around;
-  background:var(--card);
-  padding:10px 0;
-}
-
-.nav div{
-  cursor:pointer;
-  font-size:13px;
-}
-
-.message{
-  padding:10px;
-  margin:6px 0;
-  border-radius:10px;
-  background:#334155;
-}
-.me{
-  background:var(--accent);
-  text-align:right;
+.card{
+background:#1e293b;
+padding:10px;
+margin:5px 0;
 }
 </style>
 </head>
-
 <body>
 
-<header>
-  VigoChatt
-  <div onclick="logout()" style="cursor:pointer;">Çıkış</div>
-</header>
+<header>VigoChat</header>
 
-<!-- AUTH -->
-<div id="authSection" class="section active">
-  <div class="card">
-    <h3>Giriş / Kayıt</h3>
-    <input id="email" placeholder="Email">
-    <input id="password" type="password" placeholder="Şifre">
-    <button onclick="register()">Kayıt Ol</button>
-    <button onclick="login()">Giriş Yap</button>
-    <div id="authError" style="color:red;"></div>
-  </div>
+<div id="login" class="section active">
+<h3>Giriş / Kayıt</h3>
+<input id="email" placeholder="Email">
+<input id="password" type="password" placeholder="Şifre">
+<button onclick="register()">Kayıt Ol</button>
+<button onclick="login()">Giriş Yap</button>
 </div>
 
-<!-- CHAT -->
-<div id="chatSection" class="section">
-  <div id="messages"></div>
-  <input id="messageInput" placeholder="Mesaj yaz">
-  <button onclick="sendMessage()">Gönder</button>
+<div id="chat" class="section">
+<h3>Genel Sohbet</h3>
+<div id="messages"></div>
+<input id="msgInput" placeholder="Mesaj yaz">
+<button onclick="sendMessage()">Gönder</button>
 </div>
 
-<!-- STATUS -->
-<div id="statusSection" class="section">
-  <input id="statusInput" placeholder="Durum yaz">
-  <button onclick="addStatus()">Paylaş</button>
-  <div id="statusList"></div>
+<div id="status" class="section">
+<h3>Durum Ekle</h3>
+<input id="statusInput" placeholder="Durum yaz">
+<button onclick="addStatus()">Paylaş</button>
+<div id="statusList"></div>
 </div>
 
-<!-- PROFILE -->
-<div id="profileSection" class="section">
-  <div class="card">
-    <input id="nameInput" placeholder="İsim">
-    <input id="birthdayInput" type="date">
-    <textarea id="bioInput" placeholder="Hakkında"></textarea>
-    <button onclick="saveProfile()">Kaydet</button>
-  </div>
+<div id="profile" class="section">
+<h3>Profil</h3>
+<input id="nameInput" placeholder="Ad Soyad">
+<input id="birthdayInput" type="date">
+<textarea id="bioInput" placeholder="Hakkında"></textarea>
+<button onclick="saveProfile()">Kaydet</button>
+<div id="profileInfo"></div>
 </div>
 
-<div class="nav">
-  <div onclick="switchTab('chatSection')">Sohbet</div>
-  <div onclick="switchTab('statusSection')">Durum</div>
-  <div onclick="switchTab('profileSection')">Profil</div>
-</div>
+<nav>
+<button onclick="show('chat')">Sohbet</button>
+<button onclick="show('status')">Durum</button>
+<button onclick="show('profile')">Profil</button>
+</nav>
 
 <script type="module">
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import {
-  getAuth,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-
-import {
-  getDatabase,
-  ref,
-  push,
-  set,
-  onValue,
-  get
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getDatabase, ref, push, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyA3--Xy1WrM6WlxurXXr4i5qwMZiafXN4k",
   authDomain: "vigochat-58144.firebaseapp.com",
   databaseURL: "https://vigochat-58144-default-rtdb.europe-west1.firebasedatabase.app",
   projectId: "vigochat-58144",
-  storageBucket: "vigochat-58144.appspot.com",
+  storageBucket: "vigochat-58144.firebasestorage.app",
   messagingSenderId: "384136632816",
-  appId: "1:384136632816:web:2bb6d6942680a2e2e6e535"
+  appId: "1:384136632816:web:2bb6d6942680a2e2e6e535",
+  measurementId: "G-62VZ3906GS"
 };
 
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getDatabase(app);
+const auth = getAuth();
+const db = getDatabase();
 
-let currentUser=null;
+window.register = function(){
+createUserWithEmailAndPassword(auth,email.value,password.value)
+.then(()=>alert("Kayıt başarılı"))
+.catch(e=>alert(e.message));
+}
 
-onAuthStateChanged(auth, user=>{
-  if(user){
-    currentUser=user;
-    document.getElementById("authSection").classList.remove("active");
-    switchTab("chatSection");
-    loadMessages();
-    loadStatuses();
-    loadProfile();
-  }else{
-    document.getElementById("authSection").classList.add("active");
-  }
+window.login = function(){
+signInWithEmailAndPassword(auth,email.value,password.value)
+.catch(e=>alert(e.message));
+}
+
+onAuthStateChanged(auth,user=>{
+if(user){
+show('chat');
+loadMessages();
+loadStatus();
+loadProfile();
+}
 });
 
-window.register = async function(){
-  try{
-    await createUserWithEmailAndPassword(auth,email.value,password.value);
-  }catch(e){
-    authError.innerText=e.message;
-  }
-}
-
-window.login = async function(){
-  try{
-    await signInWithEmailAndPassword(auth,email.value,password.value);
-  }catch(e){
-    authError.innerText=e.message;
-  }
-}
-
-window.logout = function(){
-  signOut(auth);
-}
-
-window.switchTab = function(id){
-  document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
+window.sendMessage = function(){
+const user = auth.currentUser;
+push(ref(db,'messages'),{
+text:msgInput.value,
+uid:user.uid
+});
+msgInput.value="";
 }
 
 function loadMessages(){
-  const msgRef = ref(db,"messages");
-  onValue(msgRef,snapshot=>{
-    const data=snapshot.val();
-    messages.innerHTML="";
-    if(!data)return;
-    Object.values(data).forEach(msg=>{
-      const div=document.createElement("div");
-      div.className="message";
-      if(msg.uid===currentUser.uid) div.classList.add("me");
-      div.innerText=msg.text;
-      messages.appendChild(div);
-    });
-  });
+onValue(ref(db,'messages'),snap=>{
+messages.innerHTML="";
+snap.forEach(child=>{
+let data=child.val();
+messages.innerHTML+=`<div class="card">${data.text}</div>`;
+});
+});
 }
 
-window.sendMessage=function(){
-  const text=messageInput.value;
-  if(!text)return;
-  push(ref(db,"messages"),{
-    text:text,
-    uid:currentUser.uid,
-    time:Date.now()
-  });
-  messageInput.value="";
+window.addStatus = function(){
+const user = auth.currentUser;
+set(ref(db,'status/'+user.uid),{
+text:statusInput.value
+});
+statusInput.value="";
 }
 
-window.addStatus=function(){
-  const text=statusInput.value;
-  if(!text)return;
-  push(ref(db,"statuses/"+currentUser.uid),{
-    text:text,
-    time:Date.now()
-  });
-  statusInput.value="";
+function loadStatus(){
+onValue(ref(db,'status'),snap=>{
+statusList.innerHTML="";
+snap.forEach(child=>{
+let data=child.val();
+statusList.innerHTML+=`<div class="card">${data.text}</div>`;
+});
+});
 }
 
-function loadStatuses(){
-  onValue(ref(db,"statuses"),snapshot=>{
-    const data=snapshot.val();
-    statusList.innerHTML="";
-    if(!data)return;
-    for(let uid in data){
-      Object.values(data[uid]).forEach(st=>{
-        const div=document.createElement("div");
-        div.className="card";
-        div.innerText=st.text;
-        statusList.appendChild(div);
-      });
-    }
-  });
-}
-
-window.saveProfile=async function(){
-  await set(ref(db,"users/"+currentUser.uid),{
-    name:nameInput.value,
-    birthday:birthdayInput.value,
-    bio:bioInput.value,
-    email:currentUser.email
-  });
+window.saveProfile = function(){
+const user = auth.currentUser;
+set(ref(db,'users/'+user.uid),{
+name:nameInput.value,
+birthday:birthdayInput.value,
+bio:bioInput.value
+});
+alert("Profil kaydedildi");
 }
 
 function loadProfile(){
-  get(ref(db,"users/"+currentUser.uid)).then(snapshot=>{
-    const d=snapshot.val();
-    if(!d)return;
-    nameInput.value=d.name||"";
-    birthdayInput.value=d.birthday||"";
-    bioInput.value=d.bio||"";
-  });
+const user = auth.currentUser;
+onValue(ref(db,'users/'+user.uid),snap=>{
+if(snap.exists()){
+let data=snap.val();
+profileInfo.innerHTML=
+`<div class="card">
+İsim: ${data.name}<br>
+Doğum: ${data.birthday}<br>
+Bio: ${data.bio}
+</div>`;
+}
+});
 }
 
+window.show=function(id){
+document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+document.getElementById(id).classList.add('active');
+}
 </script>
+
 </body>
 </html>
