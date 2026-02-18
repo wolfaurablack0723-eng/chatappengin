@@ -3,1014 +3,1109 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
-  <title>VigoChatt</title>
+  <title>ARKO AI Platform</title>
+
   <style>
     :root{
-      --bg:#efe7db;
-      --card:rgba(0,0,0,.06);
-      --text:#1b1b1b;
-      --muted:rgba(0,0,0,.55);
-      --border:rgba(0,0,0,.10);
-      --accent:#2b6cff;
-      --safe-bottom: env(safe-area-inset-bottom, 0px);
-      --safe-top: env(safe-area-inset-top, 0px);
-      --radius:18px;
+      --bg0:#070A12;
+      --bg1:#0B1020;
+      --panel:rgba(255,255,255,.06);
+      --panel2:rgba(255,255,255,.09);
+      --stroke:rgba(255,255,255,.10);
+      --text:#F4F7FF;
+      --muted:rgba(255,255,255,.65);
+      --accent:#00E676;
+      --danger:#FF4D4D;
+      --warn:#FFB020;
+      --shadow:0 18px 50px rgba(0,0,0,.55);
+      --r16:16px;
+      --r22:22px;
+      --safeT: env(safe-area-inset-top, 0px);
+      --safeB: env(safe-area-inset-bottom, 0px);
     }
+
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
       margin:0;
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
-      background: radial-gradient(900px 600px at 60% 10%, rgba(255,255,255,.75), transparent 60%),
-                  radial-gradient(900px 600px at 10% 90%, rgba(255,255,255,.60), transparent 60%),
-                  var(--bg);
       color:var(--text);
+      background:
+        radial-gradient(900px 520px at 20% -10%, rgba(0,230,118,.18), transparent 55%),
+        radial-gradient(900px 520px at 90% 0%, rgba(43,108,255,.16), transparent 55%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
+      overflow-x:hidden;
     }
 
-    .app{
-      max-width:520px;
-      margin:0 auto;
-      height:100dvh;
-      display:flex;
-      flex-direction:column;
-      padding-top: var(--safe-top);
-      padding-bottom: calc(84px + var(--safe-bottom));
+    /* TOPBAR */
+    .topbar{
+      position:sticky; top:0;
+      padding: calc(10px + var(--safeT)) 14px 10px 14px;
+      backdrop-filter: blur(14px);
+      background: linear-gradient(180deg, rgba(5,8,15,.75), rgba(5,8,15,.25));
+      border-bottom:1px solid var(--stroke);
+      z-index:50;
     }
+    .toprow{display:flex; align-items:center; justify-content:space-between; gap:10px;}
+    .brand{display:flex; align-items:center; gap:10px;}
+    .logo{
+      width:38px;height:38px;border-radius:12px;
+      background: linear-gradient(135deg, rgba(0,230,118,.9), rgba(255,176,32,.9));
+      box-shadow: 0 10px 25px rgba(0,230,118,.18);
+    }
+    .brand h1{font-size:16px; margin:0; letter-spacing:.3px}
+    .brand .sub{font-size:12px; color:var(--muted); margin-top:2px}
 
-    /* Header */
-    .header{
-      padding:16px 16px 10px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-    }
-    .header h1{
-      margin:0;
-      font-size:18px;
-      letter-spacing:.2px;
-    }
-    .header small{color:var(--muted)}
-    .pill{
-      border:1px solid var(--border);
-      background: rgba(255,255,255,.55);
+    .iconBtn{
+      appearance:none; border:1px solid var(--stroke);
+      background: rgba(255,255,255,.06);
+      color:var(--text);
+      border-radius:14px;
       padding:10px 12px;
-      border-radius:999px;
+      font-weight:900;
       cursor:pointer;
-      user-select:none;
     }
-    .pill:active{transform:scale(.98)}
 
-    /* Views */
-    .view{
-      display:none;
-      padding: 6px 16px 16px;
-      overflow:auto;
-      flex:1;
+    /* LAYOUT */
+    .wrap{max-width:1100px; margin:0 auto; padding:14px;}
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:12px;
+      padding-bottom: calc(18px + var(--safeB));
     }
-    .view.active{display:block}
 
     .card{
-      border:1px solid var(--border);
-      background: rgba(255,255,255,.55);
-      border-radius: var(--radius);
-      padding: 14px;
-      margin-bottom: 12px;
+      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.05));
+      border:1px solid var(--stroke);
+      border-radius: var(--r22);
+      box-shadow: var(--shadow);
+      padding:14px;
     }
-    .list{display:flex; flex-direction:column; gap:10px}
-    .item{
-      display:flex; align-items:center; gap:12px;
-      border:1px solid var(--border);
-      background: rgba(255,255,255,.55);
-      border-radius: 16px;
-      padding: 12px;
-      cursor:pointer;
-      user-select:none;
-    }
-    .item:active{transform:scale(.99)}
-    .avatar{
-      width:44px;height:44px;border-radius:16px;
-      background: rgba(43,108,255,.12);
-      border:1px solid rgba(43,108,255,.18);
-      display:grid; place-items:center;
-      font-weight:900;
-      color:var(--accent);
-      flex:0 0 auto;
-      overflow:hidden;
-    }
-    .meta{min-width:0; flex:1}
-    .meta b{display:block; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-    .meta span{display:block; font-size:13px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:3px}
+    .card h2{margin:0 0 8px 0; font-size:16px}
+    .muted{color:var(--muted); font-size:12px; line-height:1.5}
 
-    /* Chat overlay */
+    .row{display:flex; gap:10px; flex-wrap:wrap}
+    .stat{
+      flex:1; min-width:140px;
+      border:1px solid var(--stroke);
+      background: rgba(0,0,0,.18);
+      border-radius:18px;
+      padding:12px;
+    }
+    .stat .n{font-size:20px; font-weight:950}
+    .stat .t{font-size:12px; color:var(--muted); margin-top:3px}
+
+    label{display:block; font-size:12px; color:var(--muted); margin:10px 0 6px}
+    input, textarea, select{
+      width:100%;
+      border-radius:16px;
+      border:1px solid var(--stroke);
+      background: rgba(0,0,0,.22);
+      color:var(--text);
+      padding:12px 12px;
+      outline:none;
+    }
+    textarea{min-height:110px; resize:vertical}
+
+    .btn{
+      border:0;
+      border-radius:16px;
+      padding:12px 14px;
+      font-weight:950;
+      cursor:pointer;
+      color:#07110B;
+      background: var(--accent);
+    }
+    .btn2{
+      border:1px solid var(--stroke);
+      border-radius:16px;
+      padding:12px 14px;
+      font-weight:900;
+      cursor:pointer;
+      color:var(--text);
+      background: rgba(255,255,255,.06);
+    }
+    .btnDanger{background:var(--danger); color:white}
+    .btnWarn{background:var(--warn); color:#1a1203}
+
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,.06);
+      padding:8px 10px;
+      border-radius:999px;
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    /* DRAWER MENU */
     .overlay{
       position:fixed; inset:0;
-      background: rgba(0,0,0,.15);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      display:none;
-      z-index: 50;
-      padding-top: var(--safe-top);
-      padding-bottom: var(--safe-bottom);
+      background: rgba(0,0,0,.55);
+      backdrop-filter: blur(6px);
+      opacity:0; pointer-events:none;
+      transition: .18s ease;
+      z-index:80;
     }
-    .overlay.show{display:block}
+    .overlay.on{opacity:1; pointer-events:auto}
 
-    .chat{
-      max-width:520px;
-      margin:0 auto;
+    .drawer{
+      position:fixed;
+      top:0; left:0;
       height:100%;
-      display:flex;
-      flex-direction:column;
-      background: rgba(255,255,255,.50);
+      width:min(330px, 88vw);
+      transform: translateX(-110%);
+      transition:.22s ease;
+      z-index:90;
+      padding: calc(14px + var(--safeT)) 14px 14px 14px;
+      background:
+        radial-gradient(700px 380px at 20% -10%, rgba(0,230,118,.18), transparent 60%),
+        linear-gradient(180deg, rgba(10,14,26,.98), rgba(8,10,16,.98));
+      border-right:1px solid var(--stroke);
     }
-    .chatTop{
-      padding: 12px 14px;
-      display:flex; align-items:center; gap:10px;
-      border-bottom:1px solid var(--border);
-      background: rgba(255,255,255,.55);
+    .drawer.on{transform: translateX(0)}
+    .drawerHead{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:12px}
+    .drawerTitle{display:flex; align-items:center; gap:10px}
+    .drawerTitle b{font-size:14px}
+    .menu{
+      display:flex; flex-direction:column; gap:8px;
+      margin-top:10px;
     }
-    .btn{
-      width:44px; height:44px;
-      border-radius: 14px;
-      border:1px solid var(--border);
-      background: rgba(255,255,255,.65);
-      cursor:pointer;
-      display:grid; place-items:center;
-      user-select:none;
-    }
-    .btn:active{transform:scale(.98)}
-    .chatTitle{min-width:0; flex:1}
-    .chatTitle b{display:block; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-    .chatTitle span{display:block; font-size:12px; color:var(--muted)}
-
-    .chatBody{
-      flex:1;
-      overflow:auto;
-      padding: 12px 14px;
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-    }
-    .bubble{
-      max-width:78%;
-      padding:10px 12px;
-      border-radius: 16px;
-      border:1px solid var(--border);
-      background: rgba(255,255,255,.75);
-      font-size:14px;
-      line-height:1.35;
-      white-space:pre-wrap;
-      word-break:break-word;
-    }
-    .bubble.me{
-      margin-left:auto;
-      background: rgba(43,108,255,.12);
-      border-color: rgba(43,108,255,.20);
-    }
-    .bubble .t{
-      display:block;
-      margin-top:6px;
-      font-size:11px;
-      color:var(--muted);
-    }
-    .composer{
-      padding: 10px 14px calc(10px + var(--safe-bottom));
-      border-top:1px solid var(--border);
-      background: rgba(255,255,255,.55);
-      display:flex;
-      gap:10px;
-      align-items:flex-end;
-    }
-    .composer textarea{
-      flex:1;
-      min-height:44px;
-      max-height:140px;
-      resize:none;
-      border:1px solid var(--border);
-      background: rgba(255,255,255,.75);
-      border-radius: 16px;
-      padding: 12px;
-      outline:none;
-      font-size:14px;
-    }
-    .send{
-      width:52px;height:52px;
+    .mi{
+      padding:12px 12px;
       border-radius:16px;
-      border:1px solid rgba(43,108,255,.25);
-      background: rgba(43,108,255,.12);
-      color: var(--accent);
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,.06);
+      color:var(--text);
       font-weight:900;
       cursor:pointer;
-      display:grid; place-items:center;
-      user-select:none;
+      display:flex; justify-content:space-between; align-items:center;
+    }
+    .mi small{color:var(--muted); font-weight:700}
+    .mi.active{
+      background: rgba(0,230,118,.16);
+      border-color: rgba(0,230,118,.35);
     }
 
-    /* Bottom bar (AYNI) */
-    .bottom{
-      position:fixed;
-      left:0; right:0; bottom:0;
-      z-index:9999;
-      padding: 10px 12px calc(10px + var(--safe-bottom));
-      display:flex;
-      justify-content:center;
-    }
-    .nav{
-      width:min(520px, calc(100% - 24px));
-      border:1px solid var(--border);
-      background: rgba(255,255,255,.55);
-      border-radius: 22px;
-      padding: 10px;
-      display:flex;
-      gap:8px;
-    }
-    .tab{
-      flex:1;
-      border-radius: 16px;
-      padding: 10px 6px;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      gap:6px;
-      cursor:pointer;
-      user-select:none;
-      color:var(--muted);
-      border:1px solid transparent;
-    }
-    .tab.active{
-      color: var(--text);
-      background: rgba(43,108,255,.10);
-      border-color: rgba(43,108,255,.18);
-    }
-    .tab .ico{font-size:20px; line-height:1}
-    .tab .lbl{font-size:12px; font-weight:800}
-
-    /* --- Modallar (tema bozmadan) --- */
+    /* MODAL */
     .modal{
       position:fixed; inset:0;
-      z-index: 80;
-      display:none;
-      background: rgba(0,0,0,.15);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      padding-top: var(--safe-top);
-      padding-bottom: var(--safe-bottom);
+      display:none; align-items:center; justify-content:center;
+      padding:16px; z-index:120;
     }
-    .modal.show{display:block}
-    .sheet{
-      max-width:520px;
-      margin: 10px auto 0;
-      border:1px solid var(--border);
-      background: rgba(255,255,255,.70);
+    .modal.on{display:flex}
+    .modalBox{
+      width:min(900px, 100%);
+      max-height: 78vh;
+      overflow:auto;
+      background: rgba(10,12,18,.96);
+      border:1px solid var(--stroke);
       border-radius: 18px;
-      overflow:hidden;
+      box-shadow: var(--shadow);
     }
-    .sheetHd{
-      padding: 12px 14px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      border-bottom:1px solid var(--border);
-      background: rgba(255,255,255,.55);
+    .modalTop{
+      position:sticky; top:0;
+      display:flex; justify-content:space-between; align-items:center; gap:10px;
+      padding:12px 14px;
+      background: rgba(10,12,18,.92);
+      border-bottom:1px solid var(--stroke);
     }
-    .sheetBd{padding:14px}
-    .field{display:flex; flex-direction:column; gap:6px; margin-bottom:10px}
-    .field label{font-size:12px; color:var(--muted)}
-    .inp{
-      border:1px solid var(--border);
-      background: rgba(255,255,255,.75);
-      border-radius: 16px;
-      padding: 12px;
-      outline:none;
-      font-size:14px;
-    }
-    .row{display:flex; gap:10px; flex-wrap:wrap}
-    .btn2{
-      border:1px solid var(--border);
-      background: rgba(255,255,255,.65);
-      border-radius: 16px;
-      padding: 12px 14px;
-      cursor:pointer;
-      font-weight:900;
-      user-select:none;
-    }
-    .btn2.primary{
-      border-color: rgba(43,108,255,.25);
-      background: rgba(43,108,255,.12);
-      color: var(--accent);
-    }
-    .err{color:#ef4444; font-size:13px; margin-top:6px}
-    .muted{color:var(--muted); font-size:13px; line-height:1.35}
-    .hr{height:1px; background:var(--border); margin:12px 0}
+    .modalBody{padding:14px}
+    pre{white-space:pre-wrap; word-break:break-word}
 
-    .toast{
-      position:fixed;
-      left:50%;
-      transform:translateX(-50%);
-      bottom: calc(92px + var(--safe-bottom));
-      z-index:99999;
-      background: rgba(0,0,0,.78);
-      color:#fff;
-      padding:10px 12px;
-      border-radius:999px;
-      font-size:13px;
-      display:none;
-      max-width: calc(100% - 24px);
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
+    /* DESKTOP */
+    @media (min-width: 980px){
+      .grid{grid-template-columns: 1.1fr .9fr;}
+      .topbar{position:sticky}
     }
-    .toast.show{display:block}
   </style>
 </head>
-
 <body>
-  <div class="toast" id="toast">...</div>
-
-  <div class="app">
-    <div class="header">
-      <div>
-        <h1 id="title">Mesajlar</h1>
-        <small id="sub">VigoChatt</small>
-      </div>
-      <div class="pill" id="addBtn">＋</div>
-    </div>
-
-    <!-- Aramalar -->
-    <section class="view" id="view-calls">
-      <div class="card">
-        <b>Aramalar</b>
-        <div class="muted" style="margin-top:6px">
-          Bu ekranda sohbet listenden kişiler görünür.
-          Sesli arama (WhatsApp gibi) için native/Capacitor gerekir.
+  <div class="topbar">
+    <div class="toprow">
+      <div class="brand">
+        <div class="logo"></div>
+        <div>
+          <h1>ARKO AI Platform</h1>
+          <div class="sub" id="subLine">Türkçe • Mobil uyumlu • Demo</div>
         </div>
       </div>
-      <div class="list" id="callsList"></div>
-    </section>
-
-    <!-- Durum -->
-    <section class="view" id="view-status">
-      <div class="card">
-        <b>Durum</b>
-        <div class="muted" style="margin-top:6px">
-          Durum yazıp paylaşabilirsin.
-        </div>
-        <div class="hr"></div>
-        <div class="row">
-          <input class="inp" id="statusText" placeholder="Durum yaz...">
-          <div class="btn2 primary" id="statusSend">Paylaş</div>
-        </div>
-      </div>
-      <div class="list" id="statusList"></div>
-    </section>
-
-    <!-- Mesajlar -->
-    <section class="view active" id="view-messages">
-      <div class="card">
-        <b>Mesajlar</b>
-        <div class="muted" style="margin-top:6px">
-          “＋” ile yeni sohbet başlat → mesaj gönder.
-        </div>
-      </div>
-      <div class="list" id="chatList"></div>
-      <div class="card" id="emptyChats" style="display:none">
-        <b>Henüz sohbet yok</b>
-        <div class="muted" style="margin-top:6px">Üstteki “＋” ile sohbet aç.</div>
-      </div>
-    </section>
-
-    <!-- Profil -->
-    <section class="view" id="view-profile">
-      <div class="card">
-        <b>Profil</b>
-        <div class="muted" style="margin-top:6px">
-          Bilgilerini düzenle.
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="field">
-          <label>Ad</label>
-          <input class="inp" id="pName" placeholder="Adın">
-        </div>
-        <div class="field">
-          <label>Doğum günü</label>
-          <input class="inp" id="pBday" type="date">
-        </div>
-        <div class="field">
-          <label>Hakkında</label>
-          <textarea class="inp" id="pAbout" placeholder="Kısa açıklama..." style="min-height:90px"></textarea>
-        </div>
-
-        <div class="row">
-          <div class="btn2 primary" id="saveProfile">Kaydet</div>
-          <div class="btn2" id="openSettings">Ayarlar</div>
-          <div class="btn2" id="logout">Çıkış</div>
-        </div>
-
-        <div class="hr"></div>
-        <div class="muted" id="meInfo">—</div>
-      </div>
-    </section>
-  </div>
-
-  <!-- Chat overlay -->
-  <div class="overlay" id="overlay">
-    <div class="chat">
-      <div class="chatTop">
-        <div class="btn" id="back">←</div>
-        <div class="chatTitle">
-          <b id="chatName">Sohbet</b>
-          <span id="chatSub">—</span>
-        </div>
-        <div class="btn" id="more">⋯</div>
-      </div>
-      <div class="chatBody" id="chatBody"></div>
-      <div class="composer">
-        <textarea id="msg" rows="1" placeholder="Mesaj yaz..."></textarea>
-        <div class="send" id="send">➤</div>
-      </div>
+      <button class="iconBtn" id="menuBtn">☰ Menü</button>
     </div>
   </div>
 
-  <!-- Bottom nav (AYNI) -->
-  <div class="bottom">
-    <nav class="nav">
-      <div class="tab" data-tab="calls"><div class="ico">👥</div><div class="lbl">Aramalar</div></div>
-      <div class="tab" data-tab="status"><div class="ico">❗</div><div class="lbl">Durum</div></div>
-      <div class="tab active" data-tab="messages"><div class="ico">📶</div><div class="lbl">Mesajlar</div></div>
-      <div class="tab" data-tab="profile"><div class="ico">🤔</div><div class="lbl">Profil</div></div>
-    </nav>
-  </div>
+  <div class="overlay" id="overlay"></div>
 
-  <!-- Login Modal -->
-  <div class="modal" id="authModal">
-    <div class="sheet">
-      <div class="sheetHd">
-        <b>VigoChatt • Giriş</b>
-        <div class="btn" id="closeAuth" style="width:44px;height:44px">✕</div>
+  <aside class="drawer" id="drawer">
+    <div class="drawerHead">
+      <div class="drawerTitle">
+        <div class="logo" style="width:34px;height:34px;border-radius:12px"></div>
+        <div>
+          <b>Menü</b>
+          <div class="muted" id="userLine">Kullanıcı: -</div>
+        </div>
       </div>
-      <div class="sheetBd">
-        <div class="muted">Firebase’e giriş yapınca gerçek kullanıcılarla mesajlaşacaksın.</div>
-        <div class="hr"></div>
+      <button class="iconBtn" id="closeDrawer">✕</button>
+    </div>
 
-        <div class="field">
-          <label>E-posta</label>
-          <input class="inp" id="email" type="email" placeholder="ornek@mail.com">
-        </div>
-        <div class="field">
-          <label>Şifre (min 6)</label>
-          <input class="inp" id="pass" type="password" placeholder="••••••••">
-        </div>
+    <div class="menu" id="menuList"></div>
 
-        <div class="row">
-          <div class="btn2 primary" id="loginBtn">Giriş</div>
-          <div class="btn2" id="signupBtn">Kayıt</div>
-        </div>
+    <div style="margin-top:12px" class="card">
+      <div class="pill">💳 Kredi: <b id="creditPill">0</b></div>
+      <div style="height:8px"></div>
+      <button class="btn2" id="add10">+10 Kredi (Demo)</button>
+    </div>
 
-        <div class="err" id="authErr"></div>
+    <div class="muted" style="margin-top:10px">
+      Bu sürüm frontend demo. Gerçek AI için sonra API bağlarız.
+    </div>
+  </aside>
 
-        <div class="hr"></div>
-        <div class="muted">
-          Not: “Numara ile giriş / rehber / sesli arama” WebView-APK’de native gerekir.
-          Bu sürümde en sorunsuz çalışan: Firebase e-posta ile gerçek chat.
-        </div>
+  <main class="wrap">
+    <div class="grid">
+      <section id="pageMain" class="card"></section>
+      <section id="pageSide" class="card"></section>
+    </div>
+  </main>
+
+  <!-- MODAL -->
+  <div class="modal" id="modal">
+    <div class="modalBox">
+      <div class="modalTop">
+        <b id="mTitle">Detay</b>
+        <button class="btn2" id="mClose">Kapat</button>
+      </div>
+      <div class="modalBody" id="mBody"></div>
+      <div class="modalTop" style="border-top:1px solid var(--stroke); border-bottom:0">
+        <button class="btn2" id="mCopy">Kopyala</button>
+        <button class="btn2" id="mDownload">JSON indir</button>
+        <button class="btn btnDanger" id="mDelete">Sil</button>
       </div>
     </div>
   </div>
-
-  <!-- New Chat Modal -->
-  <div class="modal" id="newChatModal">
-    <div class="sheet">
-      <div class="sheetHd">
-        <b>Yeni Sohbet</b>
-        <div class="btn" id="closeNewChat" style="width:44px;height:44px">✕</div>
-      </div>
-      <div class="sheetBd">
-        <div class="muted">Arkadaşının kayıtlı e-postasını yaz (o da VigoChatt’te kayıt olmalı).</div>
-        <div class="hr"></div>
-
-        <div class="field">
-          <label>E-posta</label>
-          <input class="inp" id="newChatEmail" placeholder="arkadas@mail.com">
-        </div>
-
-        <div class="row">
-          <div class="btn2 primary" id="startChat">Sohbet Başlat</div>
-          <div class="btn2" id="copyMyEmail">Benim e-postam</div>
-        </div>
-
-        <div class="err" id="newChatErr"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Settings Modal -->
-  <div class="modal" id="settingsModal">
-    <div class="sheet">
-      <div class="sheetHd">
-        <b>Ayarlar</b>
-        <div class="btn" id="closeSettings" style="width:44px;height:44px">✕</div>
-      </div>
-      <div class="sheetBd">
-        <div class="card" style="margin:0">
-          <b>Uygulama</b>
-          <div class="muted" style="margin-top:6px">
-            VigoChatt • Firebase gerçek mesajlaşma
-          </div>
-        </div>
-        <div class="hr"></div>
-        <div class="btn2" id="howVoice">Sesli arama neden yok?</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Firebase (ES module yok: APK'de boş ekran yapmasın diye) -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-
   <script>
-    const $ = (s, el=document)=> el.querySelector(s);
-    const $$ = (s, el=document)=> Array.from(el.querySelectorAll(s));
+/* =========================
+   KALICI VERİ (LocalStorage)
+========================= */
+const LS = {
+  projects: "arko_tr_projects",
+  settings: "arko_tr_settings",
+  admin: "arko_tr_admin",
+  onboard: "arko_tr_onboard"
+};
 
-    function escapeHtml(s){
-      return String(s ?? "").replace(/[&<>"']/g, c => ({
-        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
-      }[c]));
-    }
-    function toast(msg){
-      const t=$("#toast");
-      t.textContent=msg;
-      t.classList.add("show");
-      clearTimeout(toast._tm);
-      toast._tm=setTimeout(()=>t.classList.remove("show"),2200);
-    }
-    function fmtTime(ts){
-      try{
-        const d=new Date(ts);
-        return d.toLocaleTimeString("tr-TR",{hour:"2-digit",minute:"2-digit"});
-      }catch(e){return "";}
-    }
-    function modal(id, on){
-      $(id).classList.toggle("show", !!on);
-    }
+const state = {
+  user: { name: "Engin", plan: "Ücretsiz", credits: 5, isAdmin: true },
+  projects: safeJSON(localStorage.getItem(LS.projects), []),
+  logs: [],
+  settings: safeJSON(localStorage.getItem(LS.settings), { accent:"#00E676" }),
+  admin: safeJSON(localStorage.getItem(LS.admin), {
+    maintenance:false,
+    features:{ dashboard:true, voice:true, ideas:true, projects:true, settings:true, admin:true },
+    costs:{ voice:1, ideas:1 }
+  }),
+  ui: { page:"dashboard", modalProjectId:null }
+};
 
-    // === Firebase config (SENİN) ===
-    const firebaseConfig = {
-      apiKey: "AIzaSyA3--Xy1WrM6WlxurXXr4i5qwMZiafXN4k",
-      authDomain: "vigochat-58144.firebaseapp.com",
-      databaseURL: "https://vigochat-58144-default-rtdb.europe-west1.firebasedatabase.app",
-      projectId: "vigochat-58144",
-      storageBucket: "vigochat-58144.firebasestorage.app",
-      messagingSenderId: "384136632816",
-      appId: "1:384136632816:web:2bb6d6942680a2e2e6e535",
-      measurementId: "G-62VZ3906GS"
+function safeJSON(txt, fallback){
+  try{ return txt ? JSON.parse(txt) : fallback; }catch{ return fallback; }
+}
+function persist(){
+  localStorage.setItem(LS.projects, JSON.stringify(state.projects));
+  localStorage.setItem(LS.settings, JSON.stringify(state.settings));
+  localStorage.setItem(LS.admin, JSON.stringify(state.admin));
+}
+function esc(s){
+  return (s??"").toString()
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;").replace(/'/g,"&#039;");
+}
+function logIt(msg){
+  state.logs.unshift(new Date().toLocaleString()+" • "+msg);
+  if(state.logs.length>200) state.logs.pop();
+}
+
+/* =========================
+   DRAWER / MODAL
+========================= */
+const drawer = document.getElementById("drawer");
+const overlay = document.getElementById("overlay");
+const menuBtn = document.getElementById("menuBtn");
+const closeDrawerBtn = document.getElementById("closeDrawer");
+
+function openDrawer(){
+  drawer.classList.add("on");
+  overlay.classList.add("on");
+}
+function closeDrawer(){
+  drawer.classList.remove("on");
+  overlay.classList.remove("on");
+}
+menuBtn.onclick = openDrawer;
+closeDrawerBtn.onclick = closeDrawer;
+overlay.onclick = closeDrawer;
+
+const modal = document.getElementById("modal");
+const mTitle = document.getElementById("mTitle");
+const mBody = document.getElementById("mBody");
+document.getElementById("mClose").onclick = ()=> modal.classList.remove("on");
+
+let modalDownload = { text:"", filename:"arko.json" };
+document.getElementById("mCopy").onclick = ()=>{
+  const t = mBody.innerText || "";
+  (navigator.clipboard?.writeText(t) || Promise.reject())
+    .then(()=>alert("Kopyalandı ✅"))
+    .catch(()=>alert("Kopyalama olmadı (elle seç)."));
+};
+document.getElementById("mDownload").onclick = ()=>{
+  const blob = new Blob([modalDownload.text], {type:"application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = modalDownload.filename;
+  a.click();
+  URL.revokeObjectURL(a.href);
+};
+document.getElementById("mDelete").onclick = ()=>{
+  const id = state.ui.modalProjectId;
+  if(!id) return alert("Silinecek proje yok.");
+  if(!confirm("Silinsin mi?")) return;
+  const idx = state.projects.findIndex(p=>p.id===id);
+  if(idx>=0){
+    logIt("Proje silindi: "+(state.projects[idx].title||id));
+    state.projects.splice(idx,1);
+    persist();
+    modal.classList.remove("on");
+    render();
+  }
+};
+
+/* =========================
+   MENÜ + ROUTER
+========================= */
+const MENU = [
+  { id:"dashboard",  tr:"Dashboard",  icon:"🏠", desc:"Özet & kredi" },
+  { id:"voice",      tr:"Ses Stüdyosu",icon:"🎤", desc:"Cihaz TTS" },
+  { id:"ideas",      tr:"Fikir Stüdyosu",icon:"🧠", desc:"Plan üret" },
+  { id:"projects",   tr:"Projeler",   icon:"📁", desc:"Kaydet/Export" },
+  { id:"settings",   tr:"Ayarlar",    icon:"⚙️", desc:"Tema/Yedek" },
+  { id:"admin",      tr:"Admin",      icon:"🛡️", desc:"Kontrol" }
+];
+
+function go(page){
+  // bakım modu
+  if(state.admin.maintenance && !state.user.isAdmin){
+    alert("Sistem bakımda. Sonra tekrar dene.");
+    return;
+  }
+  // feature toggle
+  if(!state.admin.features[page]){
+    alert("Bu bölüm admin tarafından kapalı.");
+    return;
+  }
+  state.ui.page = page;
+  closeDrawer();
+  render();
+}
+
+function renderMenu(){
+  const list = document.getElementById("menuList");
+  list.innerHTML = MENU.map(m=>{
+    const on = state.ui.page===m.id ? "active" : "";
+    return `<div class="mi ${on}" data-page="${m.id}">
+      <span>${m.icon} ${m.tr}</span>
+      <small>${m.desc}</small>
+    </div>`;
+  }).join("");
+  list.querySelectorAll(".mi").forEach(el=>{
+    el.onclick = ()=> go(el.getAttribute("data-page"));
+  });
+
+  document.getElementById("userLine").textContent =
+    `Kullanıcı: ${state.user.name} • Plan: ${state.user.plan}`;
+  document.getElementById("creditPill").textContent = String(state.user.credits);
+}
+
+function spend(cost){
+  if(state.user.credits < cost){
+    alert("Kredi yetersiz.");
+    logIt("Kredi yetersiz denemesi");
+    return false;
+  }
+  state.user.credits -= cost;
+  document.getElementById("creditPill").textContent = String(state.user.credits);
+  return true;
+}
+
+document.getElementById("add10").onclick = ()=>{
+  state.user.credits += 10;
+  logIt("+10 kredi yüklendi (demo)");
+  render();
+};
+
+function openProjectModal(p){
+  state.ui.modalProjectId = p.id;
+  const txt = JSON.stringify(p, null, 2);
+  mTitle.textContent = "Proje Detayı";
+  mBody.innerHTML = `
+    <div class="pill">📌 ${esc(p.type)} • ${new Date(p.createdAt).toLocaleString()}</div>
+    <div style="height:10px"></div>
+    <b>${esc(p.title||"İsimsiz")}</b>
+    <div style="height:12px"></div>
+    <pre>${esc(txt)}</pre>
+  `;
+  modalDownload = { text: txt, filename: (p.id||"project")+".json" };
+  modal.classList.add("on");
+}
+</script>
+<script>
+function renderDashboard(){
+  const main = document.getElementById("pageMain");
+  const side = document.getElementById("pageSide");
+
+  main.innerHTML = `
+    <h2>🏠 Dashboard</h2>
+    <div class="muted">Hoş geldin <b>${esc(state.user.name)}</b>. Kredi ve projelerini buradan yönet.</div>
+    <div style="height:12px"></div>
+
+    <div class="row">
+      <div class="stat">
+        <div class="n">${state.user.credits}</div>
+        <div class="t">Kredi</div>
+      </div>
+      <div class="stat">
+        <div class="n">${state.projects.length}</div>
+        <div class="t">Projeler</div>
+      </div>
+      <div class="stat">
+        <div class="n">${state.logs.length}</div>
+        <div class="t">Log</div>
+      </div>
+    </div>
+
+    <div style="height:12px"></div>
+    <div class="card" style="box-shadow:none">
+      <div class="pill">⚡ Hızlı İşlemler</div>
+      <div style="height:10px"></div>
+      <div class="row">
+        <button class="btn" onclick="go('voice')">🎤 Ses Stüdyosu</button>
+        <button class="btn2" onclick="go('ideas')">🧠 Fikir Stüdyosu</button>
+        <button class="btn2" onclick="go('projects')">📁 Projeler</button>
+      </div>
+    </div>
+  `;
+
+  side.innerHTML = `
+    <h2>📌 Durum</h2>
+    <div class="muted">Plan: <b>${esc(state.user.plan)}</b> • Admin: <b>${state.user.isAdmin?"Evet":"Hayır"}</b></div>
+    <div style="height:12px"></div>
+    <div class="card" style="box-shadow:none">
+      <div class="muted">Son loglar</div>
+      <div style="height:8px"></div>
+      ${state.logs.slice(0,6).map(x=>`<div class="pill">🧾 ${esc(x)}</div>`).join("") || `<div class="muted">Henüz yok.</div>`}
+    </div>
+  `;
+}
+
+let ttsVoices = [];
+function loadVoices(){
+  try{
+    ttsVoices = speechSynthesis.getVoices() || [];
+  }catch{ ttsVoices = []; }
+}
+
+function renderVoice(){
+  const main = document.getElementById("pageMain");
+  const side = document.getElementById("pageSide");
+
+  main.innerHTML = `
+    <h2>🎤 Ses Stüdyosu</h2>
+    <div class="muted">Cihazın kendi TTS sesleri ile metni okur. (Klon değil)</div>
+
+    <label>Metin</label>
+    <textarea id="ttsText" placeholder="Örn: Merhaba, ben Arko!"></textarea>
+
+    <div class="row">
+      <div class="stat" style="min-width:220px">
+        <div class="t">Ses</div>
+        <select id="ttsVoice"></select>
+      </div>
+      <div class="stat" style="min-width:220px">
+        <div class="t">Hız</div>
+        <input id="ttsRate" type="range" min="0.6" max="1.4" step="0.1" value="1.0">
+        <div class="muted">Seçilen: <span id="rVal">1.0</span></div>
+      </div>
+      <div class="stat" style="min-width:220px">
+        <div class="t">Ton</div>
+        <input id="ttsPitch" type="range" min="0.6" max="1.4" step="0.1" value="1.0">
+        <div class="muted">Seçilen: <span id="pVal">1.0</span></div>
+      </div>
+    </div>
+
+    <div style="height:10px"></div>
+    <div class="row">
+      <button class="btn" id="speakBtn">▶️ Seslendir (${state.admin.costs.voice} kredi)</button>
+      <button class="btn2" id="stopBtn">⏹ Durdur</button>
+      <button class="btn2" id="saveVoiceBtn">💾 Proje Kaydet</button>
+    </div>
+
+    <div style="height:12px"></div>
+    <div class="card" style="box-shadow:none">
+      <div class="pill">✅ Çıktı</div>
+      <div style="height:8px"></div>
+      <div class="muted" id="ttsOut">Henüz yok.</div>
+    </div>
+  `;
+
+  side.innerHTML = `
+    <h2>İpucu</h2>
+    <div class="muted">
+      Eğer ses listesi boşsa:<br>
+      • Sayfayı yenile<br>
+      • Telefonun “Metin Okuma (TTS)” ayarını kontrol et
+    </div>
+  `;
+
+  loadVoices();
+  const sel = document.getElementById("ttsVoice");
+  sel.innerHTML = (ttsVoices.length
+    ? ttsVoices.map((v,i)=>`<option value="${i}">${esc(v.name)}</option>`).join("")
+    : `<option value="0">Ses bulunamadı</option>`);
+
+  const rate = document.getElementById("ttsRate");
+  const pitch = document.getElementById("ttsPitch");
+  rate.oninput = ()=> document.getElementById("rVal").textContent = rate.value;
+  pitch.oninput = ()=> document.getElementById("pVal").textContent = pitch.value;
+
+  document.getElementById("stopBtn").onclick = ()=> { try{speechSynthesis.cancel()}catch{} logIt("TTS durduruldu"); };
+  document.getElementById("speakBtn").onclick = ()=>{
+    if(!state.admin.features.voice) return alert("Ses Stüdyosu kapalı.");
+    const cost = Number(state.admin.costs.voice||1);
+    const text = (document.getElementById("ttsText").value||"").trim();
+    if(!text) return alert("Metin yaz.");
+    if(!("speechSynthesis" in window)) return alert("Bu cihaz TTS desteklemiyor.");
+    if(!spend(cost)) return;
+
+    const u = new SpeechSynthesisUtterance(text);
+    const idx = Number(sel.value||0);
+    const voices = speechSynthesis.getVoices() || [];
+    if(voices[idx]) u.voice = voices[idx];
+    u.rate = Number(rate.value||1);
+    u.pitch = Number(pitch.value||1);
+
+    try{ speechSynthesis.cancel(); speechSynthesis.speak(u); }catch{}
+    document.getElementById("ttsOut").innerHTML =
+      `<b>Seslendiriliyor…</b><br><span class="muted">${esc(text)}</span>`;
+    logIt("TTS çalıştı (-"+cost+" kredi)");
+    renderMenu();
+  };
+
+  document.getElementById("saveVoiceBtn").onclick = ()=>{
+    const text = (document.getElementById("ttsText").value||"").trim();
+    if(!text) return alert("Metin yaz.");
+    const p = {
+      id:"voice_"+Date.now(),
+      type:"Ses",
+      title: (text.slice(0,42) + (text.length>42?"…":"")),
+      createdAt: Date.now(),
+      payload: {
+        text,
+        voiceIndex: Number(sel.value||0),
+        rate:Number(rate.value||1),
+        pitch:Number(pitch.value||1)
+      }
     };
+    state.projects.unshift(p);
+    persist();
+    logIt("Ses projesi kaydedildi");
+    renderMenu();
+    alert("Kaydedildi ✅");
+  };
+}
 
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.database();
+function renderIdeas(){
+  const main = document.getElementById("pageMain");
+  const side = document.getElementById("pageSide");
 
-    // --- Data model ---
-    // profiles/{uid}: {emailLower, name, about, bday, createdAt, lastSeen}
-    // inbox/{uid}/{threadId}: {otherUid, otherName, lastText, lastAt}
-    // messages/{threadId}/{msgId}: {uid, text, at}
-    // statuses/{uid}/{statusId}: {text, at}
+  main.innerHTML = `
+    <h2>🧠 Fikir Stüdyosu</h2>
+    <div class="muted">Profesyonel formatta plan üretir (demo). Sonra gerçek AI bağlanır.</div>
 
-    let me = null;
-    let myProfile = null;
+    <label>Uygulama fikri</label>
+    <textarea id="ideaTxt" placeholder="Örn: Kuaför randevu + ödeme + hatırlatma"></textarea>
 
-    let currentThreadId = null;
-    let currentOther = null;
-    let messagesOff = null;
+    <div class="row">
+      <div class="stat" style="min-width:220px">
+        <div class="t">Kategori</div>
+        <select id="cat">
+          <option>Yerel Hizmet</option><option>E-ticaret</option><option>Sosyal</option>
+          <option>Eğitim</option><option>Sağlık</option><option>İş/CRM</option>
+        </select>
+      </div>
+      <div class="stat" style="min-width:220px">
+        <div class="t">Gelir Modeli</div>
+        <select id="mon">
+          <option>Freemium</option><option>Abonelik</option><option>Reklam</option><option>Komisyon</option>
+        </select>
+      </div>
+    </div>
 
-    function threadIdFor(a,b){
-      return [a,b].sort().join("_");
-    }
+    <div style="height:10px"></div>
+    <div class="row">
+      <button class="btn" id="genPlan">⚡ Plan Üret (${state.admin.costs.ideas} kredi)</button>
+      <button class="btn2" id="saveIdea">💾 Projeye Kaydet</button>
+    </div>
 
-    async function ensureProfile(user){
-      const pRef = db.ref("profiles/"+user.uid);
-      const snap = await pRef.get();
-      const emailLower = (user.email || "").toLowerCase();
+    <div style="height:12px"></div>
+    <div class="card" style="box-shadow:none">
+      <div class="pill">📄 Üretilen Plan</div>
+      <div style="height:8px"></div>
+      <div class="muted" id="ideaOut">Henüz plan yok.</div>
+    </div>
+  `;
 
-      if(!snap.exists()){
-        const base = {
-          email: user.email || "",
-          emailLower,
-          name:"",
-          about:"",
-          bday:"",
-          createdAt: Date.now(),
-          lastSeen: Date.now()
-        };
-        await pRef.set(base);
-        return base;
-      }else{
-        const v = snap.val() || {};
-        if(v.emailLower !== emailLower){
-          await pRef.update({email: user.email || "", emailLower});
-        }
-        return Object.assign({}, v, {email: user.email || v.email || ""});
-      }
-    }
+  side.innerHTML = `
+    <h2>Öneri</h2>
+    <div class="muted">
+      İyi çıktı için fikre şu bilgileri ekle:<br>
+      • hedef kitle<br>
+      • rakipler<br>
+      • fiyat<br>
+      • en önemli 3 özellik
+    </div>
+  `;
 
-    function setTab(tab){
-      $$(".tab").forEach(t=> t.classList.toggle("active", t.dataset.tab === tab));
-      ["calls","status","messages","profile"].forEach(v=>{
-        const view = $("#view-" + v);
-        if(view) view.classList.toggle("active", v === tab);
-      });
+  let lastPlan = null;
 
-      const titles = {calls:"Aramalar", status:"Durum", messages:"Mesajlar", profile:"Profil"};
-      $("#title").textContent = titles[tab] || "Mesajlar";
+  document.getElementById("genPlan").onclick = ()=>{
+    if(!state.admin.features.ideas) return alert("Fikir Stüdyosu kapalı.");
+    const cost = Number(state.admin.costs.ideas||1);
+    const idea = (document.getElementById("ideaTxt").value||"").trim();
+    if(!idea) return alert("Fikir yaz.");
+    if(!spend(cost)) return;
 
-      // sub
-      if(me){
-        $("#sub").textContent = myProfile?.name ? ("VigoChatt • " + myProfile.name) : "VigoChatt • çevrimiçi";
-      }else{
-        $("#sub").textContent = "VigoChatt • giriş gerekli";
-      }
+    const cat = document.getElementById("cat").value;
+    const mon = document.getElementById("mon").value;
 
-      closeChat();
-    }
+    const mvp = [
+      "Kayıt/Giriş + profil",
+      "Ana akış (temel ekranlar)",
+      "Bildirim/hatırlatma",
+      "Admin panel (temel)",
+      "Raporlama/istatistik"
+    ].sort(()=>0.5-Math.random()).slice(0,4);
 
-    // --- AUTH ---
-    async function loginEmail(){
-      $("#authErr").textContent="";
-      const email = $("#email").value.trim();
-      const pass = $("#pass").value;
-      if(!email || !pass) return $("#authErr").textContent="E-posta ve şifre gir.";
-      try{
-        await auth.signInWithEmailAndPassword(email, pass);
-      }catch(e){
-        $("#authErr").textContent = (e && e.message) ? e.message : "Giriş hatası";
-      }
-    }
-    async function signupEmail(){
-      $("#authErr").textContent="";
-      const email = $("#email").value.trim();
-      const pass = $("#pass").value;
-      if(!email || !pass || pass.length<6) return $("#authErr").textContent="E-posta ve min 6 şifre gir.";
-      try{
-        await auth.createUserWithEmailAndPassword(email, pass);
-      }catch(e){
-        $("#authErr").textContent = (e && e.message) ? e.message : "Kayıt hatası";
-      }
-    }
-    async function logout(){
-      try{ await auth.signOut(); }catch(e){}
-    }
+    const roadmap = [
+      "Hafta 1: Tasarım + MVP ekranları",
+      "Hafta 2: Proje/DB + API",
+      "Hafta 3: Ödeme/kredi + güvenlik",
+      "Hafta 4: Yayın + kullanıcı toplama"
+    ];
 
-    // --- Profile UI ---
-    async function saveProfile(){
-      if(!me) return;
-      const name = $("#pName").value.trim();
-      const about = $("#pAbout").value.trim();
-      const bday = $("#pBday").value;
+    lastPlan = { idea, cat, mon, mvp, roadmap };
 
-      await db.ref("profiles/"+me.uid).update({
-        name, about, bday, lastSeen: Date.now()
-      });
+    document.getElementById("ideaOut").innerHTML = `
+      <b>${esc(idea)}</b><br>
+      <span class="pill">📦 ${esc(cat)}</span>
+      <span class="pill">💰 ${esc(mon)}</span>
+      <div style="height:10px"></div>
+      <b>MVP:</b><ul>${mvp.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>
+      <b>Roadmap:</b><ul>${roadmap.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>
+    `;
 
-      toast("Kaydedildi");
-    }
+    logIt("Plan üretildi (-"+cost+" kredi)");
+    renderMenu();
+  };
 
-    function paintProfile(){
-      $("#pName").value = myProfile?.name || "";
-      $("#pAbout").value = myProfile?.about || "";
-      $("#pBday").value = myProfile?.bday || "";
-      $("#meInfo").innerHTML = "<b>E-posta:</b> "+escapeHtml(me?.email || "-");
-    }
+  document.getElementById("saveIdea").onclick = ()=>{
+    const idea = (document.getElementById("ideaTxt").value||"").trim();
+    if(!idea) return alert("Fikir yaz.");
+    const p = {
+      id:"idea_"+Date.now(),
+      type:"Fikir",
+      title: (idea.slice(0,42) + (idea.length>42?"…":"")),
+      createdAt: Date.now(),
+      payload: lastPlan || { idea }
+    };
+    state.projects.unshift(p);
+    persist();
+    logIt("Fikir projesi kaydedildi");
+    renderMenu();
+    alert("Kaydedildi ✅");
+  };
+}
 
-    // --- New Chat: find user by emailLower ---
-    async function findUserByEmail(email){
-      const e = (email || "").trim().toLowerCase();
-      if(!e) return null;
+function renderProjects(){
+  const main = document.getElementById("pageMain");
+  const side = document.getElementById("pageSide");
 
-      const q = db.ref("profiles").orderByChild("emailLower").equalTo(e);
-      const snap = await q.get();
-      if(!snap.exists()) return null;
+  main.innerHTML = `
+    <h2>📁 Projeler</h2>
+    <div class="muted">Arama, aç, sil, export/import.</div>
 
-      const obj = snap.val();
-      const uid = Object.keys(obj)[0];
-      return { uid, ...obj[uid] };
-    }
+    <label>Ara</label>
+    <input id="q" placeholder="başlık / içerik">
 
-    async function startChat(){
-      $("#newChatErr").textContent="";
-      if(!me) return;
+    <div class="row">
+      <button class="btn2" id="exportBtn">⬇️ Export JSON</button>
+      <button class="btn2" id="importBtn">⬆️ Import JSON</button>
+      <button class="btn btnDanger" id="clearBtn">🗑 Hepsini Sil</button>
+    </div>
 
-      const email = $("#newChatEmail").value.trim();
-      const other = await findUserByEmail(email);
+    <div style="height:12px"></div>
+    <div id="plist"></div>
+  `;
 
-      if(!other){
-        $("#newChatErr").textContent="Bu e-posta ile kayıtlı kullanıcı yok. Arkadaşın önce kayıt olsun.";
-        return;
-      }
-      if(other.uid === me.uid){
-        $("#newChatErr").textContent="Kendi e-postanla sohbet açamazsın.";
-        return;
-      }
+  side.innerHTML = `
+    <h2>Log</h2>
+    <div class="muted">${state.logs.slice(0,10).map(x=>`<div class="pill">🧾 ${esc(x)}</div>`).join("") || "Henüz yok."}</div>
+  `;
 
-      const tid = threadIdFor(me.uid, other.uid);
+  const plist = document.getElementById("plist");
+  const q = document.getElementById("q");
 
-      // inbox for me
-      await db.ref("inbox/"+me.uid+"/"+tid).update({
-        otherUid: other.uid,
-        otherName: other.name || other.email || "Kullanıcı",
-        lastText: "",
-        lastAt: Date.now()
-      });
+  function draw(){
+    const s = (q.value||"").toLowerCase();
+    const items = state.projects.filter(p=>{
+      const a = (p.title||"").toLowerCase();
+      const b = JSON.stringify(p.payload||{}).toLowerCase();
+      return !s || a.includes(s) || b.includes(s);
+    });
 
-      // inbox for other
-      const myName = myProfile?.name || me.email || "Kullanıcı";
-      await db.ref("inbox/"+other.uid+"/"+tid).update({
-        otherUid: me.uid,
-        otherName: myName,
-        lastText: "",
-        lastAt: Date.now()
-      });
+    plist.innerHTML = items.map(p=>`
+      <div class="card" style="box-shadow:none; margin-top:10px">
+        <div class="pill">🧩 ${esc(p.type)} • ${new Date(p.createdAt).toLocaleString()}</div>
+        <div style="height:8px"></div>
+        <b style="font-size:14px">${esc(p.title||"İsimsiz")}</b>
+        <div style="height:10px"></div>
+        <div class="row">
+          <button class="btn2" data-open="${p.id}">Aç</button>
+          <button class="btn btnDanger" data-del="${p.id}">Sil</button>
+        </div>
+      </div>
+    `).join("") || `<div class="muted">Proje yok.</div>`;
 
-      modal("#newChatModal", false);
-      toast("Sohbet açıldı");
-      openChat(tid, {uid: other.uid, name: other.name || other.email || "Kullanıcı"});
-      setTab("messages");
-    }
-
-    async function copyMyEmail(){
-      try{
-        await navigator.clipboard.writeText(me?.email || "");
-        toast("Kopyalandı");
-      }catch(e){
-        toast(me?.email || "—");
-      }
-    }
-
-    // --- Inbox render ---
-    function renderInbox(list){
-      const el = $("#chatList");
-      const empty = $("#emptyChats");
-
-      if(!list.length){
-        el.innerHTML = "";
-        empty.style.display = "block";
-        $("#callsList").innerHTML = "";
-        return;
-      }
-
-      empty.style.display = "none";
-      el.innerHTML = list.map(x=>{
-        const initial = (x.otherName || "V")[0].toUpperCase();
-        return `
-          <div class="item" data-thread="${escapeHtml(x.tid)}" data-ouid="${escapeHtml(x.otherUid)}" data-oname="${escapeHtml(x.otherName||"Kullanıcı")}">
-            <div class="avatar">${escapeHtml(initial)}</div>
-            <div class="meta">
-              <b>${escapeHtml(x.otherName||"Kullanıcı")}</b>
-              <span>${escapeHtml(x.lastText || "Henüz mesaj yok")}</span>
-            </div>
-          </div>
-        `;
-      }).join("");
-
-      // Calls list uses same people (demo call)
-      $("#callsList").innerHTML = list.map(x=>{
-        const initial = "📞";
-        return `
-          <div class="item" data-call="1">
-            <div class="avatar">${initial}</div>
-            <div class="meta">
-              <b>${escapeHtml(x.otherName||"Kullanıcı")}</b>
-              <span>Sesli arama: native gerekir</span>
-            </div>
-          </div>
-        `;
-      }).join("");
-    }
-
-    function listenInbox(){
-      if(!me) return;
-      db.ref("inbox/"+me.uid).on("value", (snap)=>{
-        const data = snap.val() || {};
-        const arr = Object.entries(data).map(([tid,v])=>({
-          tid,
-          otherUid: v.otherUid || "",
-          otherName: v.otherName || "Kullanıcı",
-          lastText: v.lastText || "",
-          lastAt: v.lastAt || 0
-        })).sort((a,b)=> (b.lastAt||0) - (a.lastAt||0));
-
-        renderInbox(arr);
-      });
-    }
-
-    // --- Messages ---
-    function openChat(tid, other){
-      currentThreadId = tid;
-      currentOther = other;
-
-      $("#chatName").textContent = other?.name || "Sohbet";
-      $("#chatSub").textContent = "çevrimiçi";
-      $("#overlay").classList.add("show");
-
-      const ref = db.ref("messages/"+tid);
-
-      if(messagesOff){ messagesOff(); messagesOff=null; }
-      const handler = (snap)=>{
-        const data = snap.val() || {};
-        const arr = Object.entries(data).map(([k,v])=>({k,...v}))
-          .sort((a,b)=> (a.at||0)-(b.at||0))
-          .slice(-250);
-
-        $("#chatBody").innerHTML = arr.map(m=>{
-          const meMsg = (m.uid === me.uid);
-          return `<div class="bubble ${meMsg?"me":""}">
-            ${escapeHtml(m.text||"")}
-            <span class="t">${escapeHtml(fmtTime(m.at||Date.now()))}</span>
-          </div>`;
-        }).join("");
-        $("#chatBody").scrollTop = $("#chatBody").scrollHeight;
+    plist.querySelectorAll("[data-open]").forEach(b=>{
+      b.onclick = ()=>{
+        const p = state.projects.find(x=>x.id===b.getAttribute("data-open"));
+        if(p) openProjectModal(p);
       };
-
-      ref.on("value", handler);
-      messagesOff = ()=> ref.off("value", handler);
-    }
-
-    function closeChat(){
-      $("#overlay").classList.remove("show");
-      $("#msg").value = "";
-      currentThreadId = null;
-      currentOther = null;
-      if(messagesOff){ messagesOff(); messagesOff=null; }
-    }
-
-    async function sendMsg(){
-      if(!me || !currentThreadId || !currentOther) return;
-      const t = $("#msg").value.trim();
-      if(!t) return;
-
-      $("#msg").value = "";
-      const now = Date.now();
-
-      // push message
-      await db.ref("messages/"+currentThreadId).push({
-        uid: me.uid,
-        text: t,
-        at: now
-      });
-
-      // update inbox for both
-      await db.ref("inbox/"+me.uid+"/"+currentThreadId).update({
-        otherUid: currentOther.uid,
-        otherName: currentOther.name || "Kullanıcı",
-        lastText: t,
-        lastAt: now
-      });
-
-      const myName = myProfile?.name || me.email || "Kullanıcı";
-      await db.ref("inbox/"+currentOther.uid+"/"+currentThreadId).update({
-        otherUid: me.uid,
-        otherName: myName,
-        lastText: t,
-        lastAt: now
-      });
-    }
-
-    // --- Status ---
-    async function addStatus(){
-      if(!me) return toast("Giriş yap");
-      const text = $("#statusText").value.trim();
-      if(!text) return;
-      $("#statusText").value = "";
-      await db.ref("statuses/"+me.uid).push({text, at: Date.now()});
-      toast("Durum paylaşıldı");
-    }
-
-    function listenStatus(){
-      if(!me) return;
-      db.ref("statuses/"+me.uid).on("value", (snap)=>{
-        const data = snap.val() || {};
-        const arr = Object.entries(data).map(([k,v])=>({k,...v}))
-          .sort((a,b)=> (b.at||0)-(a.at||0))
-          .slice(0,30);
-
-        const el = $("#statusList");
-        if(!arr.length){
-          el.innerHTML = `<div class="card"><b>Durum yok</b><div class="muted" style="margin-top:6px">Yukarıdan durum paylaş.</div></div>`;
-          return;
+    });
+    plist.querySelectorAll("[data-del]").forEach(b=>{
+      b.onclick = ()=>{
+        const id = b.getAttribute("data-del");
+        if(!confirm("Silinsin mi?")) return;
+        const idx = state.projects.findIndex(x=>x.id===id);
+        if(idx>=0){
+          logIt("Proje silindi: "+(state.projects[idx].title||id));
+          state.projects.splice(idx,1);
+          persist();
+          render();
         }
-        el.innerHTML = arr.map(s=>`
-          <div class="item" style="cursor:default">
-            <div class="avatar">❗</div>
-            <div class="meta">
-              <b>${escapeHtml(myProfile?.name || "Sen")}</b>
-              <span>${escapeHtml(s.text || "")}</span>
-            </div>
-          </div>
-        `).join("");
-      });
+      };
+    });
+  }
+
+  q.oninput = draw;
+  draw();
+
+  document.getElementById("exportBtn").onclick = ()=>{
+    const txt = JSON.stringify(state.projects, null, 2);
+    state.ui.modalProjectId = null;
+    mTitle.textContent = "Export (Projeler)";
+    mBody.innerHTML = `<pre>${esc(txt)}</pre>`;
+    modalDownload = { text: txt, filename:"arko-projects.json" };
+    modal.classList.add("on");
+    document.getElementById("mDelete").onclick = ()=> alert("Export ekranında silme yok.");
+  };
+
+  document.getElementById("importBtn").onclick = ()=>{
+    const txt = prompt("JSON yapıştır (projects array):");
+    if(!txt) return;
+    try{
+      const arr = JSON.parse(txt);
+      if(!Array.isArray(arr)) throw new Error("Array değil");
+      const cleaned = arr.map(p=>({
+        id: p.id || ("imp_"+Date.now()+Math.random()),
+        type: p.type || "Imported",
+        title: p.title || "Imported",
+        createdAt: p.createdAt || Date.now(),
+        payload: p.payload || {}
+      }));
+      state.projects = [...cleaned, ...state.projects];
+      persist();
+      logIt("Import: "+cleaned.length+" proje");
+      render();
+      alert("İçe aktarıldı ✅");
+    }catch(e){
+      alert("JSON hatalı: "+e.message);
     }
+  };
 
-    // --- Click + Events ---
-    document.addEventListener("click", (e)=>{
-      const tab = e.target.closest(".tab");
-      if(tab){
-        setTab(tab.dataset.tab);
-        if(!me) modal("#authModal", true);
-        return;
-      }
+  document.getElementById("clearBtn").onclick = ()=>{
+    if(!confirm("Tüm projeler silinsin mi?")) return;
+    state.projects = [];
+    persist();
+    logIt("Tüm projeler silindi");
+    render();
+  };
+}
+</script>
+<script>
+function renderSettings(){
+  const main = document.getElementById("pageMain");
+  const side = document.getElementById("pageSide");
 
-      const chatItem = e.target.closest("#chatList .item");
-      if(chatItem){
-        if(!me){ modal("#authModal", true); return; }
-        openChat(chatItem.dataset.thread, {
-          uid: chatItem.dataset.ouid,
-          name: chatItem.dataset.oname
-        });
-        return;
-      }
+  main.innerHTML = `
+    <h2>⚙️ Ayarlar</h2>
+    <div class="muted">Tema rengi, yedekleme, sıfırlama.</div>
 
-      const callItem = e.target.closest("#callsList .item");
-      if(callItem){
-        alert("Sesli arama için Android native/Capacitor gerekir (WebView tek HTML ile WhatsApp gibi olmaz).");
-        return;
-      }
-    });
+    <label>Kullanıcı Adı</label>
+    <input id="nm" value="${esc(state.user.name)}">
 
-    $("#back").addEventListener("click", closeChat);
-    $("#send").addEventListener("click", sendMsg);
-    $("#msg").addEventListener("keydown", (e)=>{
-      if(e.key === "Enter" && !e.shiftKey){
-        e.preventDefault();
-        sendMsg();
-      }
-    });
+    <label>Plan</label>
+    <select id="pl">
+      <option ${state.user.plan==="Ücretsiz"?"selected":""}>Ücretsiz</option>
+      <option ${state.user.plan==="Pro"?"selected":""}>Pro</option>
+      <option ${state.user.plan==="Business"?"selected":""}>Business</option>
+    </select>
 
-    $("#addBtn").addEventListener("click", ()=>{
-      if(!me){ modal("#authModal", true); return; }
-      $("#newChatErr").textContent="";
-      $("#newChatEmail").value="";
-      modal("#newChatModal", true);
-      setTimeout(()=>$("#newChatEmail").focus(), 50);
-    });
+    <label>Accent renk</label>
+    <input id="ac" type="color" value="${state.settings.accent || "#00E676"}">
 
-    $("#closeAuth").addEventListener("click", ()=> modal("#authModal", false));
-    $("#closeNewChat").addEventListener("click", ()=> modal("#newChatModal", false));
-    $("#closeSettings").addEventListener("click", ()=> modal("#settingsModal", false));
+    <div class="row">
+      <button class="btn" id="saveSet">Kaydet</button>
+      <button class="btn2" id="backup">Backup Export</button>
+      <button class="btn2" id="restore">Backup Import</button>
+      <button class="btn btnDanger" id="reset">Factory Reset</button>
+    </div>
+  `;
 
-    $("#loginBtn").addEventListener("click", loginEmail);
-    $("#signupBtn").addEventListener("click", signupEmail);
+  side.innerHTML = `
+    <h2>Bilgi</h2>
+    <div class="muted">
+      • Bu sürüm mobil uyumlu<br>
+      • Veriler cihazında saklanır<br>
+      • Gerçek AI için backend gerekir
+    </div>
+  `;
 
-    $("#startChat").addEventListener("click", startChat);
-    $("#newChatEmail").addEventListener("keydown", (e)=>{ if(e.key==="Enter") startChat(); });
+  document.getElementById("saveSet").onclick = ()=>{
+    state.user.name = (document.getElementById("nm").value||"Engin").trim() || "Engin";
+    state.user.plan = document.getElementById("pl").value;
+    state.settings.accent = document.getElementById("ac").value || "#00E676";
+    document.documentElement.style.setProperty("--accent", state.settings.accent);
+    persist();
+    logIt("Ayarlar kaydedildi");
+    render();
+    alert("Kaydedildi ✅");
+  };
 
-    $("#copyMyEmail").addEventListener("click", copyMyEmail);
+  document.getElementById("backup").onclick = ()=>{
+    const pack = {
+      v:"arko-tr-1",
+      user: state.user,
+      settings: state.settings,
+      admin: state.admin,
+      projects: state.projects,
+      logs: state.logs,
+      at: Date.now()
+    };
+    const txt = JSON.stringify(pack, null, 2);
+    state.ui.modalProjectId = null;
+    mTitle.textContent = "Backup Export";
+    mBody.innerHTML = `<pre>${esc(txt)}</pre>`;
+    modalDownload = { text: txt, filename:"arko-backup.json" };
+    modal.classList.add("on");
+  };
 
-    $("#saveProfile").addEventListener("click", saveProfile);
-    $("#logout").addEventListener("click", logout);
-    $("#openSettings").addEventListener("click", ()=> modal("#settingsModal", true));
-    $("#howVoice").addEventListener("click", ()=>{
-      alert("Sesli arama (WhatsApp gibi) için native uygulama gerekir.\nİstersen sonraki adımda Capacitor/Android projesi kurup ekleriz.");
-    });
+  document.getElementById("restore").onclick = ()=>{
+    const txt = prompt("Backup JSON yapıştır:");
+    if(!txt) return;
+    try{
+      const b = JSON.parse(txt);
+      if(!b || !b.projects) throw new Error("Geçersiz backup");
+      state.projects = Array.isArray(b.projects) ? b.projects : state.projects;
+      state.settings = b.settings || state.settings;
+      state.admin = b.admin || state.admin;
+      state.user = b.user ? {...state.user, ...b.user} : state.user;
+      state.logs = Array.isArray(b.logs) ? b.logs : state.logs;
+      persist();
+      document.documentElement.style.setProperty("--accent", state.settings.accent || "#00E676");
+      logIt("Backup import yapıldı");
+      render();
+      alert("Yüklendi ✅");
+    }catch(e){
+      alert("Backup hatalı: "+e.message);
+    }
+  };
 
-    $("#statusSend").addEventListener("click", addStatus);
-    $("#statusText").addEventListener("keydown", (e)=>{ if(e.key==="Enter"){ e.preventDefault(); addStatus(); } });
+  document.getElementById("reset").onclick = ()=>{
+    if(!confirm("Her şey silinsin mi?")) return;
+    localStorage.removeItem(LS.projects);
+    localStorage.removeItem(LS.settings);
+    localStorage.removeItem(LS.admin);
+    state.projects = [];
+    state.logs = [];
+    state.user.credits = 5;
+    state.settings = { accent:"#00E676" };
+    state.admin = {
+      maintenance:false,
+      features:{ dashboard:true, voice:true, ideas:true, projects:true, settings:true, admin:true },
+      costs:{ voice:1, ideas:1 }
+    };
+    persist();
+    logIt("Factory reset");
+    render();
+  };
+}
 
-    // Close modals by tapping background
-    ["#authModal","#newChatModal","#settingsModal"].forEach(id=>{
-      $(id).addEventListener("click",(e)=>{ if(e.target.id === id.slice(1)) modal(id,false); });
-    });
+function renderAdmin(){
+  const main = document.getElementById("pageMain");
+  const side = document.getElementById("pageSide");
 
-    // --- Auth state ---
-    auth.onAuthStateChanged(async (user)=>{
-      me = user || null;
+  if(!state.user.isAdmin){
+    main.innerHTML = `<h2>🛡️ Admin</h2><div class="muted">Yetkin yok.</div>`;
+    side.innerHTML = `<div class="muted">Admin açmak için koddan state.user.isAdmin=true</div>`;
+    return;
+  }
 
-      if(!me){
-        myProfile = null;
-        $("#chatList").innerHTML = "";
-        $("#callsList").innerHTML = "";
-        $("#statusList").innerHTML = "";
-        $("#emptyChats").style.display = "block";
-        $("#sub").textContent = "VigoChatt • giriş gerekli";
-        modal("#authModal", true);
-        return;
-      }
+  main.innerHTML = `
+    <h2>🛡️ Admin Panel</h2>
+    <div class="muted">Özellik aç/kapat, bakım modu, kredi maliyetleri.</div>
 
-      myProfile = await ensureProfile(me);
-      paintProfile();
-      $("#sub").textContent = myProfile?.name ? ("VigoChatt • " + myProfile.name) : "VigoChatt • çevrimiçi";
+    <div style="height:10px"></div>
+    <div class="row">
+      <div class="stat">
+        <div class="n">${state.admin.maintenance ? "BAKIM" : "AKTİF"}</div>
+        <div class="t">Sistem</div>
+      </div>
+      <div class="stat">
+        <div class="n">${state.user.credits}</div>
+        <div class="t">Kullanıcı Kredisi</div>
+      </div>
+      <div class="stat">
+        <div class="n">${state.projects.length}</div>
+        <div class="t">Projeler</div>
+      </div>
+    </div>
 
-      // Listen data
-      listenInbox();
-      listenStatus();
+    <label>Bakım modu</label>
+    <button class="btn2" id="mnt">${state.admin.maintenance?"Bakımı Kapat":"Bakımı Aç"}</button>
 
-      modal("#authModal", false);
-      toast("Giriş başarılı");
-      setTab("messages");
-    });
+    <label>Özellikler</label>
+    <div class="row" id="ft"></div>
 
-    // Init
-    setTab("messages");
-    $("#emptyChats").style.display = "block";
-  </script>
+    <label>Kredi maliyeti</label>
+    <div class="row">
+      <div class="stat" style="min-width:220px">
+        <div class="t">Ses Stüdyosu</div>
+        <input id="cVoice" type="number" min="0" value="${state.admin.costs.voice}">
+      </div>
+      <div class="stat" style="min-width:220px">
+        <div class="t">Fikir Stüdyosu</div>
+        <input id="cIdeas" type="number" min="0" value="${state.admin.costs.ideas}">
+      </div>
+    </div>
+
+    <div class="row">
+      <button class="btn" id="saveAdmin">Kaydet</button>
+      <button class="btn2" id="give50">+50 kredi</button>
+      <button class="btn btnDanger" id="wipeLogs">Log temizle</button>
+    </div>
+  `;
+
+  side.innerHTML = `
+    <h2>Not</h2>
+    <div class="muted">
+      Feature kapalıysa menüden girilmez.<br>
+      Bakım modunda admin dışı işlem yapamaz.
+    </div>
+  `;
+
+  // feature buttons
+  const ft = document.getElementById("ft");
+  ft.innerHTML = Object.keys(state.admin.features).map(k=>{
+    const on = state.admin.features[k];
+    return `<button class="${on?'btn2':'btn btnDanger'}" data-k="${k}">${k}: ${on?'Açık':'Kapalı'}</button>`;
+  }).join("");
+
+  ft.querySelectorAll("button").forEach(b=>{
+    b.onclick = ()=>{
+      const k = b.getAttribute("data-k");
+      state.admin.features[k] = !state.admin.features[k];
+      persist();
+      render();
+    };
+  });
+
+  document.getElementById("mnt").onclick = ()=>{
+    state.admin.maintenance = !state.admin.maintenance;
+    persist();
+    render();
+  };
+
+  document.getElementById("saveAdmin").onclick = ()=>{
+    state.admin.costs.voice = Math.max(0, Number(document.getElementById("cVoice").value||1));
+    state.admin.costs.ideas = Math.max(0, Number(document.getElementById("cIdeas").value||1));
+    persist();
+    logIt("Admin ayarları kaydedildi");
+    render();
+    alert("Kaydedildi ✅");
+  };
+
+  document.getElementById("give50").onclick = ()=>{
+    state.user.credits += 50;
+    logIt("+50 kredi verildi");
+    render();
+  };
+
+  document.getElementById("wipeLogs").onclick = ()=>{
+    if(!confirm("Loglar silinsin mi?")) return;
+    state.logs = [];
+    logIt("Log temizlendi");
+    render();
+  };
+}
+
+function render(){
+  document.documentElement.style.setProperty("--accent", state.settings.accent || "#00E676");
+  document.getElementById("subLine").textContent = "Türkçe • Mobil uyumlu • Demo";
+  renderMenu();
+
+  const p = state.ui.page;
+
+  // sağ panel: sayfaya göre
+  if(p==="dashboard") return renderDashboard();
+  if(p==="voice") return renderVoice();
+  if(p==="ideas") return renderIdeas();
+  if(p==="projects") return renderProjects();
+  if(p==="settings") return renderSettings();
+  if(p==="admin") return renderAdmin();
+
+  // fallback
+  state.ui.page="dashboard";
+  renderDashboard();
+}
+
+// TTS voice list bazı cihazlarda geç geliyor
+if("speechSynthesis" in window){
+  speechSynthesis.onvoiceschanged = ()=> {
+    loadVoices();
+    if(state.ui.page==="voice") renderVoice();
+  };
+}
+
+render();
+
+// İlk açılış kısa bilgilendirme (1 kere)
+if(!localStorage.getItem(LS.onboard)){
+  setTimeout(()=>{
+    alert("ARKO AI Platform (Demo)\n\n• Ses Stüdyosu: Metni cihaz sesiyle okur\n• Fikir Stüdyosu: Plan üretir (demo)\n• Projeler: Kaydet / Export / Import\n\nSağ taraf kesilmez, menü çekmeceden açılır.");
+    localStorage.setItem(LS.onboard,"1");
+  }, 500);
+}
+</script>
+
 </body>
 </html>
